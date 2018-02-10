@@ -4,8 +4,7 @@ import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
-import utils.math.Vector3f;
-import utils.math.Vector4f;
+import utils.math.*;
 
 /**
  * 
@@ -157,10 +156,10 @@ public class Matrix4f{
 	 * @param f - Forward vector. This must be a unit vector.
 	 * @param u - Universal up vector.
 	 */
-	public void lookAt(Vector3f e, Vector3f f, Vector3f u) {
-		Vector3f s = f.crossProduct(u);
+	public void lookAt(Vector e, Vector f, Vector u) {
+		Vector s = f.crossProduct(u);
 		s.normalize();
-		Vector3f viewU = s.crossProduct(f);
+		Vector viewU = s.crossProduct(f);
 		viewU.normalize();
 		this.m00 = s.x;
 	    this.m10 = s.y;
@@ -190,7 +189,7 @@ public class Matrix4f{
 	 * 
 	 * @param v - The new position.
 	 */
-	public void translate(Vector3f v) {
+	public void translate(Vector v) {
         this.m30 = (float) (this.m00 * v.x + this.m10 * v.y + this.m20 * v.z);
         this.m31 = (float) (this.m01 * v.x + this.m11 * v.y + this.m21 * v.z);
         this.m32 = (float) (this.m02 * v.x + this.m12 * v.y + this.m22 * v.z);
@@ -201,8 +200,8 @@ public class Matrix4f{
 	 * @param v
 	 * @return
 	 */
-	public Vector4f multiply(Vector4f v) {
-		Vector4f v2 = new Vector4f();
+	public Vector multiply(Vector v) {
+		Vector v2 = new Vector();
 		v2.x = m00*v.x+m10*v.y+m20*v.z+m30*v.w;
 		v2.y = m01*v.x+m11*v.y+m21*v.z+m31*v.w;
 		v2.z = m02*v.x+m12*v.y+m22*v.z+m32*v.w;
@@ -215,13 +214,13 @@ public class Matrix4f{
 	 * @param v
 	 * @return
 	 */
-	public Vector3f multiply(Vector3f v) {
+	/*public Vector3f multiply(Vector3f v) {
 		Vector3f v2 = new Vector3f();
 		v2.x = m00*v.x+m10*v.y+m20*v.z;
 		v2.y = m01*v.x+m11*v.y+m21*v.z;
 		v2.z = m02*v.x+m12*v.y+m22*v.z;
 		return v2;
-	}
+	}*/
 	
 	/**
 	 * 
@@ -254,7 +253,7 @@ public class Matrix4f{
 	 *@param
 	 * shaders - Det program som uniformen ska bindas till.
 	 * @param
-	 * buf - Flyttalsbufferten med alla värden i matrisen, används för att lagra matrisen externt.
+	 * buf - Flyttalsbufferten med alla vï¿½rden i matrisen, anvï¿½nds fï¿½r att lagra matrisen externt.
 	 * */
 	public void createUniform (int shaders, FloatBuffer buf, String uniformName) {
 		int loc1 = GL20.glGetUniformLocation(shaders, uniformName);

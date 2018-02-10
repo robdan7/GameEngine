@@ -6,7 +6,6 @@ import org.lwjgl.opengl.GL20;
 
 import utils.math.Matrix4f;
 import utils.math.Vector;
-import utils.math.Vector3f;
 import utils.rendering.Shaders;
 
 /**
@@ -18,9 +17,9 @@ public class Camera{
 	private Matrix4f lookAtMatrix;
 	private Matrix4f perspectiveMatrix;
 	private String name;
-	private Vector3f position;
-	private Vector3f forward;
-	private Vector3f up;
+	private Vector position;
+	private Vector forward;
+	private Vector up;
 	private float hAngle;
 	float vAngle;
 
@@ -32,7 +31,7 @@ public class Camera{
 	 * @param zFar - far plane.
 	 * @param name - uniform shader name.
 	 */
-	public Camera(Vector3f upVector, float fovy, float aspect, float zNear, float zFar, String name) {
+	public Camera(Vector upVector, float fovy, float aspect, float zNear, float zFar, String name) {
 		this.name = name;
 		init(upVector);
 		perspectiveMatrix.setPerspective(fovy, aspect, zNear, zFar);
@@ -40,19 +39,19 @@ public class Camera{
 	
 	public Camera(float left, float right, float bottom, float top, float zNear, float zFar, String name) {
 		this.name = name;
-		init(new Vector3f(0,1,0));
+		init(new Vector(0,1,0));
 		perspectiveMatrix.setOrtho(left, right, bottom, top, zNear, zFar);
 	}
 	
 	/**
 	 * Init matrices for camera.
 	 */
-	private void init(Vector3f upVector) {
+	private void init(Vector upVector) {
 		this.up = upVector;
 		lookAtMatrix = new Matrix4f();
 		perspectiveMatrix = new Matrix4f();
-		forward = new Vector3f(0,0,1);
-		position = new Vector3f(0,0,0);
+		forward = new Vector(0,0,1);
+		position = new Vector(0,0,0);
 	}
 	
 	public void perspective(float fovy, float aspect, float zNear, float zFar, String name) {
@@ -96,7 +95,7 @@ public class Camera{
 	 * Set the absolute position for the camera.
 	 * @param v - the new camera position;
 	 */
-	public void setPosition(Vector3f v) {
+	public void setPosition(Vector v) {
 		this.position.x = v.x;
 		this.position.y = v.y;
 		this.position.z = v.z;
@@ -106,7 +105,7 @@ public class Camera{
 	 * Set the position to a choosen vector. The two objects will now point to the same data.
 	 * @param v
 	 */
-	public void copyPosition(Vector3f v) {
+	public void copyPosition(Vector v) {
 		this.position = v;
 	}
 
@@ -125,8 +124,8 @@ public class Camera{
 	 */
 	public void lookAt(float offset) {
 		this.lookAtMatrix.setIdentity();
-		//
-		this.lookAtMatrix.lookAt(this.position.subtract(this.forward.multiply(offset)), this.forward, this.up);
+		Vector v = this.forward.copy().multiply(offset);
+		this.lookAtMatrix.lookAt(this.position.copy().subtract(v), this.forward, this.up);
 	}
 	
 	/**
@@ -134,7 +133,7 @@ public class Camera{
 	 * @param v - The vector v to look at.
 	 */
 	public void lookAt(Vector v) {
-		this.forward = (Vector3f) v.normalize().toVec3f();
+		this.forward = v.normalize();
 		this.lookAt();
 	}
 	
@@ -156,11 +155,11 @@ public class Camera{
 		return this.name;
 	}
 	
-	public Vector3f getPosition() {
+	public Vector getPosition() {
 		return this.position;
 	}
 	
-	public Vector3f getForward() {
+	public Vector getForward() {
 		return this.forward;
 	}
 	

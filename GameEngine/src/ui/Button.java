@@ -65,7 +65,7 @@ public class Button implements UIElement {
 	public void render(Matrix4f mat) {
 		glUseProgram(shader.getShaderProgram());
 		mat.setIdentity();
-		mat.translate(this.position.toVec3f());
+		mat.translate(this.position);
 		mat.createUniform(shader.getShaderProgram());
 		
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);

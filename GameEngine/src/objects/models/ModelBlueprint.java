@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL20;
 
 import utils.fileSystem.OBJLoader;
 import utils.math.Matrix4f;
-import utils.math.Vector3f;
+import utils.math.*;
 import utils.other.Texture;
 import utils.rendering.RenderObject;
 import utils.rendering.Shaders;
@@ -18,14 +18,14 @@ import static org.lwjgl.opengl.GL11.*;
 public  class ModelBlueprint implements RenderObject{
 
 	int[] model;
-	Vector3f position;
+	Vector position;
 	private Texture texture;
 	
 	int shader;
 	int depthshader;
 	
 	public ModelBlueprint(String modelFile) {
-		this.position = new Vector3f();
+		this.position = new Vector();
 		try {
 			Model m = OBJLoader.loadTexturedModel(modelFile, 1);
 			model = OBJLoader.createVBO(m);
@@ -36,7 +36,7 @@ public  class ModelBlueprint implements RenderObject{
 	}
 	
 	public ModelBlueprint(String modelFile, String textureUniformName) {
-		this.position = new Vector3f();
+		this.position = new Vector();
 		try {
 			Model m = OBJLoader.loadTexturedModel(modelFile, 1);
 			model = OBJLoader.createVBO(m);
@@ -55,11 +55,11 @@ public  class ModelBlueprint implements RenderObject{
 		}
 	}
 	
-	public void translate(Vector3f v) {
+	public void translate(Vector v) {
 		this.position = v.copy();
 	}
 	
-	public void move(Vector3f deltaV) {
+	public void move(Vector deltaV) {
 		this.position.add(deltaV);
 	}
 	

@@ -26,9 +26,7 @@ import objects.lights.DirectionalLight;
 import objects.lights.Light;
 import objects.models.*;
 import utils.math.Matrix4f;
-import utils.math.Vector2f;
-import utils.math.Vector3f;
-import utils.math.Vector4f;
+import utils.math.*;
 import utils.rendering.Shaders;
 import utils.rendering.ShadowMap;
 
@@ -173,7 +171,7 @@ public class Engine {
 	}
 	
 	public void addPlayer() {
-		player = new Pawn(new Vector3f(0, 1, 0), 60, (float)window.getWidth()/window.getHeight(), 0.1f, 200f, "camera");
+		player = new Pawn(new Vector(0, 1, 0), 60, (float)window.getWidth()/window.getHeight(), 0.1f, 200f, "camera");
 		keyboard.addKeyFunction(GLFW_KEY_W, () -> player.setZvelocity(1)); 
 		keyboard.addKeyFunction(GLFW_KEY_S, () -> player.setZvelocity(-1));
 		keyboard.addKeyFunction(GLFW_KEY_A, () -> player.setXvelocity(1));
@@ -182,7 +180,7 @@ public class Engine {
 		keyboard.addKeyFunction(GLFW.GLFW_KEY_LEFT_SHIFT, () -> player.setYvelocity(-1));
 		keyboard.addKeyFunction(GLFW_KEY_ESCAPE, true, () -> mouse.toggleGrab(window));
 		player.addModel("/Core/Models/stock.obj", "modelTexture");
-		player.thirdPersonPreset(0.25f, new Vector3f(0,70,0), 10);
+		player.thirdPersonPreset(0.25f, new Vector(0,70,0), 10);
 	}
 
 }

@@ -7,9 +7,7 @@ import org.lwjgl.opengl.GL11;
 import objects.Camera;
 import objects.models.ModelBlueprint;
 import utils.fileSystem.OBJLoader;
-import utils.math.Matrix4f;
-import utils.math.Vector2f;
-import utils.math.Vector3f;
+import utils.math.*;
 import utils.other.Timer;
 import utils.rendering.RenderObject;
 import utils.rendering.Shaders;
@@ -48,7 +46,7 @@ public class Pawn implements RenderObject{
 	 * @param zFar - The far plane. Depth will be inaccurate if the far plane is to far away.
 	 * @param cameraName - The name for the camera in shaders.
 	 */
-	public Pawn(Vector3f upVector, float fovy, float aspect, float zNear, float zFar, String cameraName) {
+	public Pawn(Vector upVector, float fovy, float aspect, float zNear, float zFar, String cameraName) {
 		cam = new Camera(upVector, fovy, aspect, zNear, zFar, cameraName);
 		actions = new Runnable[65536];
 		moveDirection = new Vector3f[3];
@@ -62,7 +60,7 @@ public class Pawn implements RenderObject{
 		clock = new Timer();
 	}
 	
-	public void thirdPersonPreset(float smooth, Vector3f position, float velocity) {
+	public void thirdPersonPreset(float smooth, Vector position, float velocity) {
 		this.setSmoothAmount(smooth);
 		this.setPosition(position);
 		this.resetMovement();
@@ -201,11 +199,12 @@ public class Pawn implements RenderObject{
 		if (this.time > this.movementSmoothing) this.time = this.movementSmoothing;
 			
 		if (!this.moveDirection[2].equals(this.moveDirection[1])) {
-			this.moveDirection[0] = this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing);
-			this.moveDirection[1] = this.moveDirection[2].copy();
+			this.moveDirection[0] = this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing).toVec3f();
+			this.moveDirection[1] = this.moveDirection[2].copy().toVec3f();
 			this.time = 0;	
 		}
-		this.position.add(this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing).multiply(delta*this.moveVelocity));
+		Vector v= this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing);
+		this.position.add(v.multiply(delta*this.moveVelocity));
 	}
 	
 	private void move() {
@@ -260,7 +259,7 @@ public class Pawn implements RenderObject{
 	 * It interpolates the current movement vector with the previous movement direction.
 	 * @param t - Time that should pass before the movement direction has changed completely. Set to 0 for no smoothing and 1 for ice skating.
 	 */
-	public Vector3f smoothMovement(Vector3f v, Vector3f v2, float t) {
+	public Vector smoothMovement(Vector v, Vector v2, float t) {
 		return v.interpolate(v2, t);
 	}
 	
@@ -272,7 +271,7 @@ public class Pawn implements RenderObject{
 		return this.position;
 	}
 	
-	public void setPosition(Vector3f pos) {
+	public void setPosition(Vector pos) {
 		this.position.x = pos.x;
 		this.position.y = pos.y;
 		this.position.z = pos.z;

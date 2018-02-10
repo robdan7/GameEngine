@@ -7,6 +7,7 @@ import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
 
+import utils.math.Vector;
 import utils.math.Vector4f;
 import utils.rendering.Uniform;
 
@@ -20,14 +21,14 @@ public abstract class Light {
 	
 	/**
 	 * 
-	 * @param position - The position.
+	 * @param vector - The position.
 	 * @param diffuse - Diffuse lighting.
 	 * @param ambient - Ambient lighting.
 	 */
-	public Light (Vector4f position, Vector4f diffuse, Vector4f ambient, int index) {
+	public Light (Vector vector, Vector diffuse, Vector ambient, int index) {
 		uniformBuffer = BufferUtils.createFloatBuffer(12);
 		UBO = glGenBuffers();
-		genUniformBuffer(new float[][] {position.asFloat(), ambient.asFloat(), diffuse.asFloat()});
+		genUniformBuffer(new float[][] {vector.asFloat(), ambient.asFloat(), diffuse.asFloat()});
 		this.index = index;
 		createUniform();
 	}
@@ -42,7 +43,7 @@ public abstract class Light {
 	
 	public abstract void setPosition(float x, float y, float z, float w);
 	
-	public abstract void setPosition(Vector4f position);
+	public abstract void setPosition(Vector position);
 	
 	void genUniformBuffer(float[]... values) {
 		for (int i = 0; i < values.length; i++) {
@@ -51,5 +52,5 @@ public abstract class Light {
 		this.uniformBuffer.flip();
 	}
 	
-	public abstract Vector4f getPosition();
+	public abstract Vector getPosition();
 }
