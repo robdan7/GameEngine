@@ -122,6 +122,19 @@ public class BufferTools {
         return buffer;
     }
     
+    public static FloatBuffer combineBuffers(FloatBuffer... buffers) {
+    	int size = 0;
+    	for (FloatBuffer b: buffers) {
+    		size += b.capacity();
+    	}
+    	FloatBuffer dest = BufferUtils.createFloatBuffer(size);
+    	for (FloatBuffer b: buffers) {
+    		dest.put(b);
+    	}
+    	dest.flip();
+    	return dest;
+    }
+    
     public static FloatBuffer asFloatBuffer(Vector4f values) {
         return BufferTools.asFloatBuffer(new float[] {values.x, values.y, values.z, values.w});
     }

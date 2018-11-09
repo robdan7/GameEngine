@@ -5,32 +5,36 @@ import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
 
+import core.graphics.renderUtils.uniforms.UniformTools;
+
 /**
  * 
  * @author Robin
  * 
  */
 public class Matrix4f{
-	public float left, mat, top, bottom, far, near, widthRadius, heightRadius;
+	private float left, right, top, bottom, zFar, zNear, widthRadius, heightRadius, fovy, aspectRatio;
 	
-	float m00;
-	float m01;
-	float m02;
-	float m03;
-	float m10;
-	float m11;
-	float m12;
-	float m13;
-	float m20;
-	float m21;
-	float m22;
-	float m23;
-	float m30;
-	float m31;
-	float m32;
-	float m33;
+	protected float m00;
+	protected float m01;
+	protected float m02;
+	protected float m03;
+	protected float m10;
+	protected float m11;
+	protected float m12;
+	protected float m13;
+	protected float m20;
+	protected float m21;
+	protected float m22;
+	protected float m23;
+	protected float m30;
+	protected float m31;
+	protected float m32;
+	protected float m33;
 	
-	FloatBuffer shaderBuffer;
+	private FloatBuffer shaderBuffer;
+	private float[] dest;
+	private int uniformOffset, UBO;
 	
 	String uniformName;
 	
@@ -62,15 +66,24 @@ public class Matrix4f{
 	    m33 = 1.0f;
 	}
 
+	/**
+	 * Set this matrix to have an orthographic perspective.
+	 * @param left
+	 * @param right
+	 * @param bottom
+	 * @param top
+	 * @param zNear
+	 * @param zFar
+	 */
 	public void setOrtho(float left, float right, float bottom, float top, float zNear, float zFar) {
 		this.widthRadius = Math.abs(left-right)/2;
 		this.heightRadius = Math.abs(top-bottom)/2;
 		this.left = left;
-		this.mat = right;
+		this.right = right;
 		this.top = top;
 		this.bottom = bottom;
-		this.far = zFar;
-		this.near = zNear;
+		this.zFar = zFar;
+		this.zNear = zNear;
 		m00 = 2.0f / (right - left);
 	    m01 = 0.0f;
 	    m02 = 0.0f;
@@ -90,15 +103,39 @@ public class Matrix4f{
 	}
 	
 	public void loadTransformIdentity() {
-		this.m30 = (mat + left) / (left - mat);
+		this.m30 = (right + left) / (left - right);
         this.m31 = (top + bottom) / (bottom - top);
-        this.m32 = (far + near) / (near - far);
+        this.m32 = (zFar + zNear) / (zNear - zFar);
 	}
 	
 	public void rotate(double angle, float x, float y, float z) {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
-        double C = 1.0 - cos;
+        this.rotate(sin, cos, x, y, z);
+    }
+	
+	public void rotateFromPoint(Vector v) {
+		if (v.length() == 0) {
+			throw new RuntimeException("Length of vector is 0");
+		}
+		v = v.normalize();
+		
+		if (v.z == 1 || v.z == -1) {
+			throw new RuntimeException("Illegal Vector (|z| == 1)");
+		}
+		Vector u = new Vector3f(0,0,-1);
+		Vector n = u.crossProduct(v);
+		
+		float lengthProduct = u.length()*v.length();
+		double sin = n.length()/lengthProduct;
+		double cos = u.dotProduct(v)/lengthProduct;
+		
+		n = n.normalize();
+		this.rotate(sin, cos, n.x, n.y, n.z);
+	}
+	
+	private void rotate(double sin, double cos, float x,float y, float z) {
+		double C = 1.0 - cos;
         float xy = x * y, xz = x * z, yz = y * z;
         this.m00 = (float)(cos + x * x * C);
         this.m10 = (float)(xy * C - z * sin);
@@ -111,20 +148,15 @@ public class Matrix4f{
         this.m02 = (float)(xz * C - y * sin);
         this.m12 = (float)(yz * C + x * sin);
         this.m22 = (float)(cos + z * z * C);
-        //mat.m32 = 0.0f;
-        /*this.m03 = 0.0f;
-        this.m13 = 0.0f;
-        this.m23 = 0.0f;
-        this.m33 = 1.0f;*/
-    }
+	}
 	
 	/**
-	 * Method gluPerspective.
+	 * Set the perspective of this matrix.
 	 *
-	 * @param fovy
-	 * @param aspect
-	 * @param zNear
-	 * @param zFar
+	 * @param fovy - The view angle in degrees.
+	 * @param aspect - the window length divided by it's height.
+	 * @param zNear - closest point in space.
+	 * @param zFar - Furthest point in space.
 	 */
 	public  void setPerspective(float fovy, float aspect, float zNear, float zFar) {
 		float sine, cotangent, deltaZ;
@@ -147,6 +179,11 @@ public class Matrix4f{
 		m23 =  -1;
 		m32 = -2 * zNear * zFar / deltaZ;
 		m33 = 0;
+		
+		this.zFar = zFar;
+		this.zNear = zNear;
+		this.fovy = radians*2;
+		this.aspectRatio = aspect;
 	}
 	
 	/**Move the camera to a point and look in the same direction as the forward vector.
@@ -154,10 +191,14 @@ public class Matrix4f{
 	 * @param e - The eye.
 	 * @param f - Forward vector. This must be a unit vector.
 	 * @param u - Universal up vector.
+	 * @param r - Default left vector. This is used when e and f are opposite or the same.
 	 */
-	public void lookAt(Vector e, Vector f, Vector u) {
+	public void lookAt(Vector e, Vector f, Vector u, Vector r) {
 		Vector s = f.crossProduct(u);
 		s.normalize();
+		if (s.length() == 0) {
+			s = r;
+		}
 		Vector viewU = s.crossProduct(f);
 		viewU.normalize();
 		this.m00 = s.x;
@@ -200,7 +241,7 @@ public class Matrix4f{
 	 * @return
 	 */
 	public Vector multiply(Vector v) {
-		Vector v2 = new Vector();
+		Vector v2 = new Vector4f();
 		v2.x = m00*v.x+m10*v.y+m20*v.z+m30*v.w;
 		v2.y = m01*v.x+m11*v.y+m21*v.z+m31*v.w;
 		v2.z = m02*v.x+m12*v.y+m22*v.z+m32*v.w;
@@ -222,7 +263,7 @@ public class Matrix4f{
 	}*/
 	
 	/**
-	 * 
+	 * Multiply
 	 * @param mat - The matrix to multiply with.
 	 * @return - The new multiplied matrix.
 	 */
@@ -248,6 +289,79 @@ public class Matrix4f{
 	}
 	
 	/**
+	 * Calculate the inverse of this matrix. A matrix multiplied by it's inverse is the identity matrix.
+	 * @return
+	 */
+	public Matrix4f getInverse() {
+		Matrix4f m = new Matrix4f();
+		m.m00 = m12*m23*m31 - m13*m22*m31 + m13*m21*m32 - m11*m23*m32 - m12*m21*m33 + m11*m22*m33;
+		m.m01 = m03*m22*m31 - m02*m23*m31 - m03*m21*m32 + m01*m23*m32 + m02*m21*m33 - m01*m22*m33;
+		m.m02 = m02*m13*m31 - m03*m12*m31 + m03*m11*m32 - m01*m13*m32 - m02*m11*m33 + m01*m12*m33;
+		m.m03 = m03*m12*m21 - m02*m13*m21 - m03*m11*m22 + m01*m13*m22 + m02*m11*m23 - m01*m12*m23;
+		m.m10 = m13*m22*m30 - m12*m23*m30 - m13*m20*m32 + m10*m23*m32 + m12*m20*m33 - m10*m22*m33;
+		m.m11 = m02*m23*m30 - m03*m22*m30 + m03*m20*m32 - m00*m23*m32 - m02*m20*m33 + m00*m22*m33;
+		m.m12 = m03*m12*m30 - m02*m13*m30 - m03*m10*m32 + m00*m13*m32 + m02*m10*m33 - m00*m12*m33;
+		m.m13 = m02*m13*m20 - m03*m12*m20 + m03*m10*m22 - m00*m13*m22 - m02*m10*m23 + m00*m12*m23;
+		m.m20 = m11*m23*m30 - m13*m21*m30 + m13*m20*m31 - m10*m23*m31 - m11*m20*m33 + m10*m21*m33;
+		m.m21 = m03*m21*m30 - m01*m23*m30 - m03*m20*m31 + m00*m23*m31 + m01*m20*m33 - m00*m21*m33;
+		m.m22 = m01*m13*m30 - m03*m11*m30 + m03*m10*m31 - m00*m13*m31 - m01*m10*m33 + m00*m11*m33;
+		m.m23 = m03*m11*m20 - m01*m13*m20 - m03*m10*m21 + m00*m13*m21 + m01*m10*m23 - m00*m11*m23;
+		m.m30 = m12*m21*m30 - m11*m22*m30 - m12*m20*m31 + m10*m22*m31 + m11*m20*m32 - m10*m21*m32;
+		m.m31 = m01*m22*m30 - m02*m21*m30 + m02*m20*m31 - m00*m22*m31 - m01*m20*m32 + m00*m21*m32;
+		m.m32 = m02*m11*m30 - m01*m12*m30 - m02*m10*m31 + m00*m12*m31 + m01*m10*m32 - m00*m11*m32;
+		m.m33 = m01*m12*m20 - m02*m11*m20 + m02*m10*m21 - m00*m12*m21 - m01*m10*m22 + m00*m11*m22;
+		m.scale(1/this.determinant());
+		return m;
+	}
+	
+	/**
+	 * Calculate the determinant of this matrix.
+	 * @return
+	 */
+	public Double determinant() {
+		double value;
+		value = m03 * m12 * m21 * m30 - m02 * m13 * m21 * m30 - m03 * m11 * m22 * m30 + m01 * m13 * m22 * m30
+				+ m02 * m11 * m23 * m30 - m01 * m12 * m23 * m30 - m03 * m12 * m20 * m31 + m02 * m13 * m20 * m31
+				+ m03 * m10 * m22 * m31 - m00 * m13 * m22 * m31 - m02 * m10 * m23 * m31 + m00 * m12 * m23 * m31
+				+ m03 * m11 * m20 * m32 - m01 * m13 * m20 * m32 - m03 * m10 * m21 * m32 + m00 * m13 * m21 * m32
+				+ m01 * m10 * m23 * m32 - m00 * m11 * m23 * m32 - m02 * m11 * m20 * m33 + m01 * m12 * m20 * m33
+				+ m02 * m10 * m21 * m33 - m00 * m12 * m21 * m33 - m01 * m10 * m22 * m33 + m00 * m11 * m22 * m33;
+		return value;
+	}
+	
+	public void scale(double scale) {
+		m00 *= scale;
+	    m01 *= scale;
+	    m02 *= scale;
+	    m03 *= scale;
+	    m10 *= scale;
+	    m11 *= scale;
+	    m12 *= scale;
+	    m13 *= scale;
+	    m20 *= scale;
+	    m21 *= scale;
+	    m22 *= scale;
+	    m23 *= scale;
+	    m30 *= scale;
+	    m31 *= scale;
+	    m32 *= scale;
+	    m33 *= scale;
+	}
+	
+	/**
+	 * Calculate a pointer in 3d space form the relative mouse position on screen.
+	 * @param p - Relative position in screen coordinates. From -1 to 1.
+	 * @return
+	 */
+	public Vector3f pointToVector(Vector2f p) {
+		Vector3f v = new Vector3f();
+		v.z =-this.zNear;
+		v.y = (p.y)*(float)Math.tan(this.fovy/2)*this.zNear;
+		v.x = (p.x)*(float)Math.tan(this.fovy/2)*this.zNear;
+		return v;
+	}
+	
+	/**
 	 * bind en uniform till definierade shaders och flyttalsbuffer.
 	 *@param
 	 * shaders - Det program som uniformen ska bindas till.
@@ -264,15 +378,15 @@ public class Matrix4f{
 	 * @param shaders
 	 * @param name
 	 */
-	public void createUniform (int shaders, String name) {
+	/*public void createUniform (int shaders, String name) {
 		int location = GL20.glGetUniformLocation(shaders, name);
 		GL20.glUniformMatrix4fv(location, false, this.put());
-	}
+	}*/
 	
-	public void createUniform (int shaders) {
+	/*public void createUniform (int shaders) {
 		int location = GL20.glGetUniformLocation(shaders, this.uniformName);
 		GL20.glUniformMatrix4fv(location, false, this.put());
-	}
+	}*/
 	
 	
 	@Deprecated
@@ -285,50 +399,93 @@ public class Matrix4f{
 	 * Store this matrix in a floatbuffer.
 	 * @return Return the matrix as a buffer.
 	 * */
-	public FloatBuffer put() {
+	/*public FloatBuffer put() {
 		if (this.shaderBuffer == null) {
 			this.shaderBuffer = BufferUtils.createFloatBuffer(16);
 		}
-		shaderBuffer.put(0,    this.m00);
-		shaderBuffer.put(1,  this.m01);
-		shaderBuffer.put(2,  this.m02);
-		shaderBuffer.put(3,  this.m03);
-		shaderBuffer.put(4,  this.m10);
-		shaderBuffer.put(5,  this.m11);
-		shaderBuffer.put(6,  this.m12);
-		shaderBuffer.put(7,  this.m13);
-		shaderBuffer.put(8,  this.m20);
-		shaderBuffer.put(9,  this.m21);
-		shaderBuffer.put(10, this.m22);
-		shaderBuffer.put(11, this.m23);
-		shaderBuffer.put(12, this.m30);
-		shaderBuffer.put(13, this.m31);
-		shaderBuffer.put(14, this.m32);
-		shaderBuffer.put(15, this.m33);
-        
+		this.put(this.shaderBuffer);
         return shaderBuffer;
-    }
+    }*/
 	
 	/**
-	 * Store this matrix in a floatbuffer.
-	 * @return Return the matrix as a buffer.
+	 * Store this matrix in a float buffer.
 	 * */
 	public void put(FloatBuffer dest) {
-        dest.put(0,    this.m00);
-        dest.put(1,  this.m01);
-        dest.put(2,  this.m02);
-        dest.put(3,  this.m03);
-        dest.put(4,  this.m10);
-        dest.put(5,  this.m11);
-        dest.put(6,  this.m12);
-        dest.put(7,  this.m13);
-        dest.put(8,  this.m20);
-        dest.put(9,  this.m21);
-        dest.put(10, this.m22);
-        dest.put(11, this.m23);
-        dest.put(12, this.m30);
-        dest.put(13, this.m31);
-        dest.put(14, this.m32);
-        dest.put(15, this.m33);
+		dest.clear();
+        dest.put(this.m00);
+        dest.put(this.m01);
+        dest.put(this.m02);
+        dest.put(this.m03);
+        dest.put(this.m10);
+        dest.put(this.m11);
+        dest.put(this.m12);
+        dest.put(this.m13);
+        dest.put(this.m20);
+        dest.put(this.m21);
+        dest.put(this.m22);
+        dest.put(this.m23);
+        dest.put(this.m30);
+        dest.put(this.m31);
+        dest.put(this.m32);
+        dest.put(this.m33);
     }
+	
+	public float[] toFloatArray() {
+		if (this.dest == null) {
+			this.dest = new float[Matrix4f.getSize()];
+		}
+		dest[0] = this.m00;
+		dest[1] = this.m01;
+		dest[2] = this.m02;
+		dest[3] = this.m03;
+		
+		dest[4] = this.m10;
+		dest[5] = this.m11;
+		dest[6] = this.m12;
+		dest[7] = this.m13;
+		
+		dest[8] = this.m20;
+		dest[9] = this.m21;
+		dest[10] = this.m22;
+		dest[11] = this.m23;
+		
+		dest[12] = this.m30;
+		dest[13] = this.m31;
+		dest[14] = this.m32;
+		dest[15] = this.m33;
+		return dest;
+	}
+	
+	/**
+	 * Add this matrix to a common uniform block.
+	 * @param buffer - The target buffer.
+	 * @param UBO - The buffer index used for binding.
+	 * @param offset - The index offset in the buffer associated with this matrix.
+	 */
+	public void connectToUniformBlock(int UBO, int offset) {
+		this.uniformOffset = offset;
+	}
+	
+	/*
+	public void updateUniformBlock() {
+		this.put();
+		UniformTools.updateUniformBlock(this.UBO, this.shaderBuffer, this.uniformOffset);
+	}*/
+	
+	/**
+	 * Return the variable size of any 4x4 matrix.
+	 * @return
+	 */
+	public static int getSize() {
+		return 16;
+	}
+	
+	@Override
+	public String toString() {
+		String s = m00 + " " + m10 + " " + m20 + " " + m30 + "\n";
+		s += m01 + " " + m11 + " " + m21 + " " + m31 + "\n";
+		s += m02 + " " + m12 + " " + m22 + " " + m32 + "\n";
+		s += m03 + " " + m13 + " " + m23 + " " + m33 + "\n";
+		return s;
+	}
 }

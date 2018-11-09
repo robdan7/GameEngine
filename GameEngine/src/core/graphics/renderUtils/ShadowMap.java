@@ -4,6 +4,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 import core.graphics.lights.DirectionalLight;
 import core.graphics.lights.Light;
+import core.graphics.renderUtils.buffers.Drawbuffer;
+import core.utils.math.Vector;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
 import core.utils.other.Texture;
@@ -14,20 +16,20 @@ public class ShadowMap {
 	private DirectionalLight light;
 	private static String sharedMatrixName;
 	/**
-	 * 
+	 * @param up - up vector.
+	 * @param right - right Vector. Must not be the same as up.
 	 * @param shader - The shader to bind it to.
 	 * @param textureName - The shader texture name.
-	 * @param matrixName - The shader matrix name.
 	 * @param width - pixel width.
 	 * @param height - pixel height.
 	 * @param imageFilter - Image filer. GL_LINEAR or GL_NEAREST.
 	 * @param matrixDimensions - The orthographic camera dimensions.
 	 * @throws Exception
 	 */
-	public ShadowMap(Shaders shader, String textureName, String matrixName, int width, int height, int imageFilter, Vector4f matrixDimensions) throws Exception {
-		buffer = new Drawbuffer(shader, textureName, width, height, imageFilter, GL_DEPTH_COMPONENT);
+	public ShadowMap(Vector3f up, Vector3f right, String textureName, int width, int height, int imageFilter, Vector4f matrixDimensions) throws Exception {
+		buffer = new Drawbuffer(textureName, width, height);
 		//buffer.getColorMapTexture().bindAsUniform(shader.getShaderProgram());
-		cam = new Camera(-matrixDimensions.x, matrixDimensions.x, -matrixDimensions.y, matrixDimensions.y, matrixDimensions.z, matrixDimensions.w, matrixName);
+		cam = new Camera(up, right, -matrixDimensions.x, matrixDimensions.x, -matrixDimensions.y, matrixDimensions.y, matrixDimensions.z, matrixDimensions.w, Camera.updateType.CAMERA);
 		//cam.rotate(0, -(float)Math.PI/2);
 		cam.lookAt(new Vector3f(0.1f,-1f,0));
 		//System.out.println(cam.getForward().toString() + " : " + cam.getPosition().toString());
@@ -59,7 +61,7 @@ public class ShadowMap {
 	 * @param v - The vector to bind as position.
 	 */
 	public void bindPositionTo(Vector3f v) {
-		this.cam.copyPosition(v);
+		this.cam.bindFocusPos(v);
 	}
 	
 	/**
@@ -71,24 +73,13 @@ public class ShadowMap {
 	}
 	
 	/**
-	 * Update the shadow map camera view for rendering to the shadow map.
-	 * @param shader - The shader to bind.
+	 * Update the camera view.
 	 */
-	public void updateCameraUniform(int shader) {
+	public void updateCameraUniform() {
 		if (this.light != null) {
-			cam.lookAt(this.light.getPosition().flip());
-			//System.out.println(this.light.getPosition().toString());
+			cam.lookAt(Vector.flip(light.getPosition()).toVec3f()); // Use the fliped position to look in the opposite direction.
 		}
-		cam.updateCamera(shader);
-	}
-	
-	/**
-	 * Update the shadow map camera view for normal rendering.
-	 * @param shader - The shader to bind.
-	 * @param name - The name in the shader to use.
-	 */
-	public void updateRenderCameraUniform(int shader, String name) {
-		cam.updateCamera(shader, name);
+		cam.updateUniform();
 	}
 	
 	/**
@@ -104,15 +95,7 @@ public class ShadowMap {
 	 * @return - The generated shadow map depth texture.
 	 */
 	public Texture getTexture() {
-		return this.buffer.getColorMapTexture();
-	}
-	
-	public static void setSharedMatrixName(String name) {
-		sharedMatrixName = name;
-	}
-	
-	public static String getSharedMatrixName() {
-		return sharedMatrixName;
+		return this.buffer.getDepthMapTexture();
 	}
 	
 	public Light getLightSource() {

@@ -40,6 +40,7 @@ public class Mouse extends MouseController{
 			public void invoke(long arg0, double x, double y) {
 				setX((float)x);
 				setY((float)y);
+				notifyMouseMovement();
 			}
 		};
 		this.buttonCallback = new GLFWMouseButtonCallback() {
@@ -58,6 +59,10 @@ public class Mouse extends MouseController{
 		glfwSetCursorPosCallback(this.window.getWindow(), this.callback);
 		glfwSetMouseButtonCallback(this.window.getWindow(), this.buttonCallback);
 		this.movementRatio = ratio;
+	}
+	
+	public Vector2f getNormalizedPosition() {
+		return new Vector2f((getX()/window.getWidth())*2-1,-getY()/window.getHeight()*(2)+1);
 	}
 	
 	/**

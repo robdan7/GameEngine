@@ -1,0 +1,11 @@
+#define name = Matrices; // name. Must be the same as in the code.
+#define bindings = 4; // The max number of uniform sources to bind.
+#define size = 80; // The amount of floating values.
+
+layout (std140, binding = #index) uniform Matrices {
+	layout(offset = 0) uniform mat4 camera;
+	layout(offset = 64) uniform mat4 viewMatrix;
+	layout(offset = 128) uniform mat4 translateMatrix;
+	layout(offset = 192) uniform mat4 dynamicOrthoMatrix;
+	layout(offset = 256) uniform mat4 staticOrthoMatrix;
+};

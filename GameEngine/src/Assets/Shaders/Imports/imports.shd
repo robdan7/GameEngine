@@ -1,0 +1,33 @@
+#define name = lightUtils;
+
+float nDotLight(vec4 normal, vec4 light) {
+	return max(dot(normal, light),0);
+}
+
+vec4 light(vec4 lightNormal, vec4 vertexNormal) {
+
+	float nDotL = max(dot(vertexNormal, lightNormal),0);
+	vec4 light = min(lightSource.diffuse*vec4(vec3(nDotL),1) + lightSource.ambient,1);
+	return light;
+}
+
+vec4 calcDiffuseLight(vec4 lightN, vec4 vertexN) {
+	float nDotL = max(dot(vertexN.xyz, lightN.xyz),0);
+	vec4 light = min(lightSource.diffuse*vec4(vec3(nDotL),1),1);
+	return light;
+}
+
+float calcSpecularLight(vec4 lNormal, vec4 vNormal, vec4 eyeNormal, float shininess) {
+	vec4 lightReflection = normalize(reflect(lNormal, vNormal));
+	float eyeReflectionAngle = max(0.0,dot(eyeNormal,lightReflection));
+	return pow(eyeReflectionAngle, shininess);
+	//return dot(eyeNormal,lightReflection);
+}
+
+vec4 calcNormal(mat4 matrix, vec3 normal) {
+	return normalize(matrix * vec4(normal,0));
+}
+
+vec4 calcLightNormal(mat4 matrix, vec4 normal, vec4 vert) {
+	return normalize(normal-matrix* vert*normal.w);
+}

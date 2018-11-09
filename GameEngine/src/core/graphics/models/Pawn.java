@@ -3,17 +3,25 @@ package core.graphics.models;
 import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 
 import core.graphics.renderUtils.Camera;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
-import core.utils.fileSystem.OBJLoader;
+import core.input.Mouse;
+import core.input.listeners.MouseController;
+import core.input.listeners.MouseListener;
+import core.utils.math.Line;
 import core.utils.math.Matrix4f;
+import core.utils.math.Plane;
 import core.utils.math.Vector;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
+import core.utils.math.Vector4f;
 import core.utils.other.Timer;
 
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL20.*;
 
 /**
@@ -21,11 +29,9 @@ import static org.lwjgl.opengl.GL20.*;
  * @author Robin
  *
  */
-public class Pawn implements RenderObject{
-	Runnable[] actions;
-	private final Vector3f position;
-	private Vector2f rotation;
+public class Pawn extends MouseListener {
 	private Vector3f[] moveDirection;
+	private Vector3f position;
 	private float movementSmoothing = 0;
 	
 	private float moveVelocity;
@@ -34,42 +40,51 @@ public class Pawn implements RenderObject{
 	private Timer clock;
 	
 	private Camera cam;
-	private float camoffset = 0;
 	camFollow followmode;
 	
 	ModelBlueprint model;
+
+	Plane p;
+	Line l;
 	
 	/**
 	 * Camera follow mode: FPV.
 	 * @param upVector - Up direction. Presumably 0,1,0.
+	 * @param right - Right vector. Must not be the same as up.
 	 * @param fovy - Angle of field of view.
 	 * @param aspect - Window width divided by window height.
 	 * @param zNear - The new plane. Set to roughly 0.001f.
 	 * @param zFar - The far plane. Depth will be inaccurate if the far plane is to far away.
-	 * @param cameraName - The name for the camera in shaders.
 	 */
-	public Pawn(Vector upVector, float fovy, float aspect, float zNear, float zFar, String cameraName) {
-		cam = new Camera(upVector, fovy, aspect, zNear, zFar, cameraName);
-		actions = new Runnable[65536];
-		moveDirection = new Vector3f[3];
-		moveDirection[0] = new Vector3f();
-		moveDirection[1] = new Vector3f();
-		moveDirection[2] = new Vector3f();
-		moveVelocity = 1;
+	public Pawn(Vector3f upVector, Vector3f right, float fovy, float aspect, float zNear, float zFar) {
 		this.position = new Vector3f();
-		this.rotation = new Vector2f();
+		cam = new Camera(upVector, right, fovy, aspect, zNear, zFar, Camera.updateType.BOTH);
+		this.cam.bindFocusPos(this.position);
+		moveDirection = new Vector3f[3];
+		moveDirection[0] = new Vector3f(); // The current movement direction.
+		moveDirection[1] = new Vector3f(); // The new movement direction.
+		moveDirection[2] = new Vector3f(); // Movement direction from actuators.
+		moveVelocity = 1;
 		this.followmode = camFollow.FPV;
 		clock = new Timer();
+		this.l = new Line(new Vector3f(0,0,0), new Vector3f(0,0,1));
+		p = new Plane(new Vector3f(0,2,0), new Vector3f(0,1,0));
 	}
 	
-	public void thirdPersonPreset(float smooth, Vector position, float velocity) {
+	/**
+	 * 
+	 * @param smooth
+	 * @param position
+	 * @param velocity
+	 */
+	public void thirdPersonPreset(float smooth, Vector position, float velocity, float camOffset) {
 		this.setSmoothAmount(smooth);
 		this.setPosition(position);
 		this.resetMovement();
 		this.setWalkVelocity(velocity);
 		
 		
-		this.setCameraOffset(7);
+		this.cam.setFocusOffset(camOffset);
 		this.setFollowmode(Pawn.camFollow.THIRDVIEW);
 	}
 	
@@ -83,42 +98,20 @@ public class Pawn implements RenderObject{
 	/**
 	 * Add a .obj model to the pawn.
 	 */
-	public void addModel(String file, String modelTerxure) {
-		this.model = new ModelBlueprint(file, modelTerxure);
+	public void addModel(ModelBlueprint m) {
+		this.model = m;
 	}
 	
 	public void bindTexture(Shaders shader) {
+		if (this.model == null) {
+			throw new RuntimeException("No model exists");
+		}
 		this.model.bindTexture(shader);
-	}
-	@Override
-	public void discard() {
-		// TODO Auto-generated method stub
-		if(this.model != null) {
-			this.model.discard();
-		}	
-	}
-	@Override
-	public void render(Matrix4f mat, int shader) {
-		this.setMatrix(mat, shader);
-		this.model.render();
-	}
-	@Override
-	public void renderTextured (Matrix4f mat, int shader) {
-		this.setMatrix(mat, shader);
-		this.model.renderTextured();
-	}
-	
-	private void setMatrix(Matrix4f mat, int shader) {
-		mat.setIdentity();
-		mat.translate(this.position);
-		mat.rotate(this.rotation.x, 1, 0, 0);
-		this.rotation.x += 0.02f;
-		mat.createUniform(shader);
 	}
 	
 	/**
-	 * 
-	 * @param v - 
+	 * Set the movement velocity of the pawn.
+	 * @param v - velocity in unit size.
 	 */
 	public void setWalkVelocity(float v) {
 		this.moveVelocity = v;
@@ -128,7 +121,6 @@ public class Pawn implements RenderObject{
 	 * Reset movement speed.
 	 */
 	public void resetMovement() {
-		//System.out.println(this.moveDirection[2].z);
 		moveDirection[2].setZero();
 	}
 	
@@ -156,19 +148,6 @@ public class Pawn implements RenderObject{
 		this.moveDirection[2].z += f;
 	}
 	
-	/** Convert the input velocity to a change in position. All movement is locked to the x,y and z axis.
-	 *
-	 */
-	@Deprecated
-	public void updateMovement() {
-		this.moveDirection[2].normalize();
-		if (this.movementSmoothing != 0) {
-			this.moveSmooth();
-		} else {
-			this.move();
-		}
-	}
-	
 	public void setFollowmode(camFollow mode) {
 		followmode = mode;
 	}
@@ -176,19 +155,23 @@ public class Pawn implements RenderObject{
 	
 	/** Convert the input velocity to a change in position. Movement in y direction is locked to the y axis.
 	 *
-	 * @param hAngle - The horizontal angle to follow. For  example the horizontal camera direction. 
 	 */
-	public void updateMovement(float hAngle) {
+	public void updateMovement() {
+		Vector oldPos = this.position.copy();
 		float tempX = this.moveDirection[2].x;
 		float tempZ = this.moveDirection[2].z;
-		this.moveDirection[2].x = (float)Math.sin(hAngle)*tempZ + (float)Math.cos(hAngle)*tempX; 	// Rotate x.
-		this.moveDirection[2].z = (float)Math.sin(hAngle)*(-tempX) + (float)Math.cos(hAngle)*tempZ;	// Rotate z.
+		this.moveDirection[2].x = (float)Math.sin(this.cam.gethAngle())*tempZ + (float)Math.cos(this.cam.gethAngle())*tempX; 	// Rotate x.
+		this.moveDirection[2].z = (float)Math.sin(this.cam.gethAngle())*(-tempX) + (float)Math.cos(this.cam.gethAngle())*tempZ;	// Rotate z.
 		this.moveDirection[2].normalize();
 		if (this.movementSmoothing != 0) {
 			this.moveSmooth();
 		} else {
 			this.move();
 		}
+		this.model.translate(this.position);
+		//if (!this.position.equals(oldPos)) {
+		this.updateCamera();
+		//}
 	}
 	
 	/**
@@ -202,42 +185,36 @@ public class Pawn implements RenderObject{
 			
 		if (!this.moveDirection[2].equals(this.moveDirection[1])) {
 			this.moveDirection[0] = this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing).toVec3f();
-			this.moveDirection[1] = this.moveDirection[2].copy().toVec3f();
-			this.time = 0;	
+			this.moveDirection[1] = this.moveDirection[2].toVec3f();
+			this.time = 0;
 		}
-		Vector v= this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing);
+		Vector v = this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing);
+		
 		this.position.add(v.multiply(delta*this.moveVelocity));
 	}
 	
 	private void move() {
-		
+		throw new IllegalArgumentException("This method is not supported yet");
 	}
 	
 	
 	/**
-	 * Update camera position. Should be done before rendering a scene.
-	 * Note: glUseProgram(int program) must be called before.
-	 * @param shader - The shaderprogram to bind.
+	 * Update the camera view for all shaders with the correct uniform index for the connected block.
 	 */
-	public void updateCamera(Shaders shader) {
-		glUseProgram(shader.getShaderProgram());
+	private void updateCamera() {
+		//glUseProgram(shader.getShaderProgram());
 		if(this.followmode != camFollow.STATIC) {
-			cam.setPosition(this.position);
-			if (this.followmode == camFollow.THIRDVIEW) {
+			//cam.bindFocusPos(this.position);
+			/*if (this.followmode == camFollow.THIRDVIEW) {
 				cam.lookAt(this.camoffset);
 			} else {
 				cam.lookAt();
-			}
+			}*/
+			//this.cam.lookAt();
 		}
-		cam.updateCamera(shader.getShaderProgram());
-		glUseProgram(0);
-	}
-	/**
-	 * Set the distance between player and camera.
-	 * @param offset - The offset length.
-	 */
-	public void setCameraOffset(float offset) {
-		camoffset = offset;
+		this.cam.lookAt();
+		cam.updateUniform();
+		//glUseProgram(0);
 	}
 	
 	/**
@@ -266,7 +243,7 @@ public class Pawn implements RenderObject{
 	}
 	
 	/**
-	 * 
+	 * Set the position.
 	 * @return Position in world coordinates.
 	 */
 	public Vector3f getPosition() {
@@ -285,35 +262,71 @@ public class Pawn implements RenderObject{
 	
 	/**
 	 * Set the camera to static of following.
-	 * @author Robin
 	 *
 	 */
 	public enum camFollow {
 		STATIC, FPV, THIRDVIEW
 	}
-
+/*
 	@Override
 	public void setShader(Shaders shader) {
-		// TODO Auto-generated method stub
+		
 		this.model.setShader(shader);
 	}
 
 	@Override
 	public int getShader() {
-		// TODO Auto-generated method stub
+		
 		return this.model.getShader();
 	}
 
 	@Override
 	public void setDepthShader(Shaders shader) {
-		// TODO Auto-generated method stub
+		
 		this.model.setDepthShader(shader);
 	}
 
 	@Override
 	public int getDepthShader() {
-		// TODO Auto-generated method stub
+		
 		return this.model.getDepthShader();
+	}
+*/
+	public ModelBlueprint getModel() {
+		return this.model;
+	}
+	
+	@Override
+	public void leftClick(MouseController obs) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void leftClickRelease(MouseController obs) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void rightClick(MouseController obs) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void rightClickRelease(MouseController obs) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseMovement(MouseController obs, Vector2f v) {
+		Vector3f pointer = ((Mouse)obs).getNormalizedPosition().toVec3f();
+		pointer.z = -1;
+		l.setDirection(pointer);
+		Vector3f v2 = Vector.multiply(this.cam.getForward(), this.cam.getCamOffset()).toVec3f();
+		l.setStart(Vector.subtract(this.position, v2));
 	}
 }
 

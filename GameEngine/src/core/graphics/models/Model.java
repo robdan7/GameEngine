@@ -190,5 +190,11 @@ public class Model {
             this.normalIndices[2] = normalIndices[2];
             this.material = material;
         }
+        
+        @Override
+        public String toString() {
+        	return this.vertexIndices[0] + " , " + this.vertexIndices[1] + " , " + this.vertexIndices[2]
+        			+ " : "+ this.normalIndices[0] + " , " + this.normalIndices[1] + " , "  + this.normalIndices[2];
+        }
     }
 }

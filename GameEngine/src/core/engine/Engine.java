@@ -3,21 +3,39 @@ package core.engine;
 import static org.lwjgl.glfw.GLFW.*;
 
 import org.lwjgl.glfw.GLFW;
+import static org.lwjgl.opengl.GL15.*;
+import org.lwjgl.opengl.GL20;
 
 import core.graphics.lights.DirectionalLight;
+import core.graphics.misc.Color;
 import core.graphics.models.ModelBlueprint;
+import core.graphics.models.ModelCompiler;
 import core.graphics.models.Pawn;
+import core.graphics.renderUtils.Quad;
 import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.ShadowMap;
+import core.graphics.renderUtils.uniforms.UniformObject;
+import core.graphics.renderUtils.uniforms.UniformSource;
 import core.input.Keyboard;
 import core.input.Mouse;
+import core.utils.math.Line;
 import core.utils.math.Matrix4f;
+import core.utils.math.Plane;
 import core.utils.math.Vector;
 import core.utils.math.Vector2f;
+import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
+import core.utils.other.BufferTools;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+
+import java.io.IOException;
+import java.nio.FloatBuffer;
+
+import org.lwjgl.BufferUtils;
 
 import core.graphics.ui.*;
 
@@ -27,7 +45,7 @@ public class Engine {
 	private Keyboard keyboard;
 	Mouse mouse;
 	Shaders shader;
-	Shaders shadowShader;
+	Shaders dynamicShadows, staticShadows;
 	Shaders quad;
 	Pawn player;
 	
@@ -37,14 +55,17 @@ public class Engine {
 	ShadowMap staticShadowMap;
 	ShadowMap dynamicShadowMap;
 	
+	@Deprecated
 	MenuSystem menu;
 	
 	boolean shouldClose = false;
 	
 	public Engine() {
+		
 		run();
 		shader.dispose();
-		shadowShader.dispose();
+		dynamicShadows.dispose();
+		staticShadows.dispose();
 		window.deleteAllRenderObjects();
 		window.deleteWindow();
 		
@@ -56,10 +77,8 @@ public class Engine {
 	
 	private void run() {
 		window = new Window(1080,720);
-		//window.enableVertexArray();
-		//window.enableNormals();
-		//window.enableTexture();
-		glClearColor(01.0f, 01.0f, 01.0f, 01.0f);
+		window.setSkyColor(Color.rgbToPercent(110,148,214,255));
+		
 		keyboard = new Keyboard(window);
 		mouse = new Mouse(window, 0.5f);
 
@@ -67,24 +86,26 @@ public class Engine {
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
 
-		shader = new Shaders("/Assets/Shaders/Deafult/shader.vert", "/Assets/Shaders/Deafult/shader.frag", true);
-		shadowShader = new Shaders("/Assets/Shaders/Shadows/Default/shader.vert", "/Assets/Shaders/Shadows/Default/shader.frag", true);
-
-		this.addPlayer();
-		
+		try {
+			Shaders.addImport("/Assets/Shaders/Imports/imports.shd");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		sun = new DirectionalLight(new Vector4f(0.2f,1,0.5f,0), new Vector4f(1f,1f,1f,1), Vector.multiply(window.getSkyColor(), 0.4f), new Vector4f(2,2,2,0), 0, "/Assets/Shaders/Uniforms/light.unf");
+		UniformObject uniform = new UniformObject("/Assets/Shaders/Uniforms/matrices.unf", GL_DYNAMIC_DRAW);
+		shader = new Shaders("/Assets/Shaders/Deafult/shader.vert", "/Assets/Shaders/Deafult/shader.frag");
+		dynamicShadows = new Shaders("/Assets/Shaders/Shadows/Default/dynamic.vert", "/Assets/Shaders/Shadows/Default/shader.frag");
+		staticShadows = new Shaders("/Assets/Shaders/Shadows/Default/static.vert", "/Assets/Shaders/Shadows/Default/shader.frag");
 		
 		transformMatrix = new Matrix4f("translateMatrix");
 		
 		//glUseProgram(shader.getShaderProgram());
 		
-		
-
-		sun = new DirectionalLight(new Vector4f(0,1,0.1f,0), new Vector4f(1,1,1,1), new Vector4f(0.5f,0.5f,0.5f,1), 0);
 
 		try {
-			staticShadowMap = new ShadowMap(shader, "staticShadowmap", "staticOrthoMatrix", window.getWidth(), window.getHeight(), GL_LINEAR, new Vector4f(50,50,-100,100));
-			dynamicShadowMap = new ShadowMap(shader, "dynamicShadowmap", "dynamicOrthoMatrix", window.getWidth(), window.getHeight(), GL_LINEAR, new Vector4f(10,10,-100,100));
-			ShadowMap.setSharedMatrixName("orthomatrix");
+			staticShadowMap = new ShadowMap(new Vector3f(0,1,0), new Vector3f(-1,0,0),"staticShadowmap", 1080*3, 1080*3, GL_NEAREST, new Vector4f(10,10,-100,100));
+			dynamicShadowMap = new ShadowMap(new Vector3f(0,1,0), new Vector3f(-1,0,0),"dynamicShadowmap", 2048, 2048, GL_NEAREST, new Vector4f(7,7,-100,100));
 			//shadowMap.getBuffer().getColorMapTexture().bindAsUniform(this.shader.getShaderProgram());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -92,27 +113,52 @@ public class Engine {
 		}
 		staticShadowMap.bindToLight(sun);
 		dynamicShadowMap.bindToLight(sun);
-		dynamicShadowMap.updateCameraUniform(this.shader.getShaderProgram());
-		staticShadowMap.updateCameraUniform(this.shader.getShaderProgram());
+		//GL20.glUseProgram(this.shader.getShaderProgram());
 		
-
-		ModelBlueprint m = new ModelBlueprint("/Assets/Models/Env/Maps/Stock_Terrain.obj", "modelTexture");
-		m.bindTexture(this.shader);
 		
-		player.setShader(shader);
-		player.setDepthShader(this.shadowShader);
-		m.setShader(shader);
-		m.setDepthShader(this.shadowShader);
+		this.addPlayer();
+		//ModelBlueprint m = new ModelBlueprint("/Assets/Models/Env/Maps/Stock_Terrain.obj", "modelTexture");
+		ModelBlueprint m = null;
+		try {
+			m = ModelCompiler.loadModelBlueprint("/Assets/Models/Demo/demo.ini");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//m.bindTexture(this.shader);
+		
+		//player.getModel().setShader(shader);
+		player.getModel().setDepthShader(this.dynamicShadows);
+		//m.setShader(shader);
+		m.setDepthShader(this.staticShadows);
 		this.dynamicShadowMap.bindPositionTo(player.getPosition());
 		
-		window.addDynamicRenderObject(player);
+		window.addDynamicRenderObject(player.getModel());
 		window.addStaticRenderObject(m);
 
-		this.setupUI();
+		this.mouse.addListener(this.player);
+		
+		UniformSource translateMatrix = new UniformSource(Matrix4f.getSize());
+		player.getCamera().bindToUniformObject(uniform);
+		translateMatrix.bindToUniformObject(uniform);
+		
+		dynamicShadowMap.getCamera().bindToUniformObject(uniform);
+		staticShadowMap.getCamera().bindToUniformObject(uniform);
+		//uniform.createUniformBlock(player.getCamera(), translateMatrix, staticShadowMap.getCamera(), dynamicShadowMap.getCamera());
+		//player.getCamera().getLookAtMatrix().lookAt(new Vector3f(0,0,-10), new Vector3f(0,0,1), new Vector3f(0,1,0), new Vector3f(-1,0,0));
+		//player.setPosition(new Vector3f(0,3,0));
+
+		this.player.rotateCamera((float)Math.PI, 0);
+		//this.player.updateMovement();
+		
+		this.player.getModel().bindTransformMatrix(translateMatrix);
+		m.bindTransformMatrix(translateMatrix);
+		//this.setupUI();
 		this.renderloop();
 		m.discard();
 	}
 	
+	@Deprecated
 	public void setupUI() {
 		menu = new MenuSystem(this.window,2);
 		this.mouse.addListener(menu);
@@ -136,9 +182,14 @@ public class Engine {
 	}
 	
 	public void renderloop() {
-		staticShadowMap.getTexture().bindAsUniform(shader.getShaderProgram());
-		this.dynamicShadowMap.getTexture().bindAsUniform(this.shader.getShaderProgram());
-		window.renderStaticShadowMap(this.transformMatrix, this.staticShadowMap);
+		Shaders deffered = new Shaders("/Assets/Shaders/deffered/deffered.vert","/Assets/Shaders/deffered/deffered.frag");
+		Quad screenQuad = new Quad(window.getWidth(),window.getHeight(),deffered);
+		
+
+		this.staticShadowMap.getTexture().bindAsUniforms(shader, deffered);
+		this.dynamicShadowMap.getTexture().bindAsUniforms(this.shader,deffered);
+		window.renderStaticShadowMap(this.staticShadowMap);
+		
 		
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
 			player.resetMovement();
@@ -146,13 +197,23 @@ public class Engine {
 			if (!mouse.isVisible()) {
 				player.rotateCamera(-mouse.getDX(),-mouse.getDY());
 			}
-			player.updateMovement(player.getCamera().gethAngle());
-			player.updateCamera(shader);
+			player.updateMovement();
+			//player.getCamera().updateUniform();
 			
+			
+
+			window.renderDynamicShadowMap(this.dynamicShadowMap);
+			glBindFramebuffer(GL_FRAMEBUFFER, screenQuad.getFBO());
+			glClearColor(0, 0, 0, 0); // Set the background to transparent.
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			
+			
+			window.renderTextured(this.dynamicShadowMap);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			window.prepareToRender();
-			window.renderDynamicShadowMap(this.transformMatrix, this.dynamicShadowMap);
-			window.renderTextured(this.transformMatrix, this.dynamicShadowMap);
-			menu.render(this.transformMatrix);
+			glClearColor(0, 0, 1, 1);
+			screenQuad.drawQuad();
+			//menu.render(this.transformMatrix);
 			window.endRender();
 
 			// Poll for window events. The key callback above will only be
@@ -162,7 +223,7 @@ public class Engine {
 	}
 	
 	public void addPlayer() {
-		player = new Pawn(new Vector(0, 1, 0), 60, (float)window.getWidth()/window.getHeight(), 0.1f, 200f, "camera");
+		player = new Pawn(new Vector3f(0, 1, 0), new Vector3f(-1,0,0), 45, (float)window.getWidth()/window.getHeight(), 0.1f, 200f);
 		keyboard.addKeyFunction(GLFW_KEY_W, () -> player.setZvelocity(1)); 
 		keyboard.addKeyFunction(GLFW_KEY_S, () -> player.setZvelocity(-1));
 		keyboard.addKeyFunction(GLFW_KEY_A, () -> player.setXvelocity(1));
@@ -170,8 +231,14 @@ public class Engine {
 		keyboard.addKeyFunction(GLFW_KEY_SPACE, () -> player.setYvelocity(1));
 		keyboard.addKeyFunction(GLFW.GLFW_KEY_LEFT_SHIFT, () -> player.setYvelocity(-1));
 		keyboard.addKeyFunction(GLFW_KEY_ESCAPE, true, () -> mouse.toggleGrab());
-		player.addModel("/Assets/Models/stock.obj", "modelTexture");
-		player.thirdPersonPreset(0.25f, new Vector(0,70,0), 10);
+		try {
+			player.addModel(ModelCompiler.loadModelBlueprint("/Assets/Models/temp.ini"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		player.thirdPersonPreset(0.3f, new Vector3f(0,2,0), 10,5);
+		player.bindTexture(this.shader);
 	}
 
 }

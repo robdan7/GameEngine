@@ -12,7 +12,7 @@ public abstract class MouseListener implements Listener{
 		
 		this.leftClick(((MouseController)b));
 		this.rightClick(((MouseController)b));
-		this.mouseHover(((MouseController)b), ((MouseController)b).getPosition());
+		this.mouseMovement(((MouseController)b), ((MouseController)b).getPosition());
 	}
 	
 	public abstract void leftClick(MouseController obs);
@@ -23,5 +23,5 @@ public abstract class MouseListener implements Listener{
 	
 	public abstract void rightClickRelease(MouseController obs);
 	
-	public abstract void mouseHover(MouseController obs, Vector2f v);
+	public abstract void mouseMovement(MouseController obs, Vector2f v);
 }

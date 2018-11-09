@@ -4,20 +4,18 @@ import core.utils.math.Matrix4f;
 
 public interface RenderObject {
 
-	public abstract void render(Matrix4f mat, int shader);
+	public void render();
 	
-	public abstract void renderTextured(Matrix4f mat, int shader);
+	public void renderTextured();
 	
-	public abstract void discard();
+	public void discard();
 	
-	public abstract void setShader(Shaders shader);
+	public void setShader(Shaders shader);
 	
+	public void setDepthShader(Shaders shader);
 	
+	public int getShader();
 	
-	public abstract void setDepthShader(Shaders shader);
-	
-	public abstract int getShader();
-	
-	public abstract int getDepthShader();
+	public int getDepthShader();
 }
 

@@ -35,4 +35,10 @@ public class Vector3f extends Vector {
 	public String toString() {
 		return this.x + " : " + this.y + " : " + this.z;
 	}
+
+	@Override
+	public Vector copy() {
+		// TODO Auto-generated method stub
+		return new Vector3f(this.x, this.y, this.z);
+	}
 }

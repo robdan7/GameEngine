@@ -4,10 +4,13 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
-import core.graphics.renderUtils.Drawbuffer;
+import core.graphics.misc.Color;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.ShadowMap;
+import core.graphics.renderUtils.buffers.Drawbuffer;
 import core.utils.math.Matrix4f;
+import core.utils.math.Vector;
+import core.utils.math.Vector4f;
 
 import java.nio.*;
 import java.util.ArrayList;
@@ -32,6 +35,8 @@ public class Window {
 	ArrayList<RenderObject> staticRenderStack;
 	ArrayList<RenderObject> dynamicRenderStack;
 	
+	private Color skyColor;
+	
 	public void deleteWindow() {
 		// Free the window callbacks and destroy the window
 		glfwFreeCallbacks(window);
@@ -51,12 +56,13 @@ public class Window {
 	 * @param w - Window width.
 	 * @param h - Window height.
 	 */
-	public Window(int w, int h) {
+	Window(int w, int h) {
 		this.width = w;
 		this.height = h;
 		this.init();
 		this.staticRenderStack = new ArrayList<>();
 		this.dynamicRenderStack = new ArrayList<>();
+		this.skyColor = new Color();
 	}
 	
 	
@@ -119,6 +125,7 @@ public class Window {
 		// bindings available for use.
 		GL.createCapabilities();
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL);
 		glCullFace(GL_BACK);
 		
@@ -127,6 +134,7 @@ public class Window {
 	}
 	
 	public void prepareToRender() {
+		glClearColor(skyColor.getR(), skyColor.getG(), skyColor.getB(), skyColor.getAlpha());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	
@@ -134,58 +142,83 @@ public class Window {
 		glfwSwapBuffers(this.getWindow()); // swap the color buffers
 	}
 	
-	void renderStaticShadowMap(Matrix4f mat, ShadowMap shadowmap) {
+	void renderStaticShadowMap(ShadowMap shadowmap) {
+		shadowmap.updateCameraUniform();
+		glCullFace(GL_FRONT);
 		glBindFramebuffer(GL_FRAMEBUFFER, shadowmap.getBuffer().getColorMapFBO());
-		glViewport(0, 0, shadowmap.getBuffer().SHADOW_MAP_WIDTH, shadowmap.getBuffer().SHADOW_MAP_HEIGHT);
+		glViewport(0, 0, shadowmap.getBuffer().getWidth(), shadowmap.getBuffer().getHeight());
 		glClear(GL_DEPTH_BUFFER_BIT);
 		int lastShader = 0;
 		for (int i = 0; i < staticRenderStack.size(); i++) {
 			if (lastShader != staticRenderStack.get(i).getDepthShader()) {
-				shadowmap.updateRenderCameraUniform(staticRenderStack.get(i).getDepthShader(), ShadowMap.getSharedMatrixName());
 				glUseProgram(staticRenderStack.get(i).getDepthShader());
+				//shadowmap.updateCameraUniform();
 			}
-			staticRenderStack.get(i).render(mat, staticRenderStack.get(i).getDepthShader());
+			staticRenderStack.get(i).render();
 		}
 		glViewport(0, 0, this.getWidth(), this.getHeight());
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glUseProgram(0);
+		glCullFace(GL_BACK);
 	}
 	
-	void renderDynamicShadowMap(Matrix4f mat, ShadowMap shadowMap) {
+	void renderDynamicShadowMap(ShadowMap shadowMap) {
+		shadowMap.updateCameraUniform();
+		glCullFace(GL_FRONT);
 		glBindFramebuffer(GL_FRAMEBUFFER, shadowMap.getBuffer().getColorMapFBO());
-		glViewport(0, 0, shadowMap.getBuffer().SHADOW_MAP_WIDTH, shadowMap.getBuffer().SHADOW_MAP_HEIGHT);
+		glViewport(0, 0, shadowMap.getBuffer().getWidth(), shadowMap.getBuffer().getHeight());
 		glClear(GL_DEPTH_BUFFER_BIT);
 		int lastShader = 0;
 		for (int i = 0; i < dynamicRenderStack.size(); i++) {
 			if (lastShader != dynamicRenderStack.get(i).getDepthShader()) {
-				shadowMap.updateRenderCameraUniform(dynamicRenderStack.get(i).getDepthShader(), ShadowMap.getSharedMatrixName());
 				glUseProgram(dynamicRenderStack.get(i).getDepthShader());
 			}
-			dynamicRenderStack.get(i).render(mat, dynamicRenderStack.get(i).getDepthShader());
+			dynamicRenderStack.get(i).render();
 		}
 		glViewport(0, 0, this.getWidth(), this.getHeight());
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glUseProgram(0);
+		glCullFace(GL_BACK);
 	}
 	
-	void renderTextured( Matrix4f mat, ShadowMap dynamicShadowMap) {
+	void renderTextured(ShadowMap dynamicShadowMap) {
+		dynamicShadowMap.updateCameraUniform();
 		int lastShader = 0;
 		for (int i = 0; i < staticRenderStack.size(); i++) {
 			if (lastShader != staticRenderStack.get(i).getShader()) {
-			glUseProgram(staticRenderStack.get(i).getShader());
-			dynamicShadowMap.updateCameraUniform(staticRenderStack.get(i).getShader());
+				glUseProgram(staticRenderStack.get(i).getShader());
+			
 			}
-			staticRenderStack.get(i).renderTextured(mat, staticRenderStack.get(i).getShader());
+			staticRenderStack.get(i).renderTextured();
 		}
 		
 		for (int i = 0; i < dynamicRenderStack.size(); i++) {
 			if (lastShader != dynamicRenderStack.get(i).getShader()) {
-			glUseProgram(dynamicRenderStack.get(i).getShader());
-			dynamicShadowMap.updateCameraUniform(dynamicRenderStack.get(i).getShader());
+				glUseProgram(dynamicRenderStack.get(i).getShader());
 			}
-			dynamicRenderStack.get(i).renderTextured(mat, dynamicRenderStack.get(i).getShader());
+			dynamicRenderStack.get(i).renderTextured();
 		}
 		glUseProgram(0);
+	}
+	
+	/**
+	 * Bind the sky color to a color. If the color values of the argument change the sky color will also change.
+	 * @param color - The color to bind. The sky color will automatically update to this color.
+	 */
+	public void bindSkyColor(Color color) {
+		this.skyColor = color;
+	}
+	
+	public void setSkyColor(Vector4f v) {
+		this.skyColor.setColor(v);
+	}
+	
+	public void setSkyColor(Color c) {
+		this.skyColor.setColor(c);
+	}
+	
+	public Vector getSkyColor() {
+		return this.skyColor.getColor();
 	}
 	
 	void addStaticRenderObject(RenderObject obj) {

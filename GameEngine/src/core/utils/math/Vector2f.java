@@ -19,4 +19,10 @@ public class Vector2f extends Vector{
 	public String toString() {
 		return this.x + " : " + this.y;
 	}
+
+	@Override
+	public Vector copy() {
+		// TODO Auto-generated method stub
+		return new Vector2f(this.x, this.y);
+	}
 }

@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import org.lwjgl.opengl.*;
 
 import de.matthiasmann.twl.utils.PNGDecoder;
+import core.graphics.renderUtils.Shaders;
 import core.utils.fileSystem.FileManager;
 
 /**
@@ -27,12 +28,13 @@ public class Texture {
 	private int width = 0;
 	String name;
 	
-	public Texture(int width, int height, String textureName, int filtering, int internalFormat) throws Exception {
+	public Texture(int width, int height, String textureName, int filtering, int internalFormat, int format) {
 		this.name = textureName;
 	    this.id = glGenTextures();
 	    
 	    glBindTexture(GL_TEXTURE_2D, this.id);
-	    GL11.glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0,  internalFormat, GL_FLOAT, (ByteBuffer) null);
+	    GL11.glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0,  format, GL_FLOAT, (ByteBuffer) null);
+	    //GL42.glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, width, height);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
@@ -49,7 +51,6 @@ public class Texture {
 		ByteBuffer buf = null;
 		int tWidth = 0;
 		int tHeight = 0;
-		 
 		try {
 		    // Open the PNG file as an InputStream
 		    InputStream in = FileManager.getStream(file);
@@ -121,21 +122,42 @@ public class Texture {
 	}
 	
 	/**
-	 * Binder en textur som uniform. Till�ter flera texturer samtidigt och beh�ver bara bindas en g�ng.
-	 * */
-	public void bindAsUniform(int shaderProgram) {
-		GL20.glUseProgram(shaderProgram);
+	 * Bind this texture to several different shaders. The shaders are individually bound one after another.
+	 * No shader program will be bound after calling this method.
+	 * @param shaderProgram
+	 */
+	public void bindAsUniforms(Shaders... shaderProgram) {
+		
+		for (Shaders sh : shaderProgram) {
+			GL20.glUseProgram(sh.getShaderProgram());
+			GL13.glActiveTexture(GL13.GL_TEXTURE0 + id);
+	        glBindTexture(GL_TEXTURE_2D, id);
+	        GL20.glUniform1i(GL20.glGetUniformLocation(sh.getShaderProgram(), name), id);
+		}
+		GL20.glUseProgram(0);
+		
+		//GL20.glUseProgram(shaderProgram);
+		/*GL13.glActiveTexture(GL13.GL_TEXTURE0 + id);
+        glBindTexture(GL_TEXTURE_2D, id);
+        GL20.glUniform1i(GL20.glGetUniformLocation(shaderProgram.getShaderProgram(), name), id);
+        */
+        //glBindTexture(GL_TEXTURE_2D, 0);
+        //GL20.glUseProgram(0);
+    }
+	
+	/**
+	 * Bind this texture to a shader. Remember to bind the shader first.
+	 * @param shaderProgram
+	 */
+	public void bindAsUniform(Shaders shaderProgram) {
 		GL13.glActiveTexture(GL13.GL_TEXTURE0 + id);
         glBindTexture(GL_TEXTURE_2D, id);
-        GL20.glUniform1i(GL20.glGetUniformLocation(shaderProgram, name), id);
-        //glBindTexture(GL_TEXTURE_2D, 0);
-        GL20.glUseProgram(0);
-    }
-	/**
-	 * Binder en textur till grafikkortet. Fungerar med default-matriser och grafikkortets standard-shaders.
-	 * */
+        GL20.glUniform1i(GL20.glGetUniformLocation(shaderProgram.getShaderProgram(), name), id);
+	}
+	
+	@Deprecated
 	public void bind() {
-        glBindTexture(GL_TEXTURE_2D, id);
+        glBindTexture(GL_TEXTURE_2D,GL13.GL_TEXTURE0);
     }
 	
 	public void unbind() {

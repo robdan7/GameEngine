@@ -58,6 +58,18 @@ public class MouseController extends Observer<MouseListener>{
 		return new Vector2f(this.position.x-window.getWidth()/2, window.getHeight()/2-this.position.y);
 	}
 	
+	protected void notifyMouseMovement(Vector2f v) {
+		for (MouseListener e : this.listeners) {
+			e.mouseMovement(this, v);
+		}
+	}
+	
+	protected void notifyMouseMovement() {
+		for (MouseListener e : this.listeners) {
+			e.mouseMovement(this, this.getPosition());
+		}
+	}
+	
 	protected void notifyLeftClick(boolean state) {
 		for (MouseListener e : this.listeners) {
 			if (state) {
