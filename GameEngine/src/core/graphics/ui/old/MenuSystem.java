@@ -1,4 +1,4 @@
-package core.graphics.ui;
+package core.graphics.ui.old;
 
 import java.nio.FloatBuffer;
 import java.util.HashMap;

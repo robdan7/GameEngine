@@ -1,4 +1,4 @@
-package core.graphics.ui;
+package core.graphics.ui.old;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;

@@ -38,6 +38,8 @@ import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 
 import core.graphics.ui.*;
+import core.graphics.ui.old.MenuSystem;
+import core.graphics.ui.old.UIPanel;
 
 
 public class Engine {

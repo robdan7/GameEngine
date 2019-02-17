@@ -46,6 +46,7 @@ public class ModelCompiler {
 				shader = splittedLine[1];
 			}
 		}
+		reader.close();
 		
 		// Create a private shader program for the model.
 		Shaders shaderProgram = new Shaders(shader);

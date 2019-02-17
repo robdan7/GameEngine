@@ -1,4 +1,4 @@
-package core.graphics.ui;
+package core.graphics.ui.old;
 
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector2f;
