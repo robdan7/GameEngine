@@ -1,7 +1,7 @@
 #version 450 core
 
-#define uniform = Light;
-#define uniform = Matrices;
+#import uniform = Light;
+#import uniform = Matrices;
 
 uniform sampler2D modelTexture;
 
@@ -16,8 +16,8 @@ out vec4 diffuseLight;
 
 out vec4 staticDepthNormal;
 
-// Import methods for calculating light.
-#import lightUtils;
+// include methods for calculating light.
+#include lightUtils;
 
 void main() {
 	n = calcNormal(translateMatrix, normal);

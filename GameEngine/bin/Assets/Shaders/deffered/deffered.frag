@@ -1,7 +1,7 @@
 #version 450 core
 
-#define uniform = Matrices;
-#define uniform = Light;
+#import uniform = Matrices;
+#import uniform = Light;
 
 in vec2 texCoord;
 in vec2 frag;
@@ -26,8 +26,8 @@ struct lightInfo {
 
 //out vec4 outColor;
 
-// Import methods for calculating light.
-#import lightUtils;
+// include methods for calculating light.
+#include lightUtils;
 
 vec4 colorMix(vec4 c1, vec4 c2, float w) {
 	vec4 col = c1 * (1-w) + c2* w;

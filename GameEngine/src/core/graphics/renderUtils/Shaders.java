@@ -56,6 +56,10 @@ public class Shaders{
     		this.init(vShader, fShader);
 		} catch (IOException e) {
 			throw new IOException("Shader wasn't able to be created");
+		} finally {
+			if (reader != null) {
+				reader.close();
+			}
 		}
     }
     
@@ -97,12 +101,13 @@ public class Shaders{
             String line,command;
             while ((line = reader.readLine()) != null) {
             	command = line.replaceFirst("\\s*", "");
-            	if (command.startsWith(commands.DEFINE.getString())) {
-            		if (command.contains(commands.USE.getString())) {
+            	if (command.startsWith(commands.IMPORT.getString())) {
+            		
+            		if (command.contains(commands.UNIFORM.getString())) {
             			shaderSource.append(UniformObject.requestUniform(readBetween(command,commands.EQUALS.getString(),commands.END.getString())).getUniformCode()).append("\n");
             		}
-            	} else if (command.startsWith(commands.IMPORT.getString())) {
-            		shaderSource.append(Shaders.getImport(StringUtils.readBetween(command, commands.IMPORT.getString(), commands.END.getString())));
+            	} else if (command.startsWith(commands.INCLUDE.getString())) {
+            		shaderSource.append(Shaders.getImport(StringUtils.readBetween(command, commands.INCLUDE.getString(), commands.END.getString())));
             	} else {
             		shaderSource.append(line).append("\n");
             	}
@@ -129,9 +134,9 @@ public class Shaders{
 	}
     
     /**
-     * Load code that can be used in any shader with the "#import" keyword.
+     * Load code that can be used in any shader with the "#include" keyword.
      * @param file
-     * @throws IOException
+     * @throws IOException 
      */
     public static void addImport(String file) throws IOException {
     	if (!file.contains(".shd")) {
@@ -143,8 +148,7 @@ public class Shaders{
     	String name = "";
     	int counter = 0;
     	while((line = reader.readLine()) != null) {
-    		if (line.replaceFirst("\\s*", "").startsWith(commands.DEFINE.getString())) {
-    			line = line.replaceAll("\\s*", "");
+    		if ((line = line.replaceFirst("\\s*", "")).startsWith(commands.DEFINE.getString())) {
     			if (line.contains(commands.NAME.getString())) {
     				name = StringUtils.readBetween(line, commands.EQUALS.getString(), commands.END.getString());
     			} else {
@@ -154,6 +158,9 @@ public class Shaders{
     			result.append(line).append("\n");
     		}
     		counter ++;
+    	}
+    	if (name == "") {
+    		throw new IOException("Empty name");
     	}
     	if (imports.containsKey(name)) {
     		throw new IllegalArgumentException("Import file does already exist.");
@@ -228,9 +235,15 @@ public class Shaders{
 		}
 	}
 	
-
+	/**
+	 * include: paste in code from a file.
+	 * import: Import an element with custom parameters.
+	 * define: Define a parameter for the file.
+	 * @author Robin
+	 *
+	 */
 	private static enum commands {
-		DEFINE("#define"), IMPORT("#import"), NAME("name"), USE("uniform"), EQUALS("="), COMMENT("//"), END(";");
+		IMPORT("#import"), INCLUDE("#include"), DEFINE("#define"), NAME("name"), UNIFORM("uniform"), EQUALS("="), COMMENT("//"), END(";");
 		String command;
 		private commands(String s) {
 			this.command = s;

@@ -1,6 +1,8 @@
 package core.utils.datatypes;
 
-public class Stack <E>{
+import java.util.Iterator;
+
+public class Stack <E> implements Iterable{
 	private Node first, last;
 
 	public Stack() {
@@ -15,15 +17,22 @@ public class Stack <E>{
 	}
 	
 	public E pull() {
+		if (!this.last.previous.equals(this.first)) {
+			return null;
+		}
 		E result = this.last.getPrevious().getObject();
 		this.last = this.last.getPrevious();
 		this.last.setObject(null);
 		return result;
 	}
 	
+	public E getTop() {
+		return this.last.getPrevious().getObject();
+	}
+	
 	private class Node {
-		E object;
-		Node previous;
+		private E object;
+		private Node previous;
 		
 		private Node(E object, Node previous) {
 			this.object = object;
@@ -43,5 +52,25 @@ public class Stack <E>{
 		}
 		
 		
+	}
+
+	@Override
+	public Iterator<E> iterator() {
+		
+		Iterator<E> iter = new Iterator<E>() {
+			Node n = last;
+			@Override
+			public boolean hasNext() {
+				return !n.getPrevious().equals(first);
+			}
+
+			@Override
+			public E next() {
+				n = last.getPrevious();
+				return n.getObject();
+			}
+		
+		};
+		return null;
 	}
 }
