@@ -1,7 +1,7 @@
 package core.input;
 
 public class Key{
-	private boolean actiontype;
+	private actionType actiontype;
 	public short state;
 	private Runnable action;
 	
@@ -11,13 +11,8 @@ public class Key{
 	 * @param actiontype - True = only activate on on press.
 	 * @param action - Runnable 
 	 */
-	public Key(boolean actiontype, Runnable action) {
+	public Key(actionType actiontype, Runnable action) {
 		this.actiontype = actiontype;
-		this.action = action;
-	}
-	
-	public Key( Runnable action) {
-		this.actiontype = false;
 		this.action = action;
 	}
 	
@@ -43,8 +38,8 @@ public class Key{
 	 * @return The key type. true is equal to press only. false is press and/or hold.
 	 *
 	 */
-	public boolean getType() {
-		return actiontype;
+	public actionType getType() {
+		return this.actiontype;
 	}
 	
 	/**
@@ -60,5 +55,10 @@ public class Key{
 	 */
 	public void run() {
 		action.run();
+	}
+	
+	public static enum actionType {
+		TYPE, HOLD
+		
 	}
 }
