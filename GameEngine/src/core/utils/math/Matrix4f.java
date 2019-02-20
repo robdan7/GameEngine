@@ -263,7 +263,7 @@ public class Matrix4f{
 	}*/
 	
 	/**
-	 * Multiply
+	 * Multiply with a matrix.
 	 * @param mat - The matrix to multiply with.
 	 * @return - The new multiplied matrix.
 	 */
@@ -329,6 +329,10 @@ public class Matrix4f{
 		return value;
 	}
 	
+	/**
+	 * Scale this matrix.
+	 * @param scale
+	 */
 	public void scale(double scale) {
 		m00 *= scale;
 	    m01 *= scale;
@@ -362,12 +366,12 @@ public class Matrix4f{
 	}
 	
 	/**
-	 * bind en uniform till definierade shaders och flyttalsbuffer.
+	 * Create a matrix shader uniform.
 	 *@param
-	 * shaders - Det program som uniformen ska bindas till.
+	 * shaders - The shader program.
 	 * @param
-	 * buf - Flyttalsbufferten med alla v�rden i matrisen, anv�nds f�r att lagra matrisen externt.
-	 * */
+	 * buf - The matrix float buffer. Can be created with {@link #put(FloatBuffer)}.
+	 */
 	public void createUniform (int shaders, FloatBuffer buf, String uniformName) {
 		int loc1 = GL20.glGetUniformLocation(shaders, uniformName);
 		GL20.glUniformMatrix4fv(loc1, false, buf);
@@ -388,7 +392,11 @@ public class Matrix4f{
 		GL20.glUniformMatrix4fv(location, false, this.put());
 	}*/
 	
-	
+	/**
+	 * Create a matrix shader uniform.
+	 *@param
+	 * shaders - The shader program.
+	 */
 	@Deprecated
 	public static void createIntUniform (int shaders, int num, String uniformName) {
 		int loc1 = GL20.glGetUniformLocation(shaders, uniformName);
@@ -409,7 +417,7 @@ public class Matrix4f{
 	
 	/**
 	 * Store this matrix in a float buffer.
-	 * */
+	 */
 	public void put(FloatBuffer dest) {
 		dest.clear();
         dest.put(this.m00);
