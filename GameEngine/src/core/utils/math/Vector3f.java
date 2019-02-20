@@ -1,7 +1,7 @@
 package core.utils.math;
 
 /**
- * 
+ * 3-dimensional vector.
  * @author Robin
  *
  */

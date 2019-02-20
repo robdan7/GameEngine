@@ -1,5 +1,10 @@
 package core.utils.math;
 
+/**
+ * 4-dimensional vector.
+ * @author Robin
+ *
+ */
 public class Vector4f extends Vector {
 	public Vector4f() {
 		super();

@@ -1,5 +1,10 @@
 package core.utils.math;
 
+/**
+ * 2-dimensional vector.
+ * @author Robin
+ *
+ */
 public class Vector2f extends Vector{
 	
 	public Vector2f() {
@@ -25,4 +30,5 @@ public class Vector2f extends Vector{
 		// TODO Auto-generated method stub
 		return new Vector2f(this.x, this.y);
 	}
+
 }

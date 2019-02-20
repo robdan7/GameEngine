@@ -273,6 +273,25 @@ public abstract class Vector {
 		return this.x + " : " + this.y + " : " + this.z + " : " + this.w;
 	}
 	
+	
+	/**
+	 * Generate an array from one or more vectors.
+	 * @param vectors - One or more {@link Vector4f}.
+	 * @return
+	 */
+	public static float[] to4fArray(Vector4f... vectors) {
+		float[] result = new float[vectors.length*4];
+		int i  = 0;
+		for (Vector4f v : vectors) {
+			result[i] = v.x;
+			result[i+1] = v.y;
+			result[i+2] = v.z;
+			result[i+3] = v.w;
+			i+=4;
+		}
+		return result;
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Vector)) {
