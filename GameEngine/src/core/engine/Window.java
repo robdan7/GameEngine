@@ -142,6 +142,7 @@ public class Window {
 		glfwSwapBuffers(this.getWindow()); // swap the color buffers
 	}
 	
+	@Deprecated
 	void renderStaticShadowMap(ShadowMap shadowmap) {
 		shadowmap.updateCameraUniform();
 		glCullFace(GL_FRONT);
@@ -162,6 +163,7 @@ public class Window {
 		glCullFace(GL_BACK);
 	}
 	
+	@Deprecated
 	void renderDynamicShadowMap(ShadowMap shadowMap) {
 		shadowMap.updateCameraUniform();
 		glCullFace(GL_FRONT);
@@ -181,12 +183,58 @@ public class Window {
 		glCullFace(GL_BACK);
 	}
 	
+
+	void renderShadowMap(ShadowMap map, ArrayList<RenderObject> objects) {
+		map.updateCameraUniform();
+		glCullFace(GL_FRONT);
+		glBindFramebuffer(GL_FRAMEBUFFER, map.getBuffer().getColorMapFBO());
+		glViewport(0, 0, map.getBuffer().getWidth(), map.getBuffer().getHeight());
+		glClear(GL_DEPTH_BUFFER_BIT);
+		int lastShader = 0;
+		for (int i = 0; i < objects.size(); i++) {
+			if (lastShader != objects.get(i).getDepthShader()) {
+				glUseProgram(objects.get(i).getDepthShader());
+			}
+			objects.get(i).render();
+		}
+		glViewport(0, 0, this.getWidth(), this.getHeight());
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glUseProgram(0);
+		glCullFace(GL_BACK);
+		
+	}
+	
+	/**
+	 * Render several lists with {@link RenderObject}.
+	 * @param dynamicShadowMap
+	 * @param arrayLists
+	 */
+	@SafeVarargs
+	final void renderTextured(ShadowMap dynamicShadowMap, ArrayList<? extends RenderObject>... arrayLists ) {
+		dynamicShadowMap.updateCameraUniform();
+
+		int lastShader = 0;
+		for (ArrayList<? extends RenderObject> renderlist : arrayLists) {
+			for (RenderObject o : renderlist) {
+				if (lastShader != o.getShader()) {
+					lastShader = o.getShader();
+					glUseProgram(lastShader);
+				}
+				o.renderTextured();
+			}
+		}
+		glUseProgram(0);
+	}
+	
+	@Deprecated
 	void renderTextured(ShadowMap dynamicShadowMap) {
 		dynamicShadowMap.updateCameraUniform();
-		int lastShader = 0;
+		
+		int lastShader = 0;		
 		for (int i = 0; i < staticRenderStack.size(); i++) {
 			if (lastShader != staticRenderStack.get(i).getShader()) {
-				glUseProgram(staticRenderStack.get(i).getShader());
+				lastShader = staticRenderStack.get(i).getShader();
+				glUseProgram(lastShader);
 			
 			}
 			staticRenderStack.get(i).renderTextured();
@@ -194,7 +242,8 @@ public class Window {
 		
 		for (int i = 0; i < dynamicRenderStack.size(); i++) {
 			if (lastShader != dynamicRenderStack.get(i).getShader()) {
-				glUseProgram(dynamicRenderStack.get(i).getShader());
+				lastShader = dynamicRenderStack.get(i).getShader();
+				glUseProgram(lastShader);
 			}
 			dynamicRenderStack.get(i).renderTextured();
 		}
@@ -221,10 +270,12 @@ public class Window {
 		return this.skyColor.getColor();
 	}
 	
+	@Deprecated
 	void addStaticRenderObject(RenderObject obj) {
 		this.staticRenderStack.add(obj);
 	}
 	
+	@Deprecated
 	void addDynamicRenderObject(RenderObject obj) {
 		this.dynamicRenderStack.add(obj);
 	}
