@@ -72,10 +72,10 @@ public class Pawn extends MouseListener {
 	}
 	
 	/**
-	 * 
-	 * @param smooth
-	 * @param position
-	 * @param velocity
+	 * Set this pawn to a third person preset.
+	 * @param smooth - How smooth the movements are.
+	 * @param position - Starting position.
+	 * @param velocity - Max falking velocity.
 	 */
 	public void thirdPersonPreset(float smooth, Vector position, float velocity, float camOffset) {
 		this.setSmoothAmount(smooth);
@@ -102,6 +102,10 @@ public class Pawn extends MouseListener {
 		this.model = m;
 	}
 	
+	/**
+	 * Bind a model texture to a shader.
+	 * @param shader
+	 */
 	public void bindTexture(Shaders shader) {
 		if (this.model == null) {
 			throw new RuntimeException("No model exists");
@@ -118,7 +122,7 @@ public class Pawn extends MouseListener {
 	}
 
 	/**
-	 * Reset movement speed.
+	 * Reset the movement speed.
 	 */
 	public void resetMovement() {
 		moveDirection[2].setZero();
@@ -157,7 +161,6 @@ public class Pawn extends MouseListener {
 	 *
 	 */
 	public void updateMovement() {
-		Vector oldPos = this.position.copy();
 		float tempX = this.moveDirection[2].x;
 		float tempZ = this.moveDirection[2].z;
 		this.moveDirection[2].x = (float)Math.sin(this.cam.gethAngle())*tempZ + (float)Math.cos(this.cam.gethAngle())*tempX; 	// Rotate x.
