@@ -16,10 +16,10 @@ import core.utils.other.Pair;
 
 
 public abstract class Light extends UniformSource {
-	private int lightNumber;
-	private UniformObject uniform;
+	private UniformObject lightUniform;
 
 	private FloatBuffer uniformBuffer;
+	private Vector4f[] lightProperties;
 	
 	/**
 	 * 
@@ -27,47 +27,67 @@ public abstract class Light extends UniformSource {
 	 * @param diffuse - Diffuse lighting.
 	 * @param ambient - Ambient lighting.
 	 */
-	public Light (Vector vector, Vector diffuse, Vector ambient, Vector specular, int index, String uniformFile) {
+	public Light (Vector vector, Vector diffuse, Vector ambient, Vector specular, String uniformFile) {
 		super(16);
-		//super.updateBuffer(this.to1dArray(new float[][] {vector.asFloat(), ambient.asFloat(), diffuse.asFloat()}));
-		
-		uniform = new UniformObject(uniformFile, GL_STATIC_DRAW);
-		super.bindToUniformObject(uniform);
-		super.updateUniform(BufferTools.asFlippedFloatBuffer(this.to1dArray(new float[][] {vector.asFloat(), ambient.asFloat(), diffuse.asFloat(), specular.asFloat()})));
-		/*this.uniform = new UniformObject(index);
 
-		float[] bufferData = to1dArray(new float[][] {vector.asFloat(), ambient.asFloat(), diffuse.asFloat()});
-		Pair<FloatBuffer, Integer> data = UniformTools.createUniformBlock(bufferData, index, GL_DYNAMIC_DRAW);
-		this.UBO = data.getSecond();
-		this.uniformBuffer = data.getFirst();*/
+		lightUniform = new UniformObject(uniformFile, GL_STATIC_DRAW);
+		super.bindToUniformObject(lightUniform);
+		super.updateUniform(BufferTools.asFlippedFloatBuffer(this.to1dArray(new float[][] {vector.asFloat(), ambient.asFloat(), diffuse.asFloat(), specular.asFloat()})));
 	}
 	
-	/*void createUniform() {
-		UniformTools.createUniformBlock(UBO, uniformBuffer, index, GL_DYNAMIC_DRAW);
-	}*/
+	/**
+	 * Create a custom light with several properties.
+	 * @param uniformFile
+	 * @param lightProperties
+	 */
+	public Light(String uniformFile, Vector4f... lightProperties) {
+		super(lightProperties.length*Float.BYTES);
+		this.lightProperties = lightProperties;
+		this.lightUniform = new UniformObject(uniformFile, GL_STATIC_DRAW);
+		
+		super.bindToUniformObject(this.lightUniform);		
+		super.updateUniform(BufferTools.asFlippedFloatBuffer(Vector.to4fArray(this.lightProperties)));
+	}
 	
+
+
 	public void updateUniform(float[] data) {
-		/*this.uniformBuffer = BufferTools.asFloatBuffer(data);
-		this.uniformBuffer.flip();
-		UniformTools.updateUniformBlock(UBO, this.uniformBuffer,0);*/
 		super.updateUniform(data);
 	}
 	
 	/**
-	 * Set the position of this light and update the associated uniform block.
-	 * @param x - x coordinate.
-	 * @param y - y coordinate.
-	 * @param z - z coordinate.
-	 * @param w - w coordinate.
+	 * Store the light position as a shader uniform.
+	*/
+	public abstract void updatePosition();
+	
+	
+	/**
+	 * Set the camera position to a static value.
+	 * @param v
+	 */
+	public abstract void setPosition(Vector4f v);
+	
+	/**
+	 * Set the camera position to a static value.
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param w
 	 */
 	public abstract void setPosition(float x, float y, float z, float w);
 	
 	/**
-	 * Set the position of this light and update the associated uniform block.
-	 * @param position - 
+	 * Bind the light position to a vector.
+	 * N.B: Both vectors will be the same.
+	 * @param v
 	 */
-	public abstract void setPosition(Vector4f position);
+	public abstract void bindPosition(Vector4f v);
 	
+	/**
+	 * Generate a 1d array from a 2d array.
+	 * @param values
+	 * @return
+	 */
 	protected float[] to1dArray(float[][] values) {
 		int length = 0;
 		for(float[] a : values) {

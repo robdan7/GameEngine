@@ -1,4 +1,5 @@
 package core.utils.other;
+//import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public class Timer {

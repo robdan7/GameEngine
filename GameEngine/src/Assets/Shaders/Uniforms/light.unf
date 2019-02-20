@@ -4,7 +4,7 @@
 
 layout (std140, binding = #index) uniform Light {
 	layout(offset = 0) vec4 position;
-	layout(offset = 16) vec4 ambient;
-	layout(offset = 32) vec4 diffuse;
+	layout(offset = 16) vec4 diffuse;
+	layout(offset = 32) vec4 ambient;
 	layout(offset = 48) vec4 specular;
 } lightSource;

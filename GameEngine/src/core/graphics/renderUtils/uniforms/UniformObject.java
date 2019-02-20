@@ -26,6 +26,8 @@ import static core.utils.other.StringUtils.*;
  * This class is used to update uniforms in the render pipeline. Several uniform sources can be connected
  * to the same uniform, thus forming a uniform block. An instance of this object does not keep track of 
  * the byte offsets in the shader for every uniform, but the float number offsets can be retrieved.
+ * 
+ * The uniform block does not store any uniform data, that's why uniform sources are used.
  * @author Robin
  *
  */
@@ -83,52 +85,52 @@ public class UniformObject {
 		connectedSource = new ArrayList<UniformSource>();
 	}
 	
+	/**
+	 * Connect a uniform source to this uniform object.
+	 * The source is given an index, and will be connected to this uniform object.
+	 * @param u
+	 */
 	void bindUniformSource(UniformSource u) {
+		// Check if all bindings have been used.
 		if (this.currentBuffer == this.totalBufferSize.length) {
 			throw new RuntimeException("The total buffer index size is reached");
 		}
+		// Check if the memory is full.
+		else if ((currentBuffer + 1 < this.totalBufferSize.length) && this.totalBufferSize[currentBuffer + 1] >= this.size) {
+			throw new RuntimeException("No more space available. Used: " + this.totalBufferSize[this.currentBuffer+1] + ", available: " + this.size);
+		}
+		// Add offset to the next index.
 		if (currentBuffer < this.totalBufferSize.length-1) {
 			this.totalBufferSize[currentBuffer + 1] = totalBufferSize[currentBuffer] + u.getSize();
-			if (this.totalBufferSize[currentBuffer + 1] >= this.size) {
-				throw new RuntimeException("Uniform source size overflow.");
-			}
 		}
+		
+		// Everything is OK. Add the source to this object.
 		u.setIndex(currentBuffer++);
 		connectedSource.add(u);
 	}	
 	
 	/**
-	 * Update a uniform source inside the uniform block.
-	 * @param data - flipped float buffer.
+	 * This method stores data at the specified uniform source index.
+	 * @param data - The data that should be stored.
 	 * @param u - The uniform source.
 	 */
 	void updateUniform(FloatBuffer data, UniformSource u) {
 		if (!this.connectedSource.contains(u)) {
 			throw new RuntimeException("the provided source is not a valid object for this uniforms");
 		}
-		//data.flip();
 		data.clear();
-		/*if (u.getIndex() >= this.buffersizes.length) {
-			throw new IllegalArgumentException("index is out of bounds. Total size: " + this.buffersizes.length);
-		}
-		if (data.capacity() > this.buffersizes[u.getIndex()]) {
-			throw new IllegalArgumentException("Out of bounds in buffer object " + u.getIndex() + ". Size: " + this.buffersizes[u.getIndex()]);
-		}*/
 		OBJLoader.updateVBO(this.getUBO(), this.totalBufferSize[u.getIndex()], data);
-		//data.clear();
 	}
 	
+	/**
+	 * This method stores data at the specified uniform source index.
+	 * @param data - The data that should be stored.
+	 * @param u - The uniform source.
+	 */
 	void updateUniform(float[] data, UniformSource u) {
 		if (!this.connectedSource.contains(u)) {
 			throw new RuntimeException("the provided source is not a valid object for this uniforms");
 		}
-		//data.flip();
-		/*if (u.getIndex() >= this.buffersizes.length) {
-			throw new IllegalArgumentException("index is out of bounds. Total size: " + this.buffersizes.length);
-		}
-		if (data.length > this.buffersizes[u.getIndex()]) {
-			throw new IllegalArgumentException("Out of bounds in buffer object " + u.getIndex() + ". Size: " + this.buffersizes[u.getIndex()]);
-		}*/
 		OBJLoader.updateVBO(this.getUBO(), this.totalBufferSize[u.getIndex()], data);
 		//data.clear();
 	}
@@ -140,6 +142,12 @@ public class UniformObject {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 	
+	/**
+	 * Reads a uniform file (.unf) and puts some values in it.
+	 * This method is meant to translate written code into usable variables.
+	 * @param f
+	 * @throws IOException
+	 */
 	private void readUniform(String f) throws IOException {
 		if (!f.contains(commands.FILENAME.getString())) {
 			throw new IOException("Unsupported file excension.");

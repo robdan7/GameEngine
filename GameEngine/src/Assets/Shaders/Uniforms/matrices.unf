@@ -1,5 +1,5 @@
 #define name = Matrices; // name. Must be the same as in the code.
-#define bindings = 4; // The max number of uniform sources to bind.
+#define bindings = 5; // The max number of uniform sources to bind.
 #define size = 80; // The amount of floating values.
 
 layout (std140, binding = #index) uniform Matrices {

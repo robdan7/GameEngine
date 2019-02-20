@@ -2,14 +2,32 @@ package core.graphics.renderUtils.uniforms;
 
 import java.nio.FloatBuffer;
 
+
 import org.lwjgl.BufferUtils;
 
 import core.utils.other.BufferTools;
 
+/**
+ * This class represents one part of a uniform block.
+ * A uniform source stores the actual data that can be put in a uniform block.
+ * @author Robin
+ *
+ */
 public class UniformSource {
-	//private final FloatBuffer buffer;
+	
+	/**
+	 * The index is the given index (1, 2, 3...) for this specific uniform source.
+	 */
 	private int index = -1;
+	
+	/**
+	 * The float size of this object.
+	 */
 	private int size;
+	
+	/**
+	 * The connected uniform block.
+	 */
 	private UniformObject uniformObject;
 	
 	public UniformSource(int size) {
@@ -17,31 +35,18 @@ public class UniformSource {
 		this.size = size;
 	}
 	
+	
+	/**
+	 * Connected this uniform source to a uniform block.
+	 * @param o
+	 */
 	public void bindToUniformObject(UniformObject o) {
 		o.bindUniformSource(this);
 		this.uniformObject = o;
 	}
 	
-	/*public void updateBuffer(float[] data) {
-		if (data.length != this.size) {
-			throw new IllegalArgumentException("Data size is not same as buffer");
-		}
-		this.buffer.clear();
-		this.buffer.put(data);
-		this.buffer.flip();
-	}*/
-	
-	/*public void updateBuffer(FloatBuffer data) {
-		if (data.capacity() != this.size) {
-			throw new IllegalArgumentException("Data size is not same as buffer");
-		}
-		this.buffer.clear();
-		this.buffer.put(data);
-		this.buffer.flip();
-	}*/
-	
 	/**
-	 * Upload a float buffer to this uniform. The previous buffer will be overwritten.
+	 * Upload a float buffer to the connected uniform block.
 	 * @param buffer
 	 */
 	public void updateUniform(FloatBuffer buffer) {
@@ -54,6 +59,10 @@ public class UniformSource {
 		this.uniformObject.updateUniform(buffer, this);		
 	}
 	
+	/**
+	 * Upload a float buffer to the connected uniform block.
+	 * @param buffer
+	 */
 	public void updateUniform(float[] buffer) {
 		if (this.uniformObject == null) {
 			throw new RuntimeException("This uniform source is not connected to a uniform block.");
@@ -64,20 +73,27 @@ public class UniformSource {
 		this.uniformObject.updateUniform(buffer, this);		
 	}
 	
+	/**
+	 * Get the float size of this uniform source.
+	 * @return
+	 */
 	public int getSize() {
 		return this.size;
 	}
 	
+	/**
+	 * Get the index of this uniform source (1, 2, 3...).
+	 * @return
+	 */
 	public int getIndex() {
 		return this.index;
 	}
 	
+	/**
+	 * Set the index of this uniform source.
+	 * @param index
+	 */
 	void setIndex(int index) {
 		this.index = index;
 	}
-	/*
-	void BindUniformObject(UniformObject block) {
-		this.uniformObject = block;
-	}*/
-
 }

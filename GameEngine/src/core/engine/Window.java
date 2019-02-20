@@ -226,6 +226,7 @@ public class Window {
 		glUseProgram(0);
 	}
 	
+	
 	@Deprecated
 	void renderTextured(ShadowMap dynamicShadowMap) {
 		dynamicShadowMap.updateCameraUniform();

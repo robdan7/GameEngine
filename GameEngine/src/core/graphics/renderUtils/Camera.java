@@ -30,7 +30,7 @@ public class Camera extends UniformSource {
 	private float focusoffset;
 	
 	private FloatBuffer uniformBuffer;
-	private updateType update;
+	private updateType updateType;
 	
 	/**
 	 * 
@@ -58,7 +58,7 @@ public class Camera extends UniformSource {
 	 * Init matrices for camera.
 	 */
 	private void init(Vector3f upVector, Vector3f right, updateType update) {
-		this.update = update;
+		this.updateType = update;
 		this.focusPosition = new Vector3f();
 		this.up = upVector;
 		this.right = right;
@@ -67,11 +67,7 @@ public class Camera extends UniformSource {
 		forward = upVector.crossProduct(right).normalize().toVec3f();
 		
 		
-		int uniformSize = Matrix4f.getSize();
-		if (this.update.getSize() == Matrix4f.getSize()*2) {
-			uniformSize = uniformSize *2;
-		}
-		this.uniformBuffer = BufferUtils.createFloatBuffer(uniformSize);
+		this.uniformBuffer = BufferUtils.createFloatBuffer(this.updateType.getSize());
 		
 	}
 	
@@ -146,8 +142,11 @@ public class Camera extends UniformSource {
 		}
 	}
 	
+	/**
+	 * Updates the uniform block connected to this camera.
+	 */
 	public void updateUniform() {
-		switch(this.update) {
+		switch(this.updateType) {
 			case CAMERA:
 				this.perspectiveMatrix.multiply(this.lookAtMatrix).put(this.uniformBuffer);
 				break;
@@ -155,6 +154,7 @@ public class Camera extends UniformSource {
 				this.lookAtMatrix.put(this.uniformBuffer);
 				break;
 			case BOTH:
+				//put the perspective matrix AND the view matrix on the buffer.
 				this.perspectiveMatrix.multiply(this.lookAtMatrix).put(this.uniformBuffer);
 				this.uniformBuffer.put(this.lookAtMatrix.toFloatArray());
 				break;
@@ -258,6 +258,14 @@ public class Camera extends UniformSource {
 		return this.vAngle;
 	}
 	
+	/**
+	 * Work in progress. Defines the size of all connected view matrices.
+	 * CAMERA: one matrix.
+	 * VIEW: one matrix.
+	 * BOTH: one camera matrix and one view matrix.
+	 * @author Robin
+	 *
+	 */
 	public static enum updateType {
 		CAMERA(Matrix4f.getSize()),VIEW(Matrix4f.getSize()),BOTH(Matrix4f.getSize()*2);
 		private int size;

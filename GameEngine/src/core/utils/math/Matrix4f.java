@@ -2,10 +2,8 @@ package core.utils.math;
 
 import java.nio.FloatBuffer;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
 
-import core.graphics.renderUtils.uniforms.UniformTools;
 
 /**
  * 
@@ -13,7 +11,7 @@ import core.graphics.renderUtils.uniforms.UniformTools;
  * 
  */
 public class Matrix4f{
-	private float left, right, top, bottom, zFar, zNear, widthRadius, heightRadius, fovy, aspectRatio;
+	private float left, right, top, bottom, zFar, zNear, fovy;
 	
 	protected float m00;
 	protected float m01;
@@ -32,9 +30,8 @@ public class Matrix4f{
 	protected float m32;
 	protected float m33;
 	
-	private FloatBuffer shaderBuffer;
 	private float[] dest;
-	private int uniformOffset, UBO;
+	private int uniformOffset;
 	
 	String uniformName;
 	
@@ -76,8 +73,8 @@ public class Matrix4f{
 	 * @param zFar
 	 */
 	public void setOrtho(float left, float right, float bottom, float top, float zNear, float zFar) {
-		this.widthRadius = Math.abs(left-right)/2;
-		this.heightRadius = Math.abs(top-bottom)/2;
+		//this.widthRadius = Math.abs(left-right)/2;
+		//this.heightRadius = Math.abs(top-bottom)/2;
 		this.left = left;
 		this.right = right;
 		this.top = top;
@@ -183,7 +180,7 @@ public class Matrix4f{
 		this.zFar = zFar;
 		this.zNear = zNear;
 		this.fovy = radians*2;
-		this.aspectRatio = aspect;
+		//this.aspectRatio = aspect;
 	}
 	
 	/**Move the camera to a point and look in the same direction as the forward vector.
@@ -466,7 +463,6 @@ public class Matrix4f{
 	
 	/**
 	 * Add this matrix to a common uniform block.
-	 * @param buffer - The target buffer.
 	 * @param UBO - The buffer index used for binding.
 	 * @param offset - The index offset in the buffer associated with this matrix.
 	 */
@@ -481,7 +477,7 @@ public class Matrix4f{
 	}*/
 	
 	/**
-	 * Return the variable size of any 4x4 matrix.
+	 * Return the number of variables in a 4x4 matrix.
 	 * @return
 	 */
 	public static int getSize() {
