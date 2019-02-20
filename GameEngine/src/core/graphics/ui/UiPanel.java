@@ -1,5 +1,7 @@
 package core.graphics.ui;
 
+import java.util.ArrayList;
+
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
 import core.utils.datatypes.Stack;
@@ -7,6 +9,7 @@ import core.utils.datatypes.Stack;
 public class UiPanel implements RenderObject {
 	private static Stack<UiPanel> uiStack;
 	private boolean visible = false;
+	private ArrayList<UiItem> items;
 	
 	static {
 		uiStack = new Stack<UiPanel>();
@@ -17,7 +20,7 @@ public class UiPanel implements RenderObject {
 	}
 	
 	public UiPanel(String panelfile) {
-		
+		items = new ArrayList<UiItem>();
 	}
 	
 	/**
