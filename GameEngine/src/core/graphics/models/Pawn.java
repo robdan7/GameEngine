@@ -4,7 +4,7 @@ package core.graphics.models;
 import core.graphics.renderUtils.Camera;
 import core.graphics.renderUtils.Shaders;
 import core.input.Mouse;
-import core.input.listeners.MouseController;
+import core.input.listeners.MouseObserver;
 import core.input.listeners.MouseListener;
 import core.utils.math.Line;
 import core.utils.math.Plane;
@@ -286,31 +286,31 @@ public class Pawn extends MouseListener {
 	}
 	
 	@Override
-	public void leftClick(MouseController obs) {
+	public void leftClick(MouseObserver obs) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void leftClickRelease(MouseController obs) {
+	public void leftClickRelease(MouseObserver obs) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void rightClick(MouseController obs) {
+	public void rightClick(MouseObserver obs) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void rightClickRelease(MouseController obs) {
+	public void rightClickRelease(MouseObserver obs) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void mouseMovement(MouseController obs, Vector2f v) {
+	public void mouseMovement(MouseObserver obs, Vector2f v) {
 		Vector3f pointer = ((Mouse)obs).getNormalizedPosition().toVec3f();
 		pointer.setZ(-1);
 		l.setDirection(pointer);

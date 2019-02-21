@@ -2,26 +2,26 @@ package core.input.listeners;
 
 import core.utils.math.Vector2f;
 
-public abstract class MouseListener implements Listener{
+public abstract class MouseListener implements Listener<MouseListener, MouseObserver>{
 
 	@Override
-	public void update(Observer b, Object arg) {
-		if (!(b instanceof MouseController)) {
+	public void update(Observer<MouseObserver, MouseListener> b, Object arg) {
+		if (!(b instanceof MouseObserver)) {
 			throw new Error("Not right observer");
 		}
 		
-		this.leftClick(((MouseController)b));
-		this.rightClick(((MouseController)b));
-		this.mouseMovement(((MouseController)b), ((MouseController)b).getPosition());
+		this.leftClick(((MouseObserver)b));
+		this.rightClick(((MouseObserver)b));
+		this.mouseMovement(((MouseObserver)b), ((MouseObserver)b).getPosition());
 	}
 	
-	public abstract void leftClick(MouseController obs);
+	public abstract void leftClick(MouseObserver obs);
 	
-	public abstract void leftClickRelease(MouseController obs);
+	public abstract void leftClickRelease(MouseObserver obs);
 	
-	public abstract void rightClick(MouseController obs);
+	public abstract void rightClick(MouseObserver obs);
 	
-	public abstract void rightClickRelease(MouseController obs);
+	public abstract void rightClickRelease(MouseObserver obs);
 	
-	public abstract void mouseMovement(MouseController obs, Vector2f v);
+	public abstract void mouseMovement(MouseObserver obs, Vector2f v);
 }

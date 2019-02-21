@@ -1,11 +1,9 @@
 package core.input.listeners;
 
-import java.util.ArrayList;
-
 import core.engine.Window;
 import core.utils.math.Vector2f;
 
-public class MouseController extends Observer<MouseListener>{
+public class MouseObserver extends Observer<MouseObserver, MouseListener>{
 	//ArrayList<MouseListener> listeners;
 	private boolean lClick = false;
 	private boolean rClick = false;
@@ -14,8 +12,8 @@ public class MouseController extends Observer<MouseListener>{
 	private boolean isHidden = false;
 	private boolean isGrabbed = false;
 	
-	public MouseController() {
-		this.listeners = new ArrayList<>();
+	public MouseObserver() {
+		super();
 		this.position = new Vector2f();
 	}
 	
@@ -38,11 +36,11 @@ public class MouseController extends Observer<MouseListener>{
 		return this.position.toVec2f();
 	}
 	
-	// TODO Change this
+
 	public float getX() {
 		return this.position.getX();
 	}
-	// TODO Change this
+
 	public float getY() {
 		return this.position.getY();
 	}
@@ -54,23 +52,32 @@ public class MouseController extends Observer<MouseListener>{
 	public void setY(float y) {
 		this.position.setY(y);
 	}
-	// TODO Change this
+
 	public Vector2f getScreenPosition(Window window) {
 		return new Vector2f(this.position.getX()-window.getWidth()/2, window.getHeight()/2-this.position.getY());
 	}
 	
+	@Deprecated
 	protected void notifyMouseMovement(Vector2f v) {
-		for (MouseListener e : this.listeners) {
+		for (MouseListener e : super.listeners) {
 			e.mouseMovement(this, v);
 		}
 	}
 	
+	/**
+	 * The mouse cursor has been moved. Notify all listeners.
+	 */
 	protected void notifyMouseMovement() {
-		for (MouseListener e : this.listeners) {
+		for (MouseListener e : super.listeners) {
 			e.mouseMovement(this, this.getPosition());
 		}
 	}
 	
+	/**
+	 * 
+	 * @param state
+	 */
+	@Deprecated
 	protected void notifyLeftClick(boolean state) {
 		for (MouseListener e : this.listeners) {
 			if (state) {
@@ -81,12 +88,16 @@ public class MouseController extends Observer<MouseListener>{
 		}
 	}
 	
+	/**
+	 * The left mouse button has been clicked. Notify all listeners.
+	 */
 	protected void notifyLeftClick() {
 		if (this.lClick) {
 			this.notifyLeftClick(this.lClick);
 		}
 	}
 	
+	@Deprecated
 	protected void notifyRightClick(boolean state) {
 		for (MouseListener e : this.listeners) {
 			if (state) {
@@ -97,6 +108,9 @@ public class MouseController extends Observer<MouseListener>{
 		}
 	}
 	
+	/**
+	 * The right mouse button has been clicked. Notify all listeners.
+	 */
 	protected void notifyRightClick() {
 		if (this.rClick) {
 			this.notifyRightClick(this.rClick);

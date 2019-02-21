@@ -9,13 +9,13 @@ import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 
 import core.engine.Window;
-import core.input.listeners.MouseController;
+import core.input.listeners.MouseObserver;
 import core.utils.math.Vector2f;
 
 //Our MouseHandler class extends the abstract class
 //abstract classes should never be instantiated so here
 //we create a concrete that we can instantiate
-public class Mouse extends MouseController{
+public class Mouse extends MouseObserver{
 	double lastX;
 	double lastY;
 	

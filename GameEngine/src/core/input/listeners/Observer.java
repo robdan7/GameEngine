@@ -2,30 +2,35 @@ package core.input.listeners;
 
 import java.util.ArrayList;
 
-class Observer<E> {
-	ArrayList<E> listeners;
+/**
+ * This class represents an observer that can notify listeners when something happens.
+ * An observer is the "whistle blower".
+ * @author Robin
+ *
+ * @param <O>
+ * @param <L>
+ */
+class Observer<O extends Observer<O,L>, L extends Listener<L,O>> {
+	ArrayList<L> listeners;
 	int i;
 	
 	
 	public Observer() {
-		this.listeners = new ArrayList<>();
+		this.listeners = new ArrayList<L>();
 	}
 	
-	public void notifyObservers(Object arg) {
-		for (E obs : this.listeners) {
-			((Listener)obs).update(this, arg);
+	public void notifyListeners(Object arg) {
+		for (L listener : this.listeners) {
+			listener.update(this, arg);
 		}
 	}
 	
-	public void notifyListeners() {
-		this.notifyObservers(null);
-	}
 	
-	public void addListener(E l) {
+	public void addListener(L l) {
 		this.listeners.add(l);
 	}
 	
-	public void removeListener(E l) {
+	public void removeListener(L l) {
 		this.listeners.remove(l);
 	}
 }

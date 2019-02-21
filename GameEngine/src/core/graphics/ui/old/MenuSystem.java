@@ -11,7 +11,7 @@ import core.utils.math.Vector2f;
 import core.utils.other.BufferTools;
 import core.utils.other.Texture;
 import core.input.listeners.MouseListener;
-import core.input.listeners.MouseController;
+import core.input.listeners.MouseObserver;
 
 import static org.lwjgl.opengl.GL15.*;
 
@@ -70,30 +70,30 @@ public class MenuSystem extends MouseListener {
 	}
 
 	@Override
-	public void leftClick(MouseController obs) {
+	public void leftClick(MouseObserver obs) {
 		if (obs.isVisible()) {
 			this.activePanel.mouseCollision(obs.getScreenPosition(this.window));
 		}
 	}
 
 	@Override
-	public void rightClick(MouseController obs) {
+	public void rightClick(MouseObserver obs) {
 
 	}
 
 	@Override
-	public void mouseMovement(MouseController obs, Vector2f v) {
+	public void mouseMovement(MouseObserver obs, Vector2f v) {
 
 	}
 
 	@Override
-	public void leftClickRelease(MouseController obs) {
+	public void leftClickRelease(MouseObserver obs) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void rightClickRelease(MouseController obs) {
+	public void rightClickRelease(MouseObserver obs) {
 		// TODO Auto-generated method stub
 
 	}
