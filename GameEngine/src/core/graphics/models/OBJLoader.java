@@ -45,8 +45,6 @@ import java.util.ArrayList;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 
-import static core.utils.math.Vector.*;
-
 /**
  * @author Oskar Veerhoek
  */
@@ -98,15 +96,15 @@ public class OBJLoader {
         for (Model.Face face : model.getFaces()) {
         	for (int i = 0; i < 3; i++) {
         		
-				data.put(asFloats(model.getVertices().get(face.getVertexIndices()[i] - 1)));
+				data.put(model.getVertices().get(face.getVertexIndices()[i] - 1).asFloats());
 
 				if (face.hasNormals()) {
-					data.put(asFloats(model.getNormals().get(face.getNormalIndices()[i] - 1)));
+					data.put(model.getNormals().get(face.getNormalIndices()[i] - 1).asFloats());
         		} else {
         			data.put(new float[] {0,0,0});
         		}
 				if (face.hasTextureCoordinates()) {
-					data.put(asFloats(model.getTextureCoordinates().get(face.getTextureCoordinateIndices()[i] - 1)));
+					data.put(model.getTextureCoordinates().get(face.getTextureCoordinateIndices()[i] - 1).asFloats());
 				} else {
 					data.put(new float[] {0,0});
 				}
@@ -143,17 +141,17 @@ public class OBJLoader {
         float[] emptyData = new float[0];
         data.put(emptyData);
         for (Model.Face face : model.getFaces()) {
-            data.put(asFloats(model.getNormals().get(face.getNormalIndices()[0] - 1)));
-            data.put(asFloats(model.getNormals().get(face.getNormalIndices()[1] - 1)));
-            data.put(asFloats(model.getNormals().get(face.getNormalIndices()[2] - 1)));
+            data.put(model.getNormals().get(face.getNormalIndices()[0] - 1).asFloats());
+            data.put(model.getNormals().get(face.getNormalIndices()[1] - 1).asFloats());
+            data.put(model.getNormals().get(face.getNormalIndices()[2] - 1).asFloats());
             
-            data.put(asFloats(model.getVertices().get(face.getVertexIndices()[0] - 1)));
-            data.put(asFloats(model.getVertices().get(face.getVertexIndices()[1] - 1)));
-            data.put(asFloats(model.getVertices().get(face.getVertexIndices()[2] - 1)));
+            data.put(model.getVertices().get(face.getVertexIndices()[0] - 1).asFloats());
+            data.put(model.getVertices().get(face.getVertexIndices()[1] - 1).asFloats());
+            data.put(model.getVertices().get(face.getVertexIndices()[2] - 1).asFloats());
             
-            data.put(asFloats(model.getTextureCoordinates().get(face.getTextureCoordinateIndices()[0]-1)));
-            data.put(asFloats(model.getTextureCoordinates().get(face.getTextureCoordinateIndices()[1]-1)));
-            data.put(asFloats(model.getTextureCoordinates().get(face.getTextureCoordinateIndices()[2]-1)));
+            data.put(model.getTextureCoordinates().get(face.getTextureCoordinateIndices()[0]-1).asFloats());
+            data.put(model.getTextureCoordinates().get(face.getTextureCoordinateIndices()[1]-1).asFloats());
+            data.put(model.getTextureCoordinates().get(face.getTextureCoordinateIndices()[2]-1).asFloats());
             
             vertices += vertPerFace;
         } 
@@ -245,10 +243,8 @@ public class OBJLoader {
         BufferedReader reader = FileManager.getReader(f);
         Model m = new Model();
         String line;
-        //int i = 0;
         while ((line = reader.readLine()) != null) {
             String prefix = line.split(" ")[0];
-            //i ++;
             if (prefix.equals("#")) {
                 continue;
             } else if (prefix.equals("v")) {
@@ -483,12 +479,6 @@ public class OBJLoader {
         return m;
     }
     
-    /**
-     * I don't know what this one does. But it is not needed anymore.
-     * @param s
-     * @param regex
-     * @return
-     */
     @Deprecated
     private static float[] fetchIndicies(String s, String regex) {
     	float[] result = {1,1,1};
@@ -504,4 +494,14 @@ public class OBJLoader {
     	} catch (Exception e) {}
     	return result;
     }
+    
+   /* public static StringBuilder formatOBJ(String f) throws IOException {
+    	StringBuilder s = new StringBuilder();
+    	BufferedReader reader = FileManager.getReader(f);
+    	String line = "";
+    	while ((line = reader.readLine()) != null) {
+    		String[] splitLine
+    	}
+    	return null;
+    }*/
 }

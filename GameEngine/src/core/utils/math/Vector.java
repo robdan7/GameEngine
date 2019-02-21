@@ -1,7 +1,7 @@
 package core.utils.math;
 
 public abstract  class Vector<T extends Vector<T>> {
-	public float x,y,z,w=0;
+	protected float x,y,z,w=0;
 
 	protected Vector() {
 		this(0,0,0,0);
@@ -226,11 +226,9 @@ public abstract  class Vector<T extends Vector<T>> {
 	
 	/**
 	 * 
-	 * @return Return this as a list of floats.
+	 * @return Return this as an array of floats.
 	 */
-	public float[] asFloat() {
-		return new float[] { this.x, this.y, this.z, this.w };
-	}
+	public abstract float[] asFloats();
 	
 	/**
 	 * 
@@ -282,19 +280,6 @@ public abstract  class Vector<T extends Vector<T>> {
 		}
 		return result;
 	}
-	
-	// TODO Remove these
-	public static float[] asFloats(Vector2f v) {
-		return new float[] {v.x,v.y};
-	}
-	
-	public static float[] asFloats(Vector3f v) {
-		return new float[] {v.x,v.y,v.z};
-	}
-	
-	public static float[] asFloats(Vector4f v) {
-		return new float[] {v.x,v.y,v.z,v.w};
-}
 	
 	@Override
 	public boolean equals(Object o) {

@@ -15,6 +15,22 @@ public class Vector2f extends Vector<Vector2f>{
 		super(x,y);
 	}
 	
+	public float getX() {
+		return this.x;
+	}
+	
+	public float getY() {
+		return this.y;
+	}
+	
+	public void setX(float x) {
+		this.x = x;
+	}
+	
+	public void setY(float y) {
+		this.y = y;
+	}
+	
 	@Override
 	public void set(Vector2f v) {
 		this.x = v.x;
@@ -22,7 +38,7 @@ public class Vector2f extends Vector<Vector2f>{
 	}
 
 	@Override
-	public float[] asFloat() {
+	public float[] asFloats() {
 		return new float[] {this.x, this.y};
 	}
 	

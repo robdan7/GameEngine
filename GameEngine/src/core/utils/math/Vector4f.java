@@ -14,6 +14,47 @@ public class Vector4f extends Vector<Vector4f> {
 		super(x,y,z,w);
 	}
 	
+
+	
+	public float getX() {
+		return this.x;
+	}
+	
+	public float getY() {
+		return this.y;
+	}
+	
+	public float getZ() {
+		return this.z;
+	}
+	
+	public float getW() {
+		return this.w;
+	}
+	
+	public void setX(float x) {
+		this.x = x;
+	}
+	
+	public void setY(float y) {
+		this.y = y;
+	}
+	
+	public void setZ(float z) {
+		this.z = z;
+	}
+	
+	public void setW(float w) {
+		this.w = w;
+	}
+	
+	public void set(float x, float y, float z, float w) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.w = w;
+	}
+	
 	@Override
 	public void set(Vector4f v) {
 		this.x = v.x;
@@ -30,5 +71,10 @@ public class Vector4f extends Vector<Vector4f> {
 	@Override
 	public Vector4f create() {
 		return new Vector4f();
+	}
+
+	@Override
+	public float[] asFloats() {
+		return new float[] {this.x,this.y,this.z,this.w};
 	}
 }

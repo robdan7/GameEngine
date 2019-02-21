@@ -38,22 +38,23 @@ public class MouseController extends Observer<MouseListener>{
 		return this.position.toVec2f();
 	}
 	
+	// TODO Change this
 	public float getX() {
 		return this.position.getX();
 	}
-	
+	// TODO Change this
 	public float getY() {
 		return this.position.getY();
 	}
-	
+
 	public void setX(float x) {
 		this.position.setX(x);
 	}
-	
+
 	public void setY(float y) {
 		this.position.setY(y);
 	}
-	
+	// TODO Change this
 	public Vector2f getScreenPosition(Window window) {
 		return new Vector2f(this.position.getX()-window.getWidth()/2, window.getHeight()/2-this.position.getY());
 	}

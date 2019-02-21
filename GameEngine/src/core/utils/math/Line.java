@@ -13,7 +13,7 @@ public class Line {
 	 * @param start - The starting point.
 	 * @param pointer - A normalized vector.
 	 */
-	public Line(Vector start, Vector pointer) {
+	public Line(Vector3f start, Vector3f pointer) {
 		this.start = start.toVec3f();
 		this.pointer = pointer.toVec3f();
 	}
@@ -39,7 +39,7 @@ public class Line {
 	 * Set the direction of this line.
 	 * @param direction - A normalized vector.
 	 */
-	public void setDirection(Vector direction) {
+	public void setDirection(Vector3f direction) {
 		this.pointer.x = direction.x;
 		this.pointer.y = direction.y;
 		this.pointer.z = direction.z;
@@ -49,7 +49,7 @@ public class Line {
 	 * Set the starting point of this line.
 	 * @param start
 	 */
-	public void setStart(Vector start) {
+	public void setStart(Vector3f start) {
 		this.start.x = start.x;
 		this.start.y = start.y;
 		this.start.z = start.z;

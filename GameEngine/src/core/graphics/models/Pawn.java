@@ -1,28 +1,16 @@
 package core.graphics.models;
 
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL13;
 
 import core.graphics.renderUtils.Camera;
-import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
 import core.input.Mouse;
 import core.input.listeners.MouseController;
 import core.input.listeners.MouseListener;
 import core.utils.math.Line;
-import core.utils.math.Matrix4f;
 import core.utils.math.Plane;
-import core.utils.math.Vector;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
-import core.utils.math.Vector4f;
 import core.utils.other.Timer;
-
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBindTexture;
-import static org.lwjgl.opengl.GL20.*;
 
 /**
  * 
@@ -191,9 +179,9 @@ public class Pawn extends MouseListener {
 			this.moveDirection[1] = this.moveDirection[2].toVec3f();
 			this.time = 0;
 		}
-		Vector v = this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing);
-		v.multiply(delta*this.moveVelocity);
-		this.position.add(v);
+		Vector3f v = this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing);
+		
+		this.position.add(v.asMultiplied(delta*this.moveVelocity));
 	}
 	
 	private void move() {
@@ -241,7 +229,7 @@ public class Pawn extends MouseListener {
 	 * It interpolates the current movement vector with the previous movement direction.
 	 * @param t - Time that should pass before the movement direction has changed completely. Set to 0 for no smoothing and 1 for ice skating.
 	 */
-	public Vector smoothMovement(Vector v, Vector v2, float t) {
+	public Vector3f smoothMovement(Vector3f v, Vector3f v2, float t) {
 		return v.interpolate(v2, t);
 	}
 	
@@ -323,17 +311,11 @@ public class Pawn extends MouseListener {
 
 	@Override
 	public void mouseMovement(MouseController obs, Vector2f v) {
-		
 		Vector3f pointer = ((Mouse)obs).getNormalizedPosition().toVec3f();
 		pointer.setZ(-1);
 		l.setDirection(pointer);
-		// TODO use copy instead.
-		Vector3f v2 = (Vector3f) this.position.toVec3f();
-		Vector3f v3 = this.cam.getForward().toVec3f();
-		v3.multiply(this.cam.getCamOffset());
-		v2.subtract(v3);
-		l.setStart(v2);
-		
+		Vector3f v2 = this.cam.getForward().asMultiplied(this.cam.getCamOffset());
+		l.setStart(this.position.asSubtracted(v2));
 	}
 }
 

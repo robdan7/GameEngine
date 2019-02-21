@@ -3,13 +3,9 @@ package core.graphics.renderUtils;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL13;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
 
 import core.graphics.renderUtils.uniforms.UniformSource;
 import core.utils.math.Matrix4f;
-import core.utils.math.Vector;
 import core.utils.math.Vector3f;
 
 /**
@@ -64,8 +60,9 @@ public class Camera extends UniformSource {
 		this.right = right;
 		lookAtMatrix = new Matrix4f();
 		perspectiveMatrix = new Matrix4f();
-		forward = upVector.crossProduct(right).toVec3f();
-		forward.normalize();
+		// TODO fix this
+		forward = upVector.crossProduct(right).getNormalized().toVec3f();
+		
 		
 		this.uniformBuffer = BufferUtils.createFloatBuffer(this.updateType.getSize());
 		
@@ -87,10 +84,7 @@ public class Camera extends UniformSource {
 		this.hAngle %= Math.PI*2;
 		this.vAngle %= Math.PI*2;
 		
-		forward.setZ((float)(Math.cos(hAngle)*Math.cos(vAngle)));
-		forward.setX((float)(Math.sin(hAngle)*Math.cos(vAngle)));
-		forward.setY((float)Math.sin(vAngle));
-		this.forward.normalize();
+		this.updateForward();
 	}
 	
 	/**
@@ -105,6 +99,10 @@ public class Camera extends UniformSource {
 		this.hAngle %= Math.PI*2;
 		this.vAngle %= Math.PI*2;
 		
+		this.updateForward();
+	}
+	
+	private void updateForward() {
 		forward.setZ((float)(Math.cos(hAngle)*Math.cos(vAngle)));
 		forward.setX((float)(Math.sin(hAngle)*Math.cos(vAngle)));
 		forward.setY((float)Math.sin(vAngle));
@@ -127,8 +125,7 @@ public class Camera extends UniformSource {
 	 * @param v - The vector v to look at.
 	 */
 	public void lookAt(Vector3f v) {
-		this.forward.set(v);
-		this.forward.normalize();
+		this.forward = v.getNormalized().toVec3f();
 		this.lookAt();
 	}	
 	
@@ -173,12 +170,8 @@ public class Camera extends UniformSource {
 			//Vector.copy(this.getFocusPos(), this.cameraPosition);
 			this.cameraPosition.set(this.getFocusPos());
 		} else {
-			Vector3f offset = this.forward.copy();
-			offset.multiply(this.focusoffset);
-			//Vector.copy(Vector.subtract(this.getFocusPos(), offset),this.cameraPosition);
-			//this.cameraPosition.set(Vector.subtract(this.getFocusPos(), offset));
-			this.cameraPosition.set(this.getFocusPos());
-			this.cameraPosition.subtract(offset);
+			Vector3f offset = this.forward.copy().asMultiplied(this.focusoffset);
+			this.cameraPosition.set(this.getFocusPos().asSubtracted( offset));
 		}
 	}
 	
@@ -191,7 +184,6 @@ public class Camera extends UniformSource {
 			throw new RuntimeException("Position is bound to another object");
 		}
 		this.getFocusPos().set(v);
-		//Vector.copy(v, this.getFocusPos());
 	}
 	
 	public void bindFocusPos(Vector3f v) {
@@ -213,8 +205,8 @@ public class Camera extends UniformSource {
 	}
 	
 	/**
-	 * Set the position to a choosen vector. The two objects will now point to the same data.
-	 * The position cannot be changed if it is bound to another object.
+	 * Set the position to a chosen vector. The two objects will now point to the same data.
+	 * The position cannot be changed if it is already bound to another object.
 	 * @param v
 	 */
 	public void copyFocusPos(Vector3f v) {

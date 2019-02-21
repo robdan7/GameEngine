@@ -5,18 +5,14 @@ import static org.lwjgl.opengl.GL15.*;
 
 import java.nio.FloatBuffer;
 
-import org.lwjgl.BufferUtils;
 import core.graphics.renderUtils.uniforms.UniformObject;
 import core.graphics.renderUtils.uniforms.UniformSource;
-import core.graphics.renderUtils.uniforms.UniformTools;
 import core.utils.math.Vector;
-import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
 import core.utils.other.BufferTools;
-import core.utils.other.Pair;
 
 
-public abstract class Light<T extends Vector<T>> extends UniformSource {
+public abstract class Light extends UniformSource {
 	private UniformObject lightUniform;
 
 	private FloatBuffer uniformBuffer;
@@ -28,7 +24,7 @@ public abstract class Light<T extends Vector<T>> extends UniformSource {
 	 * @param diffuse - Diffuse lighting.
 	 * @param ambient - Ambient lighting.
 	 */
-	public Light (T vector, T diffuse, T ambient, T specular, String uniformFile) {
+	public Light (Vector4f vector, Vector4f diffuse, Vector4f ambient, Vector4f specular, String uniformFile) {
 		super(16);
 
 		lightUniform = new UniformObject(uniformFile, GL_STATIC_DRAW);
@@ -109,5 +105,5 @@ public abstract class Light<T extends Vector<T>> extends UniformSource {
 		return this.uniformBuffer;
 	}
 	
-	public abstract Vector<?> getPosition();
+	public abstract Vector4f getPosition();
 }

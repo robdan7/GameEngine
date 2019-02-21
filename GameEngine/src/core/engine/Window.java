@@ -7,9 +7,6 @@ import org.lwjgl.system.*;
 import core.graphics.misc.Color;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.ShadowMap;
-import core.graphics.renderUtils.buffers.Drawbuffer;
-import core.utils.math.Matrix4f;
-import core.utils.math.Vector;
 import core.utils.math.Vector4f;
 
 import java.nio.*;
@@ -22,7 +19,6 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL11.*;
 
 public class Window {
 
@@ -184,11 +180,10 @@ public class Window {
 	}
 	
 
-	void renderShadowMap(ShadowMap map, ArrayList<RenderObject> objects, int buffer) {
+	void renderShadowMap(ShadowMap map, ArrayList<RenderObject> objects) {
 		map.updateCameraUniform();
 		glCullFace(GL_FRONT);
-		//glBindFramebuffer(GL_FRAMEBUFFER, map.getBuffer().getColorMapFBO());
-		glBindFramebuffer(GL_FRAMEBUFFER, buffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, map.getBuffer().getColorMapFBO());
 		glViewport(0, 0, map.getBuffer().getWidth(), map.getBuffer().getHeight());
 		glClear(GL_DEPTH_BUFFER_BIT);
 		int lastShader = 0;

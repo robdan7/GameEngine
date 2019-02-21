@@ -31,7 +31,6 @@ public class Matrix4f{
 	protected float m33;
 	
 	private float[] dest;
-	private int uniformOffset;
 	
 	String uniformName;
 	
@@ -111,7 +110,7 @@ public class Matrix4f{
         this.rotate(sin, cos, x, y, z);
     }
 	
-	public void rotateFromPoint(Vector v) {
+	public void rotateFromPoint(Vector3f v) {
 		if (v.length() == 0) {
 			throw new RuntimeException("Length of vector is 0");
 		}
@@ -120,8 +119,8 @@ public class Matrix4f{
 		if (v.z == 1 || v.z == -1) {
 			throw new RuntimeException("Illegal Vector (|z| == 1)");
 		}
-		Vector u = new Vector3f(0,0,-1);
-		Vector n = u.crossProduct(v);
+		Vector3f u = new Vector3f(0,0,-1);
+		Vector3f n = u.crossProduct(v);
 		
 		float lengthProduct = u.length()*v.length();
 		double sin = n.length()/lengthProduct;
@@ -190,13 +189,13 @@ public class Matrix4f{
 	 * @param u - Universal up vector.
 	 * @param r - Default left vector. This is used when e and f are opposite or the same.
 	 */
-	public void lookAt(Vector e, Vector f, Vector u, Vector r) {
-		Vector s = f.crossProduct(u);
+	public void lookAt(Vector3f e, Vector3f f, Vector3f u, Vector3f r) {
+		Vector3f s = f.crossProduct(u);
 		s.normalize();
 		if (s.length() == 0) {
 			s = r;
 		}
-		Vector viewU = s.crossProduct(f);
+		Vector3f viewU = s.crossProduct(f);
 		viewU.normalize();
 		this.m00 = s.x;
 	    this.m10 = s.y;
@@ -213,6 +212,7 @@ public class Matrix4f{
 	    this.m22 = -f.z;
 	    //this.m32 = -f.z;
 	    
+	    // TODO change this
 	    this.translate(e.asFlipped());
 	    //m30 = 0.0f;
 	    //m31 = 0.0f;
@@ -226,7 +226,7 @@ public class Matrix4f{
 	 * 
 	 * @param v - The new position.
 	 */
-	public void translate(Vector v) {
+	public void translate(Vector<?> v) {
         this.m30 = (float) (this.m00 * v.x + this.m10 * v.y + this.m20 * v.z);
         this.m31 = (float) (this.m01 * v.x + this.m11 * v.y + this.m21 * v.z);
         this.m32 = (float) (this.m02 * v.x + this.m12 * v.y + this.m22 * v.z);
@@ -237,8 +237,8 @@ public class Matrix4f{
 	 * @param v
 	 * @return
 	 */
-	public Vector multiply(Vector v) {
-		Vector v2 = new Vector4f();
+	public Vector4f multiply(Vector4f v) {
+		Vector4f v2 = new Vector4f();
 		v2.x = m00*v.x+m10*v.y+m20*v.z+m30*v.w;
 		v2.y = m01*v.x+m11*v.y+m21*v.z+m31*v.w;
 		v2.z = m02*v.x+m12*v.y+m22*v.z+m32*v.w;
@@ -459,15 +459,6 @@ public class Matrix4f{
 		dest[14] = this.m32;
 		dest[15] = this.m33;
 		return dest;
-	}
-	
-	/**
-	 * Add this matrix to a common uniform block.
-	 * @param UBO - The buffer index used for binding.
-	 * @param offset - The index offset in the buffer associated with this matrix.
-	 */
-	public void connectToUniformBlock(int UBO, int offset) {
-		this.uniformOffset = offset;
 	}
 	
 	/*

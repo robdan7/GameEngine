@@ -1,19 +1,13 @@
 package core.graphics.renderUtils.uniforms;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-
-import org.lwjgl.BufferUtils;
 
 import core.graphics.models.OBJLoader;
 import core.graphics.renderUtils.Shaders;
-import core.utils.math.Vector4f;
 import core.utils.other.BufferTools;
 import core.utils.other.Pair;
 
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL31.*;
-import static org.lwjgl.opengl.GL15.*;
 
 public class UniformTools {
 	//static ArrayList<Integer> usedUniforms = new ArrayList<>();
@@ -30,7 +24,7 @@ public class UniformTools {
 	 * @param drawType - GL_DYNAMIC_DRAW, GL_STATIC_DRAW or GL_STREAM_DRAW.
 	 * @return A pair with the created float buffer and the buffer index used for binding.
 	 */
-	@Deprecated
+	
 	/*public static Pair<FloatBuffer, Integer> createUniformBlock(float[] bufferData, UniformObject index, int drawType) {
 		Pair<FloatBuffer, Integer> data = createFloatBuffer(index, bufferData);
 		UniformTools.bindBuffer(data.getFirst(), data.getSecond(), index, drawType);
@@ -59,6 +53,7 @@ public class UniformTools {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}*/
 	
+	@Deprecated
 	private static Pair<FloatBuffer, Integer> createFloatBuffer(UniformObject index, float[] vertices) {
 		FloatBuffer buf = BufferTools.asFloatBuffer(vertices);
 		buf.flip();

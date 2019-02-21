@@ -32,7 +32,6 @@ package core.utils.other;
 import org.lwjgl.BufferUtils;
 
 import core.utils.math.Matrix4f;
-import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
 
 import java.nio.ByteBuffer;

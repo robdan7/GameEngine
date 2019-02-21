@@ -2,7 +2,7 @@ package core.graphics.renderUtils;
 
 import org.lwjgl.opengl.GL20;
 
-import core.graphics.models.ModelCompiler.Settings;
+
 import core.graphics.renderUtils.uniforms.UniformObject;
 import core.utils.fileSystem.FileManager;
 import core.utils.other.StringUtils;
@@ -10,9 +10,7 @@ import core.utils.other.StringUtils;
 import static core.utils.other.StringUtils.*;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import static org.lwjgl.opengl.GL11.*;

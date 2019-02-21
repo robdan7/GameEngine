@@ -2,11 +2,6 @@ package core.graphics.renderUtils.uniforms;
 
 import java.nio.FloatBuffer;
 
-
-import org.lwjgl.BufferUtils;
-
-import core.utils.other.BufferTools;
-
 /**
  * This class represents one part of a uniform block.
  * A uniform source stores the actual data that can be put in a uniform block.

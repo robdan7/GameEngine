@@ -24,6 +24,30 @@ public class Vector3f extends Vector<Vector3f> {
 		super(x,y,z);
 	}
 	
+	public float getX() {
+		return this.x;
+	}
+	
+	public float getY() {
+		return this.y;
+	}
+	
+	public float getZ() {
+		return this.z;
+	}
+	
+	public void setX(float x) {
+		this.x = x;
+	}
+	
+	public void setY(float y) {
+		this.y = y;
+	}
+	
+	public void setZ(float z) {
+		this.z = z;
+	}
+	
 	@Override
 	public void set(Vector3f v) {
 		this.x = v.x;
@@ -33,7 +57,7 @@ public class Vector3f extends Vector<Vector3f> {
 
 
 	@Override
-	public float[] asFloat() {
+	public float[] asFloats() {
 		return new float[] { this.x, this.y, this.z };
 	}
 

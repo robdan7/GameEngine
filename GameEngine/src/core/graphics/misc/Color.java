@@ -1,11 +1,10 @@
 package core.graphics.misc;
 
-import core.utils.math.Vector;
 import core.utils.math.Vector4f;
 
 public class Color {
 	private Vector4f color;
-	private final static int colorValue = 255;
+	private static float colorValue = 255.0f;
 	
 	public Color() {
 		this(0,0,0,0);
@@ -16,15 +15,15 @@ public class Color {
 	}
 	
 	public void setColor(float r, float g, float b, float a) {
-		this.color.set(r, g, b, a);
+		this.color.set(r,g,b,a);
 	}
 	
 	public void setColor(Color c) {
-		this.setColor(c.color.getW(), c.color.getY(), c.color.getZ(),c.color.getW());
+		this.color.set(c.getColor());
 	}
 	
 	public void setColor(Vector4f v) {
-		this.color = (Vector4f) v.copy();
+		this.color.set(v);
 	}
 	
 	/**
@@ -45,9 +44,7 @@ public class Color {
 	 * @return A vector with all values.
 	 */
 	public static Vector4f rgbToPercent(Vector4f v) {
-		Vector4f temp = v.copy();
-		temp.multiply(1/colorValue);
-		return temp;
+		return v.asMultiplied(1/colorValue);
 	}
 	
 	/**
@@ -64,15 +61,14 @@ public class Color {
 	}
 	
 	public static Vector4f percentToRGB(Vector4f v) {
-		//return (Vector4f)Vector.multiply(v, colorValue);
-		v.multiply(colorValue);
-		return v;
+		return v.asMultiplied(colorValue);
 	}
 	
 	public static Vector4f percentToRGB(Color c) {
 		return percentToRGB(c.color);
 	}
 	
+	// TODO Change these
 	public float getR() {
 		return this.color.getX();
 	}

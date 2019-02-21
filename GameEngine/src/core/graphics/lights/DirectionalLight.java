@@ -1,10 +1,8 @@
 package core.graphics.lights;
 
-import core.graphics.renderUtils.uniforms.*;
-import core.utils.math.Vector;
 import core.utils.math.Vector4f;
 
-public class DirectionalLight extends Light<Vector4f>{
+public class DirectionalLight extends Light{
 	private Vector4f specular;
 	private Vector4f diffuse;
 	private Vector4f ambient;
@@ -16,8 +14,8 @@ public class DirectionalLight extends Light<Vector4f>{
 	 * @param ambient - Ambient lighting.
 	 */
 	public DirectionalLight (Vector4f position, Vector4f diffuse, Vector4f ambient, Vector4f specular, String uniformFile) {
-		super(uniformFile, (Vector4f)position.getNormalized(), diffuse.toVec4f(), ambient.toVec4f(), specular.toVec4f());
-		this.position = (Vector4f)position.getNormalized();
+		super(uniformFile, position.getNormalized().toVec4f(), diffuse.toVec4f(), ambient.toVec4f(), specular.toVec4f());
+		this.position = position.getNormalized();
 		this.ambient = ambient;
 		this.diffuse = diffuse;
 		this.specular = specular;
@@ -50,7 +48,6 @@ public class DirectionalLight extends Light<Vector4f>{
 	
 	@Override
 	public Vector4f getPosition() {
-		// TODO Auto-generated method stub
 		return this.position;
 	}
 

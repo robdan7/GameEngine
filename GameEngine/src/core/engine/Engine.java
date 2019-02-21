@@ -3,9 +3,6 @@ package core.engine;
 import static org.lwjgl.glfw.GLFW.*;
 
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
 
 import core.graphics.lights.DirectionalLight;
 import core.graphics.misc.Color;
@@ -21,27 +18,18 @@ import core.graphics.renderUtils.uniforms.UniformSource;
 import core.input.Key;
 import core.input.Keyboard;
 import core.input.Mouse;
-import core.utils.math.Line;
 import core.utils.math.Matrix4f;
-import core.utils.math.Plane;
-import core.utils.math.Vector;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
-import core.utils.other.BufferTools;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.*;
 
 import java.io.IOException;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import org.lwjgl.BufferUtils;
-
-import core.graphics.ui.*;
 import core.graphics.ui.old.MenuSystem;
 import core.graphics.ui.old.UIPanel;
 
@@ -90,10 +78,6 @@ public class Engine {
 
 	public static void main(String[] args) {
 		new Engine();
-		//Vector2f v = new Vector2f(1,1);
-		//v.multiply(2);
-		//Vector2f v2 = (Vector2f)v.copy();
-		//System.out.print(v2);
 	}
 	
 	private void run() {
@@ -116,14 +100,14 @@ public class Engine {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		sun = new DirectionalLight(new Vector4f(0.2f,1,0.5f,0), new Vector4f(1f,1f,1f,1),window.getSkyColor().asMultiplied(0.4f), new Vector4f(2,2,2,0), "/Assets/Shaders/Uniforms/light.unf");
+		sun = new DirectionalLight(new Vector4f(0.2f,1,0.5f,0), new Vector4f(1f,1f,1f,1), window.getSkyColor().asMultiplied(0.4f), new Vector4f(2,2,2,0), "/Assets/Shaders/Uniforms/light.unf");
 		UniformObject uniform = new UniformObject("/Assets/Shaders/Uniforms/matrices.unf", GL_DYNAMIC_DRAW);
 		shader = new Shaders("/Assets/Shaders/Deafult/shader.vert", "/Assets/Shaders/Deafult/shader.frag");
 		dynamicShadows = new Shaders("/Assets/Shaders/Shadows/Default/dynamic.vert", "/Assets/Shaders/Shadows/Default/shader.frag");
 		staticShadows = new Shaders("/Assets/Shaders/Shadows/Default/static.vert", "/Assets/Shaders/Shadows/Default/shader.frag");
 
 		try {
-			staticShadowMap = new ShadowMap(new Vector3f(0,1,0), new Vector3f(-1,0,0),"staticShadowmap", 1080*3, 1080*3, GL_NEAREST, new Vector4f(50,50,-100,100));
+			staticShadowMap = new ShadowMap(new Vector3f(0,1,0), new Vector3f(-1,0,0),"staticShadowmap", 1080*3, 1080*3, GL_NEAREST, new Vector4f(40,40,-100,100));
 			dynamicShadowMap = new ShadowMap(new Vector3f(0,1,0), new Vector3f(-1,0,0),"dynamicShadowmap", 2048, 2048, GL_NEAREST, new Vector4f(7,7,-100,100));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -178,7 +162,7 @@ public class Engine {
 	
 	@Deprecated
 	public void setupUI() {
-		menu = new MenuSystem(this.window,2);
+		//menu = new MenuSystem(this.window,2);
 		this.mouse.addListener(menu);
 		
 		menu.addPanel("settings");
@@ -209,7 +193,7 @@ public class Engine {
 		//window.renderStaticShadowMap(this.staticShadowMap);
 		
 		// Render static shadows.
-		window.renderShadowMap(this.staticShadowMap, this.staticRenderStack, this.staticShadowMap.getBuffer().getColorMapFBO());
+		window.renderShadowMap(this.staticShadowMap, this.staticRenderStack);
 		
 		
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
@@ -224,19 +208,15 @@ public class Engine {
 			
 
 			//window.renderDynamicShadowMap(this.dynamicShadowMap);
-			window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack, screenQuad.getFBO());
-			
+			window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack);
 			glBindFramebuffer(GL_FRAMEBUFFER, screenQuad.getFBO());
 			glClearColor(0, 0, 0, 0); // Set the background to transparent.
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
 			
-			
-			
 			window.renderTextured(this.dynamicShadowMap, this.dynamicRenderStack, this.staticRenderStack);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			window.prepareToRender();
-			
 			glClearColor(0, 0, 1, 1);
 			screenQuad.drawQuad();
 			//menu.render(this.transformMatrix);

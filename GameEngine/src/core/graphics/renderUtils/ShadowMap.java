@@ -1,11 +1,8 @@
 package core.graphics.renderUtils;
 
-import static org.lwjgl.opengl.GL11.*;
-
 import core.graphics.lights.DirectionalLight;
 import core.graphics.lights.Light;
 import core.graphics.renderUtils.buffers.Drawbuffer;
-import core.utils.math.Vector;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
 import core.utils.other.Texture;
@@ -42,7 +39,6 @@ public class ShadowMap {
 		textureBuffer = new Drawbuffer(textureName, width, height);
 		//buffer.getColorMapTexture().bindAsUniform(shader.getShaderProgram());
 		cam = new Camera(up, right, -matrixDimensions.getX(), matrixDimensions.getX(), -matrixDimensions.getY(), matrixDimensions.getY(), matrixDimensions.getZ(), matrixDimensions.getW(), Camera.updateType.CAMERA);
-		System.out.println(matrixDimensions);
 		//cam.rotate(0, -(float)Math.PI/2);
 		cam.lookAt(new Vector3f(0.1f,-1f,0));
 		//System.out.println(cam.getForward().toString() + " : " + cam.getPosition().toString());
@@ -95,7 +91,7 @@ public class ShadowMap {
 			 * Use the flipped light position to look in the opposite direction.
 			 * The camera will now look in the same direction as the light source.
 			 */
-			cam.lookAt(light.getPosition().toVec3f());
+			cam.lookAt(light.getPosition().asFlipped().toVec3f());
 		}
 		cam.updateUniform();
 	}

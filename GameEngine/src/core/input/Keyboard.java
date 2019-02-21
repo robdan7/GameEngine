@@ -3,11 +3,8 @@ package core.input;
 import org.lwjgl.glfw.GLFWKeyCallback;
 
 import core.engine.Window;
-import core.input.Key.actionType;
 
 import static org.lwjgl.glfw.GLFW.*;
-
-import java.util.HashMap;
 
 public class Keyboard extends GLFWKeyCallback{
 	

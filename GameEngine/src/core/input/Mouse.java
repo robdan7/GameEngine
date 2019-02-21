@@ -3,8 +3,6 @@ package core.input;
 import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
 
-import org.lwjgl.glfw.GLFW;
-
 import static org.lwjgl.glfw.GLFW.*;
 
 import org.lwjgl.glfw.GLFWCursorPosCallback;
@@ -30,8 +28,9 @@ public class Mouse extends MouseController{
 	
 	
 	/**
-	 * 
+	 * Create the mouse and connect it to a window.
 	 * @param window - The window to bind the mouse to.
+	 * @param ratio - Input to movement ratio.
 	 */
 	public Mouse(Window window, float ratio) {
 		super();
@@ -61,20 +60,16 @@ public class Mouse extends MouseController{
 		this.movementRatio = ratio;
 	}
 	
-	public Vector2f getNormalizedPosition() {
-		return new Vector2f((getX()/window.getWidth())*2-1,-getY()/window.getHeight()*(2)+1);
-	}
-	
 	/**
 	 * set delta x to null.
 	 */
 	private void setNullDelta() {
 		this.lastX = this.getPosition().getX();
 		this.lastY = this.getPosition().getY();
-	}
+}
 	
 	/**
-	 * 
+	 * Get delta X since last call.
 	 * @param windowWitdth - Width of the window.
 	 * @return The mouse movement relative to the window width.
 	 */
@@ -85,7 +80,7 @@ public class Mouse extends MouseController{
 	}
 	
 	/**
-	 * 
+	 * Get delta Y since last call.
 	 * @param windowHeight - Height of the window.
 	 * @return The mouse movement relative to the window height.
 	 */
@@ -93,16 +88,27 @@ public class Mouse extends MouseController{
 		float DY = (float)(this.getPosition().getY()-this.lastY)/this.window.getHeight();
 		this.lastY = this.getPosition().getY();
 		return DY*this.movementRatio;
-	}
+}
 	
 	/**
 	 * 
-	 * @return The position in screen coordinates where 0 is in the center of the screen.
+	 * @return The position in screen coordinates. 0 is in the center of the screen.
 	 */
 	public Vector2f getScreenPosition () {
 		return new Vector2f(this.getPosition().getX()-window.getWidth()/2, window.getHeight()/2-this.getPosition().getY());
 	}
 	
+	/**
+	 * 
+	 * @return The position relative to the screen size.
+	 */
+	public Vector2f getNormalizedPosition() {
+		return new Vector2f((getX()/window.getWidth())*2-1,-getY()/window.getHeight()*(2)+1);
+	}
+	
+	/**
+	 * Hide and show the mouse.
+	 */
 	public void toggleHide() {
 		super.toggleHide();
 		if (this.isHidden()) {
@@ -114,6 +120,9 @@ public class Mouse extends MouseController{
 		this.setNullDelta();
 	}
 	
+	/**
+	 * Grab and release the mouse. The mouse cursor will not move or be shown when it is grabbed.
+	 */
 	public void toggleGrab() {
 		super.toggleGrab();
 		if (!this.isGrabbed()) {
@@ -124,14 +133,26 @@ public class Mouse extends MouseController{
 		this.setNullDelta();
 	}
 	
+	/**
+	 * Hide the mouse cursor. The cursor can still move when it is hidden.
+	 * @param window
+	 */
 	private void hideCursor(Window window) {
 		glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	}
 	
+	/**
+	 * Show the mouse cursor. This is pretty self explanatory.
+	 * @param window
+	 */
 	private void showCursor(Window window) {
 		glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 	
+	/**
+	 * Grab the mouse cursor. This disables cursor movement.
+	 * @param window
+	 */
 	private void grabCursor(Window window) {
 		glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}

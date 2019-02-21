@@ -2,7 +2,7 @@ package core.utils.datatypes;
 
 import java.util.Iterator;
 
-public class Stack <E> implements Iterable{
+public class Stack <E> implements Iterable<E>{
 	private Node first, last;
 
 	public Stack() {
@@ -71,6 +71,6 @@ public class Stack <E> implements Iterable{
 			}
 		
 		};
-		return null;
+		return iter;
 	}
 }

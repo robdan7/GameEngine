@@ -1,7 +1,5 @@
 package core.graphics.renderUtils;
 
-import core.utils.math.Matrix4f;
-
 /**
  * This class represents anything that can be displayed on the monitor.
  * @author Robin
