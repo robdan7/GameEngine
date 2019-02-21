@@ -6,7 +6,7 @@ package core.utils.math;
  *
  */
 public class Vector3f extends Vector<Vector3f> {
-	//public float x,y,z;
+
 	public Vector3f() {
 		super();
 	}
@@ -24,51 +24,25 @@ public class Vector3f extends Vector<Vector3f> {
 		super(x,y,z);
 	}
 	
-	public float getX() {
-		return this.x;
-	}
-	
-	public float getY() {
-		return this.y;
-	}
-	
-	public float getZ() {
-		return this.z;
-	}
-	
-	public void setX(float x) {
-		this.x = x;
-	}
-	
-	public void setY(float y) {
-		this.y = y;
+	@Override
+	public void set(Vector3f v) {
+		this.x = v.x;
+		this.y = v.y;
+		this.z = v.z;
 	}
 
-	public void setZ(float z) {
-		this.z = z;
-	}
-	
-	public void set(float x, float y, float z) {
-		this.setX(x);
-		this.setY(y);
-		this.setZ(z);
-	}
-	
-	public void set(Vector<? extends Vector<?>> v) {
-		this.set(v.x, v.y, v.z);
-	}
 
 	@Override
-	public float[] asFloats() {
-		return Vector.asFloats(this);
+	public float[] asFloat() {
+		return new float[] { this.x, this.y, this.z };
 	}
 
-/*
+
 	@Override
 	public String toString() {
 		return this.x + " : " + this.y + " : " + this.z;
 	}
-*/
+
 	@Override
 	public Vector3f copy() {
 		// TODO Auto-generated method stub
@@ -76,9 +50,7 @@ public class Vector3f extends Vector<Vector3f> {
 	}
 
 	@Override
-	public Vector3f getNormalized() {
-		Vector3f v2 = this.copy();
-		v2.normalize();
-		return v2;
+	public Vector3f create() {
+		return new Vector3f();
 	}
 }

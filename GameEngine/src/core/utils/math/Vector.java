@@ -1,21 +1,21 @@
 package core.utils.math;
 
-public abstract class Vector<T extends Vector<T>> {
-	protected float x,y,z,w;
+public abstract  class Vector<T extends Vector<T>> {
+	public float x,y,z,w=0;
 
-	Vector() {
+	protected Vector() {
 		this(0,0,0,0);
 	}
 	
-	Vector(float x, float y) {
+	protected Vector(float x, float y) {
 		this(x,y,0,0);
 	}
 	
-	Vector(float x, float y, float z) {
+	protected Vector(float x, float y, float z) {
 		this(x,y,z,0);
 	}
 	
-	Vector(float x,float y, float z, float w) {
+	protected Vector(float x,float y, float z, float w) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -33,7 +33,19 @@ public abstract class Vector<T extends Vector<T>> {
 	}
 	
 	/**
-	 * Set the vector's length to 1.
+	 * Set the values of this vector to be the same as another.
+	 * @param v
+	 */
+	public abstract void set(T v);
+	
+	/**
+	 * Create a new vector of the same data type.
+	 * @return - A new vector.
+	 */
+	public abstract T create();
+	
+	/**
+	 * Set the vector's length to 1 and scale to 1. 
 	 * @return This instance.
 	 */
 	public final void normalize() {
@@ -45,13 +57,11 @@ public abstract class Vector<T extends Vector<T>> {
 		}
 	}
 	
-	/**
-	 * Get a normalized copy of this vector.
-	 * @return A normalized copy.
-	 */
-	public abstract T getNormalized();
-	
-	
+	public T getNormalized() {
+		T v2 = this.copy();
+		v2.normalize();
+		return v2;
+	}	
 
 	/**
 	 * 
@@ -62,14 +72,13 @@ public abstract class Vector<T extends Vector<T>> {
 	}
 	
 	/**
-	 * 
-	 * @return A copy of this vector.
+	 * Make a copy of this vector.
+	 * @return A copy of a vector.
 	 */
 	public abstract T copy();
 	
 	/**
-	 * 
-	 * @return A vector with opposite values. Does not effect the original.
+	 * Flip the axes of this vector.
 	 */
 	public void  flip() {
 		this.x = -x;
@@ -82,29 +91,38 @@ public abstract class Vector<T extends Vector<T>> {
 		v.flip();
 		return v;
 	}
-	
+
 	
 	/**
 	 * Add a vector to another. The effect is immediate.
 	 * @param v - The vector to add.
-	 * @return this.
 	 */
-	public final void add(Vector<T> v) {
+	public void add(T v) {
 		this.x += v.x;
 		this.y += v.y;
 		this.z += v.z;
 	}
 	
-	
 	/**
-	 * Subtract a vector from this vector instance.
+	 * Subtract a vector from this vector.
 	 * @param v
 	 * @return
 	 */
-	public final void subtract(Vector<T> v) {
+	public final void subtract(T v) {
 		this.x -= v.x;
 		this.y -= v.y;
 		this.z -= v.z;
+	}
+	
+	/**
+	 * Return a copy of this vector subtracted by v.
+	 * @param v - The vector to subtract from.
+	 * @return A subtracted copy of this vector.
+	 */
+	public T asSubtracted(T v) {
+		T result = this.copy();
+		result.subtract(v);
+		return result;
 	}
 	
 	/**
@@ -118,35 +136,50 @@ public abstract class Vector<T extends Vector<T>> {
 		this.y *= m;
 	}
 	
-	public void multiply(Vector<T> v) {
+	/**
+	 * Multiply this vector by a vector v.
+	 * @param v - The vector to multiply with.
+	 */
+	public void multiply(T v) {
 		this.x *= v.x;
 		this.y *= v.y;
 		this.z *= v.z;
 		this.w *= v.w;
 	}
 	
+	/**
+	 * Return a copy of this vector multiplied by v.
+	 * @param v - The vector to multiply with.
+	 * @return - A multiplied copy.
+	 */
 	public T asMultiplied(T v) {
 		T result = this.copy();
-		v.multiply(v);
+		result.multiply(v);
+		return  result;
+	}
+	
+	/**
+	 * Return a copy of this vector multiplied by a constant.
+	 * @param f - The constant to multiply with.
+	 * @return A multiplied copy.
+	 */
+	public T asMultiplied(float f) {
+		T result = this.copy();
+		result.multiply(f);
 		return result;
 	}
 	
-	public T asMultiplied(float m) {
-		T result = this.copy();
-		result.multiply(m);
-		return result;
-	}
 	
 	/**
 	 * Calculate the cross product of this vector and v in right handed euclidean space.
 	 * @param v
 	 * @return
 	 */
-	public final Vector4f crossProduct(Vector<T> v) {
+	public T crossProduct(T v) {
 		if (this.length() == 0) {
 			throw new RuntimeException("Length of this vector is 0.");
 		}
-		Vector4f v2 = new Vector4f();
+		T v2 = this.copy();
 		v2.x = this.y * v.z - v.y * this.z;
 		v2.y = this.z * v.x - v.z * this.x;
 		v2.z = this.x * v.y - v.x * this.y;
@@ -158,7 +191,7 @@ public abstract class Vector<T extends Vector<T>> {
 	 * @param v
 	 * @return
 	 */
-	public final float dotProduct(Vector<T> v) {
+	public float dotProduct(T v) {
 		return this.x*v.x + this.y*v.y+ this.z*v.z;
 	}
 	
@@ -168,8 +201,8 @@ public abstract class Vector<T extends Vector<T>> {
 	 * @param t
 	 * @return
 	 */
-	public final Vector4f interpolate(Vector<T> v, float t) {
-		Vector4f v2 = new Vector4f(0, 0, 0,1);
+	public T interpolate(T v, float t) {
+		T v2 = this.create();
 		v2.x = this.x + t * (v.x - this.x);
 		v2.y = this.y + t * (v.y - this.y);
 		v2.z = this.z + t * (v.z - this.z);
@@ -183,8 +216,8 @@ public abstract class Vector<T extends Vector<T>> {
 	 * @param t
 	 * @return
 	 */
-	public final Vector4f interpolate(Vector<T> v, Vector<T> axis, float t) {
-		Vector4f v2 = new Vector4f();
+	public final T interpolate(T v, Vector3f axis, float t) {
+		T v2 = this.create();
 		v2.x = axis.x * (v.x - this.x) * (t - 1) + v.x;
 		v2.y = axis.y * (v.y - this.y) * (t - 1) + v.y;
 		v2.z = axis.z * (v.z - this.z) * (t - 1) + v.z;
@@ -195,18 +228,8 @@ public abstract class Vector<T extends Vector<T>> {
 	 * 
 	 * @return Return this as a list of floats.
 	 */
-	public abstract float[] asFloats();
-	
-	public static float[] asFloats(Vector2f v) {
-		return new float[] {v.x,v.y};
-	}
-	
-	public static float[] asFloats(Vector3f v) {
-		return new float[] {v.x,v.y,v.z};
-	}
-	
-	public static float[] asFloats(Vector4f v) {
-		return new float[] {v.x,v.y,v.z,v.w};
+	public float[] asFloat() {
+		return new float[] { this.x, this.y, this.z, this.w };
 	}
 	
 	/**
@@ -259,6 +282,19 @@ public abstract class Vector<T extends Vector<T>> {
 		}
 		return result;
 	}
+	
+	// TODO Remove these
+	public static float[] asFloats(Vector2f v) {
+		return new float[] {v.x,v.y};
+	}
+	
+	public static float[] asFloats(Vector3f v) {
+		return new float[] {v.x,v.y,v.z};
+	}
+	
+	public static float[] asFloats(Vector4f v) {
+		return new float[] {v.x,v.y,v.z,v.w};
+}
 	
 	@Override
 	public boolean equals(Object o) {
