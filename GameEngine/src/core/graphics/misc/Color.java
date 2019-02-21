@@ -5,7 +5,7 @@ import core.utils.math.Vector4f;
 
 public class Color {
 	private Vector4f color;
-	private static int colorValue = 255;
+	private final static int colorValue = 255;
 	
 	public Color() {
 		this(0,0,0,0);
@@ -16,18 +16,15 @@ public class Color {
 	}
 	
 	public void setColor(float r, float g, float b, float a) {
-		this.color.x = r;
-		this.color.y = g;
-		this.color.z = b;
-		this.color.w = a;
+		this.color.set(r, g, b, a);
 	}
 	
 	public void setColor(Color c) {
-		this.setColor(c.color.x, c.color.y, c.color.z,c.color.w);
+		this.setColor(c.color.getW(), c.color.getY(), c.color.getZ(),c.color.getW());
 	}
 	
 	public void setColor(Vector4f v) {
-		this.setColor(v.x,v.y,v.z,v.w);
+		this.color = (Vector4f) v.copy();
 	}
 	
 	/**
@@ -48,7 +45,9 @@ public class Color {
 	 * @return A vector with all values.
 	 */
 	public static Vector4f rgbToPercent(Vector4f v) {
-		return rgbToPercent(v.x,v.y,v.z,v.w);
+		Vector4f temp = v.copy();
+		temp.multiply(1/colorValue);
+		return temp;
 	}
 	
 	/**
@@ -65,7 +64,9 @@ public class Color {
 	}
 	
 	public static Vector4f percentToRGB(Vector4f v) {
-		return percentToRGB(v.x,v.y,v.z,v.w);
+		//return (Vector4f)Vector.multiply(v, colorValue);
+		v.multiply(colorValue);
+		return v;
 	}
 	
 	public static Vector4f percentToRGB(Color c) {
@@ -73,22 +74,22 @@ public class Color {
 	}
 	
 	public float getR() {
-		return this.color.x;
+		return this.color.getX();
 	}
 	
 	public float getG() {
-		return this.color.y;
+		return this.color.getY();
 	}
 	
 	public float getB() {
-		return this.color.z;
+		return this.color.getZ();
 	}
 	
 	public float getAlpha() {
-		return this.color.w;
+		return this.color.getW();
 	}
 	
-	public Vector getColor() {
+	public Vector4f getColor() {
 		return this.color;
 	}
 }

@@ -41,15 +41,6 @@ import java.nio.FloatBuffer;
 public class BufferTools {
 
     /**
-     * @param v the vector that is to be turned into an array of floats
-     *
-     * @return a float array where [0] is v.x, [1] is v.y, and [2] is v.z
-     */
-    public static float[] asFloats(Vector3f v) {
-        return new float[]{v.x, v.y, v.z};
-    }
-
-    /**
      * @param elements the amount of elements to check
      *
      * @return true if the contents of the two buffers are the same, false if not
@@ -136,7 +127,7 @@ public class BufferTools {
     }
     
     public static FloatBuffer asFloatBuffer(Vector4f values) {
-        return BufferTools.asFloatBuffer(new float[] {values.x, values.y, values.z, values.w});
+        return BufferTools.asFloatBuffer(values.asFloats());
     }
 
     /**

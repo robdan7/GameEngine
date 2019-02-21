@@ -77,7 +77,7 @@ public class Pawn extends MouseListener {
 	 * @param position - Starting position.
 	 * @param velocity - Max falking velocity.
 	 */
-	public void thirdPersonPreset(float smooth, Vector position, float velocity, float camOffset) {
+	public void thirdPersonPreset(float smooth, Vector3f position, float velocity, float camOffset) {
 		this.setSmoothAmount(smooth);
 		this.setPosition(position);
 		this.resetMovement();
@@ -133,7 +133,7 @@ public class Pawn extends MouseListener {
 	 * @param f - Velocity X in view space coordinates.
 	 */
 	public void setXvelocity(float f) {
-		this.moveDirection[2].x += f;
+		this.moveDirection[2].setX(this.moveDirection[2].getX()+f);
 	}
 	
 	/**
@@ -141,7 +141,7 @@ public class Pawn extends MouseListener {
 	 * @param f - Velocity Y in view space coordinates.
 	 */
 	public void setYvelocity(float f) {
-		this.moveDirection[2].y += f;
+		this.moveDirection[2].setY(this.moveDirection[2].getY()+f);
 	}
 	
 	/**
@@ -149,7 +149,7 @@ public class Pawn extends MouseListener {
 	 * @param f - Velocity Z in view space coordinates.
 	 */
 	public void setZvelocity(float f) {
-		this.moveDirection[2].z += f;
+		this.moveDirection[2].setZ(this.moveDirection[2].getZ()+f);
 	}
 	
 	public void setFollowmode(camFollow mode) {
@@ -161,10 +161,10 @@ public class Pawn extends MouseListener {
 	 *
 	 */
 	public void updateMovement() {
-		float tempX = this.moveDirection[2].x;
-		float tempZ = this.moveDirection[2].z;
-		this.moveDirection[2].x = (float)Math.sin(this.cam.gethAngle())*tempZ + (float)Math.cos(this.cam.gethAngle())*tempX; 	// Rotate x.
-		this.moveDirection[2].z = (float)Math.sin(this.cam.gethAngle())*(-tempX) + (float)Math.cos(this.cam.gethAngle())*tempZ;	// Rotate z.
+		float tempX = this.moveDirection[2].getX();
+		float tempZ = this.moveDirection[2].getZ();
+		this.moveDirection[2].setX((float)Math.sin(this.cam.gethAngle())*tempZ + (float)Math.cos(this.cam.gethAngle())*tempX); 	// Rotate x.
+		this.moveDirection[2].setZ((float)Math.sin(this.cam.gethAngle())*(-tempX) + (float)Math.cos(this.cam.gethAngle())*tempZ);	// Rotate z.
 		this.moveDirection[2].normalize();
 		if (this.movementSmoothing != 0) {
 			this.moveSmooth();
@@ -192,8 +192,8 @@ public class Pawn extends MouseListener {
 			this.time = 0;
 		}
 		Vector v = this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing);
-		
-		this.position.add(v.multiply(delta*this.moveVelocity));
+		v.multiply(delta*this.moveVelocity);
+		this.position.add(v);
 	}
 	
 	private void move() {
@@ -253,10 +253,8 @@ public class Pawn extends MouseListener {
 		return this.position;
 	}
 	
-	public void setPosition(Vector pos) {
-		this.position.x = pos.x;
-		this.position.y = pos.y;
-		this.position.z = pos.z;
+	public void setPosition(Vector3f pos) {
+		this.position.set(pos);
 	}
 	
 	public Camera getCamera() {
@@ -325,11 +323,17 @@ public class Pawn extends MouseListener {
 
 	@Override
 	public void mouseMovement(MouseController obs, Vector2f v) {
+		
 		Vector3f pointer = ((Mouse)obs).getNormalizedPosition().toVec3f();
-		pointer.z = -1;
+		pointer.setZ(-1);
 		l.setDirection(pointer);
-		Vector3f v2 = Vector.multiply(this.cam.getForward(), this.cam.getCamOffset()).toVec3f();
-		l.setStart(Vector.subtract(this.position, v2));
+		// TODO use copy instead.
+		Vector3f v2 = (Vector3f) this.position.toVec3f();
+		Vector3f v3 = this.cam.getForward().toVec3f();
+		v3.multiply(this.cam.getCamOffset());
+		v2.subtract(v3);
+		l.setStart(v2);
+		
 	}
 }
 

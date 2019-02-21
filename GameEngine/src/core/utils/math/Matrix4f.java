@@ -115,7 +115,7 @@ public class Matrix4f{
 		if (v.length() == 0) {
 			throw new RuntimeException("Length of vector is 0");
 		}
-		v = v.normalize();
+		v.normalize();
 		
 		if (v.z == 1 || v.z == -1) {
 			throw new RuntimeException("Illegal Vector (|z| == 1)");
@@ -127,7 +127,7 @@ public class Matrix4f{
 		double sin = n.length()/lengthProduct;
 		double cos = u.dotProduct(v)/lengthProduct;
 		
-		n = n.normalize();
+		n.normalize();
 		this.rotate(sin, cos, n.x, n.y, n.z);
 	}
 	
@@ -213,7 +213,7 @@ public class Matrix4f{
 	    this.m22 = -f.z;
 	    //this.m32 = -f.z;
 	    
-	    this.translate(e.flip());
+	    this.translate(e.asFlipped());
 	    //m30 = 0.0f;
 	    //m31 = 0.0f;
 	    //m32 = 0.0f;

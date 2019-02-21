@@ -32,7 +32,10 @@ import static core.utils.other.StringUtils.*;
  *
  */
 public class UniformObject {
-	private static int currentUniformIndex = 0; // current unused global uniform index.
+	/**
+	 * Every uniform has an index. This variable keeps track of it.
+	 */
+	private static int currentUniformIndex = 0;
 	
 	// List of all uniform blocks created.
 	private static HashMap<String, UniformObject> uniformList = new HashMap<String,UniformObject>();
@@ -44,14 +47,29 @@ public class UniformObject {
 	private int bindings;
 	private String uniformName;
 	StringBuilder uniformCode;
+	
+	/**
+	 * The uniform index associated with this object.
+	 * Not to be confused with {@link #currentBuffer}.
+	 */
 	private final int uniformIndex;
-	private ArrayList<UniformSource> connectedSource;
+	
+	/**
+	 * List of all connected uniform sources.
+	 */
+	private ArrayList<UniformSource> uniformSources;
 	
 	// remove this.
 	//private int[] buffersizes;
 	
-	// Total buffer indexes and the current unused buffer index.
-	private int[] totalBufferSize;
+	/**
+	 * The total offset in the uniform buffer per index.
+	 */
+	private int[] bufferIndexOffset;
+	
+	/**
+	 * Counter for how many indexes have been used.
+	 */
 	private int currentBuffer = 0;
 	
 	/**
@@ -69,12 +87,13 @@ public class UniformObject {
 			e.printStackTrace();
 		}
 		
+		// Two uniforms can't have the same name.
 		if (uniformList.containsKey(this.uniformName)) {
 			throw new RuntimeException("The name in " + file + " is already used");
 		}
 		uniformList.put(this.uniformName, this);
 		
-		this.totalBufferSize = new int[this.bindings];
+		this.bufferIndexOffset = new int[this.bindings];
 		
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(this.size);
 				
@@ -82,7 +101,7 @@ public class UniformObject {
 				
 		this.bindBuffer(buffer);
 		
-		connectedSource = new ArrayList<UniformSource>();
+		uniformSources = new ArrayList<UniformSource>();
 	}
 	
 	/**
@@ -92,21 +111,21 @@ public class UniformObject {
 	 */
 	void bindUniformSource(UniformSource u) {
 		// Check if all bindings have been used.
-		if (this.currentBuffer == this.totalBufferSize.length) {
+		if (this.currentBuffer == this.bufferIndexOffset.length) {
 			throw new RuntimeException("The total buffer index size is reached");
 		}
 		// Check if the memory is full.
-		else if ((currentBuffer + 1 < this.totalBufferSize.length) && this.totalBufferSize[currentBuffer + 1] >= this.size) {
-			throw new RuntimeException("No more space available. Used: " + this.totalBufferSize[this.currentBuffer+1] + ", available: " + this.size);
+		else if ((currentBuffer + 1 < this.bufferIndexOffset.length) && this.bufferIndexOffset[currentBuffer + 1] >= this.size) {
+			throw new RuntimeException("No more space available. Used: " + this.bufferIndexOffset[this.currentBuffer+1] + ", available: " + this.size);
 		}
 		// Add offset to the next index.
-		if (currentBuffer < this.totalBufferSize.length-1) {
-			this.totalBufferSize[currentBuffer + 1] = totalBufferSize[currentBuffer] + u.getSize();
+		if (currentBuffer < this.bufferIndexOffset.length-1) {
+			this.bufferIndexOffset[currentBuffer + 1] = bufferIndexOffset[currentBuffer] + u.getSize();
 		}
 		
 		// Everything is OK. Add the source to this object.
 		u.setIndex(currentBuffer++);
-		connectedSource.add(u);
+		uniformSources.add(u);
 	}	
 	
 	/**
@@ -115,11 +134,11 @@ public class UniformObject {
 	 * @param u - The uniform source.
 	 */
 	void updateUniform(FloatBuffer data, UniformSource u) {
-		if (!this.connectedSource.contains(u)) {
+		if (!this.uniformSources.contains(u)) {
 			throw new RuntimeException("the provided source is not a valid object for this uniforms");
 		}
 		data.clear();
-		OBJLoader.updateVBO(this.getUBO(), this.totalBufferSize[u.getIndex()], data);
+		OBJLoader.updateVBO(this.getUBO(), this.bufferIndexOffset[u.getIndex()], data);
 	}
 	
 	/**
@@ -128,10 +147,10 @@ public class UniformObject {
 	 * @param u - The uniform source.
 	 */
 	void updateUniform(float[] data, UniformSource u) {
-		if (!this.connectedSource.contains(u)) {
+		if (!this.uniformSources.contains(u)) {
 			throw new RuntimeException("the provided source is not a valid object for this uniforms");
 		}
-		OBJLoader.updateVBO(this.getUBO(), this.totalBufferSize[u.getIndex()], data);
+		OBJLoader.updateVBO(this.getUBO(), this.bufferIndexOffset[u.getIndex()], data);
 		//data.clear();
 	}
 	
@@ -207,7 +226,7 @@ public class UniformObject {
 	 * @return
 	 */
 	public int getBufferOffset(int index) {
-		return this.totalBufferSize[index];
+		return this.bufferIndexOffset[index];
 	}
 	
 	/**

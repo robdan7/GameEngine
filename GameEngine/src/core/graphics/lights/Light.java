@@ -10,12 +10,13 @@ import core.graphics.renderUtils.uniforms.UniformObject;
 import core.graphics.renderUtils.uniforms.UniformSource;
 import core.graphics.renderUtils.uniforms.UniformTools;
 import core.utils.math.Vector;
+import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
 import core.utils.other.BufferTools;
 import core.utils.other.Pair;
 
 
-public abstract class Light extends UniformSource {
+public abstract class Light<T extends Vector<T>> extends UniformSource {
 	private UniformObject lightUniform;
 
 	private FloatBuffer uniformBuffer;
@@ -27,12 +28,12 @@ public abstract class Light extends UniformSource {
 	 * @param diffuse - Diffuse lighting.
 	 * @param ambient - Ambient lighting.
 	 */
-	public Light (Vector vector, Vector diffuse, Vector ambient, Vector specular, String uniformFile) {
+	public Light (T vector, T diffuse, T ambient, T specular, String uniformFile) {
 		super(16);
 
 		lightUniform = new UniformObject(uniformFile, GL_STATIC_DRAW);
 		super.bindToUniformObject(lightUniform);
-		super.updateUniform(BufferTools.asFlippedFloatBuffer(this.to1dArray(new float[][] {vector.asFloat(), ambient.asFloat(), diffuse.asFloat(), specular.asFloat()})));
+		super.updateUniform(BufferTools.asFlippedFloatBuffer(this.to1dArray(new float[][] {vector.asFloats(), ambient.asFloats(), diffuse.asFloats(), specular.asFloats()})));
 	}
 	
 	/**
@@ -108,5 +109,5 @@ public abstract class Light extends UniformSource {
 		return this.uniformBuffer;
 	}
 	
-	public abstract Vector getPosition();
+	public abstract Vector<?> getPosition();
 }

@@ -184,10 +184,11 @@ public class Window {
 	}
 	
 
-	void renderShadowMap(ShadowMap map, ArrayList<RenderObject> objects) {
+	void renderShadowMap(ShadowMap map, ArrayList<RenderObject> objects, int buffer) {
 		map.updateCameraUniform();
 		glCullFace(GL_FRONT);
-		glBindFramebuffer(GL_FRAMEBUFFER, map.getBuffer().getColorMapFBO());
+		//glBindFramebuffer(GL_FRAMEBUFFER, map.getBuffer().getColorMapFBO());
+		glBindFramebuffer(GL_FRAMEBUFFER, buffer);
 		glViewport(0, 0, map.getBuffer().getWidth(), map.getBuffer().getHeight());
 		glClear(GL_DEPTH_BUFFER_BIT);
 		int lastShader = 0;
@@ -267,7 +268,7 @@ public class Window {
 		this.skyColor.setColor(c);
 	}
 	
-	public Vector getSkyColor() {
+	public Vector4f getSkyColor() {
 		return this.skyColor.getColor();
 	}
 	

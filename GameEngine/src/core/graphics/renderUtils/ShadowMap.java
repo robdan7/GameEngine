@@ -41,7 +41,8 @@ public class ShadowMap {
 	public ShadowMap(Vector3f up, Vector3f right, String textureName, int width, int height, int imageFilter, Vector4f matrixDimensions) throws Exception {
 		textureBuffer = new Drawbuffer(textureName, width, height);
 		//buffer.getColorMapTexture().bindAsUniform(shader.getShaderProgram());
-		cam = new Camera(up, right, -matrixDimensions.x, matrixDimensions.x, -matrixDimensions.y, matrixDimensions.y, matrixDimensions.z, matrixDimensions.w, Camera.updateType.CAMERA);
+		cam = new Camera(up, right, -matrixDimensions.getX(), matrixDimensions.getX(), -matrixDimensions.getY(), matrixDimensions.getY(), matrixDimensions.getZ(), matrixDimensions.getW(), Camera.updateType.CAMERA);
+		System.out.println(matrixDimensions);
 		//cam.rotate(0, -(float)Math.PI/2);
 		cam.lookAt(new Vector3f(0.1f,-1f,0));
 		//System.out.println(cam.getForward().toString() + " : " + cam.getPosition().toString());
@@ -94,7 +95,7 @@ public class ShadowMap {
 			 * Use the flipped light position to look in the opposite direction.
 			 * The camera will now look in the same direction as the light source.
 			 */
-			cam.lookAt(Vector.flip(light.getPosition()).toVec3f());
+			cam.lookAt(light.getPosition().toVec3f());
 		}
 		cam.updateUniform();
 	}

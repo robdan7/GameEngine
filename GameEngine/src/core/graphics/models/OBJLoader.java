@@ -45,6 +45,8 @@ import java.util.ArrayList;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 
+import static core.utils.math.Vector.*;
+
 /**
  * @author Oskar Veerhoek
  */
@@ -60,22 +62,22 @@ public class OBJLoader {
             for (Model.Face face : m.getFaces()) {
                 if (face.hasNormals()) {
                     Vector3f n1 = m.getNormals().get(face.getNormalIndices()[0] - 1);
-                    glNormal3f(n1.x, n1.y, n1.z);
+                    glNormal3f(n1.getX(), n1.getY(), n1.getZ());
                 }
                 Vector3f v1 = m.getVertices().get(face.getVertexIndices()[0] - 1);
-                glVertex3f(v1.x, v1.y, v1.z);
+                glVertex3f(v1.getX(), v1.getY(), v1.getZ());
                 if (face.hasNormals()) {
                     Vector3f n2 = m.getNormals().get(face.getNormalIndices()[1] - 1);
-                    glNormal3f(n2.x, n2.y, n2.z);
+                    glNormal3f(n2.getX(), n2.getY(), n2.getZ());
                 }
                 Vector3f v2 = m.getVertices().get(face.getVertexIndices()[1] - 1);
-                glVertex3f(v2.x, v2.y, v2.z);
+                glVertex3f(v2.getX(), v2.getY(), v2.getZ());
                 if (face.hasNormals()) {
                     Vector3f n3 = m.getNormals().get(face.getNormalIndices()[2] - 1);
-                    glNormal3f(n3.x, n3.y, n3.z);
+                    glNormal3f(n3.getX(), n3.getY(), n3.getZ());
                 }
                 Vector3f v3 = m.getVertices().get(face.getVertexIndices()[2] - 1);
-                glVertex3f(v3.x, v3.y, v3.z);
+                glVertex3f(v3.getX(), v3.getY(), v3.getZ());
             }
             glEnd();
         }
@@ -85,14 +87,6 @@ public class OBJLoader {
 
     private static FloatBuffer reserveData(int size) {
         return BufferUtils.createFloatBuffer(size);
-    }
-
-    private static float[] asFloats(Vector3f v) {
-        return new float[]{v.x, v.y, v.z};
-    }
-    
-    private static float[] asFloats(Vector2f v) {
-        return new float[]{v.x, v.y};
     }
 
     public static int[] createVBO(Model model) {
@@ -251,10 +245,10 @@ public class OBJLoader {
         BufferedReader reader = FileManager.getReader(f);
         Model m = new Model();
         String line;
-        int i = 0;
+        //int i = 0;
         while ((line = reader.readLine()) != null) {
             String prefix = line.split(" ")[0];
-            i ++;
+            //i ++;
             if (prefix.equals("#")) {
                 continue;
             } else if (prefix.equals("v")) {
@@ -290,34 +284,34 @@ public class OBJLoader {
                     }
                     if (face.hasNormals()) {
                         Vector3f n1 = m.getNormals().get(face.getNormalIndices()[0] - 1);
-                        glNormal3f(n1.x, n1.y, n1.z);
+                        glNormal3f(n1.getX(), n1.getY(), n1.getZ());
                     }
                     if (face.hasTextureCoordinates()) {
                         Vector2f t1 = m.getTextureCoordinates().get(face.getTextureCoordinateIndices()[0] - 1);
-                        glTexCoord2f(t1.x, t1.y);
+                        glTexCoord2f(t1.getX(), t1.getY());
                     }
                     Vector3f v1 = m.getVertices().get(face.getVertexIndices()[0] - 1);
-                    glVertex3f(v1.x + vec.get(i).x, v1.y+ vec.get(i).y, v1.z+ vec.get(i).z);
+                    glVertex3f(v1.getX() + vec.get(i).getX(), v1.getY()+ vec.get(i).getY(), v1.getZ()+ vec.get(i).getZ());
                     if (face.hasNormals()) {
                         Vector3f n2 = m.getNormals().get(face.getNormalIndices()[1] - 1);
-                        glNormal3f(n2.x, n2.y, n2.z);
+                        glNormal3f(n2.getX(), n2.getY(), n2.getZ());
                     }
                     if (face.hasTextureCoordinates()) {
                         Vector2f t2 = m.getTextureCoordinates().get(face.getTextureCoordinateIndices()[1] - 1);
-                        glTexCoord2f(t2.x, t2.y);
+                        glTexCoord2f(t2.getX(), t2.getY());
                     }
                     Vector3f v2 = m.getVertices().get(face.getVertexIndices()[1] - 1);
-                    glVertex3f(v2.x+ vec.get(i).x, v2.y+ vec.get(i).y, v2.z+ vec.get(i).z);
+                    glVertex3f(v2.getX()+ vec.get(i).getX(), v2.getY()+ vec.get(i).getY(), v2.getZ()+ vec.get(i).getZ());
                     if (face.hasNormals()) {
                         Vector3f n3 = m.getNormals().get(face.getNormalIndices()[2] - 1);
-                        glNormal3f(n3.x, n3.y, n3.z);
+                        glNormal3f(n3.getX(), n3.getY(), n3.getZ());
                     }
                     if (face.hasTextureCoordinates()) {
                         Vector2f t3 = m.getTextureCoordinates().get(face.getTextureCoordinateIndices()[2] - 1);
-                        glTexCoord2f(t3.x, t3.y);
+                        glTexCoord2f(t3.getX(), t3.getY());
                     }
                     Vector3f v3 = m.getVertices().get(face.getVertexIndices()[2] - 1);
-                    glVertex3f(v3.x+ vec.get(i).x, v3.y+ vec.get(i).y, v3.z+ vec.get(i).z);
+                    glVertex3f(v3.getX()+ vec.get(i).getX(), v3.getY()+ vec.get(i).getY(), v3.getZ()+ vec.get(i).getZ());
                 }
                 glEnd();
             glEndList();
@@ -342,34 +336,34 @@ public class OBJLoader {
                     }
                     if (face.hasNormals()) {
                         Vector3f n1 = m.getNormals().get(face.getNormalIndices()[0] - 1);
-                        glNormal3f(n1.x, n1.y, n1.z);
+                        glNormal3f(n1.getX(), n1.getY(), n1.getZ());
                     }
                     if (face.hasTextureCoordinates()) {
                         Vector2f t1 = m.getTextureCoordinates().get(face.getTextureCoordinateIndices()[0] - 1);
-                        glTexCoord2f(t1.x, t1.y);
+                        glTexCoord2f(t1.getX(), t1.getY());
                     }
                     Vector3f v1 = m.getVertices().get(face.getVertexIndices()[0] - 1);
-                    glVertex3f(v1.x*scale, v1.y*scale, v1.z*scale);
+                    glVertex3f(v1.getX()*scale, v1.getY()*scale, v1.getZ()*scale);
                     if (face.hasNormals()) {
                         Vector3f n2 = m.getNormals().get(face.getNormalIndices()[1] - 1);
-                        glNormal3f(n2.x, n2.y, n2.z);
+                        glNormal3f(n2.getX(), n2.getY(), n2.getZ());
                     }
                     if (face.hasTextureCoordinates()) {
                         Vector2f t2 = m.getTextureCoordinates().get(face.getTextureCoordinateIndices()[1] - 1);
-                        glTexCoord2f(t2.x, t2.y);
+                        glTexCoord2f(t2.getX(), t2.getY());
                     }
                     Vector3f v2 = m.getVertices().get(face.getVertexIndices()[1] - 1);
-                    glVertex3f(v2.x*scale, v2.y*scale, v2.z*scale);
+                    glVertex3f(v2.getX()*scale, v2.getY()*scale, v2.getZ()*scale);
                     if (face.hasNormals()) {
                         Vector3f n3 = m.getNormals().get(face.getNormalIndices()[2] - 1);
-                        glNormal3f(n3.x, n3.y, n3.z);
+                        glNormal3f(n3.getX(), n3.getY(), n3.getZ());
                     }
                     if (face.hasTextureCoordinates()) {
                         Vector2f t3 = m.getTextureCoordinates().get(face.getTextureCoordinateIndices()[2] - 1);
-                        glTexCoord2f(t3.x, t3.y);
+                        glTexCoord2f(t3.getX(), t3.getY());
                     }
                     Vector3f v3 = m.getVertices().get(face.getVertexIndices()[2] - 1);
-                    glVertex3f(v3.x*scale, v3.y*scale, v3.z*scale);
+                    glVertex3f(v3.getX()*scale, v3.getY()*scale, v3.getZ()*scale);
                 }
                 glEnd();
             }
@@ -489,6 +483,13 @@ public class OBJLoader {
         return m;
     }
     
+    /**
+     * I don't know what this one does. But it is not needed anymore.
+     * @param s
+     * @param regex
+     * @return
+     */
+    @Deprecated
     private static float[] fetchIndicies(String s, String regex) {
     	float[] result = {1,1,1};
     	String[] fString = s.split(regex);
@@ -503,14 +504,4 @@ public class OBJLoader {
     	} catch (Exception e) {}
     	return result;
     }
-    
-   /* public static StringBuilder formatOBJ(String f) throws IOException {
-    	StringBuilder s = new StringBuilder();
-    	BufferedReader reader = FileManager.getReader(f);
-    	String line = "";
-    	while ((line = reader.readLine()) != null) {
-    		String[] splitLine
-    	}
-    	return null;
-    }*/
 }

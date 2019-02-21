@@ -69,8 +69,8 @@ public class Mouse extends MouseController{
 	 * set delta x to null.
 	 */
 	private void setNullDelta() {
-		this.lastX = this.getPosition().x;
-		this.lastY = this.getPosition().y;
+		this.lastX = this.getPosition().getX();
+		this.lastY = this.getPosition().getY();
 	}
 	
 	/**
@@ -79,8 +79,8 @@ public class Mouse extends MouseController{
 	 * @return The mouse movement relative to the window width.
 	 */
 	public float getDX() {
-		float DX = (float)(this.getPosition().x-this.lastX)/this.window.getWidth();
-		this.lastX = this.getPosition().x;
+		float DX = (float)(this.getPosition().getX()-this.lastX)/this.window.getWidth();
+		this.lastX = this.getPosition().getX();
 		return DX*this.movementRatio;
 	}
 	
@@ -90,8 +90,8 @@ public class Mouse extends MouseController{
 	 * @return The mouse movement relative to the window height.
 	 */
 	public float getDY() {
-		float DY = (float)(this.getPosition().y-this.lastY)/this.window.getHeight();
-		this.lastY = this.getPosition().y;
+		float DY = (float)(this.getPosition().getY()-this.lastY)/this.window.getHeight();
+		this.lastY = this.getPosition().getY();
 		return DY*this.movementRatio;
 	}
 	
@@ -100,7 +100,7 @@ public class Mouse extends MouseController{
 	 * @return The position in screen coordinates where 0 is in the center of the screen.
 	 */
 	public Vector2f getScreenPosition () {
-		return new Vector2f(this.getPosition().x-window.getWidth()/2, window.getHeight()/2-this.getPosition().y);
+		return new Vector2f(this.getPosition().getX()-window.getWidth()/2, window.getHeight()/2-this.getPosition().getY());
 	}
 	
 	public void toggleHide() {

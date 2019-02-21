@@ -39,23 +39,23 @@ public class MouseController extends Observer<MouseListener>{
 	}
 	
 	public float getX() {
-		return this.position.x;
+		return this.position.getX();
 	}
 	
 	public float getY() {
-		return this.position.y;
+		return this.position.getY();
 	}
 	
 	public void setX(float x) {
-		this.position.x = x;
+		this.position.setX(x);
 	}
 	
 	public void setY(float y) {
-		this.position.y = y;
+		this.position.setY(y);
 	}
 	
 	public Vector2f getScreenPosition(Window window) {
-		return new Vector2f(this.position.x-window.getWidth()/2, window.getHeight()/2-this.position.y);
+		return new Vector2f(this.position.getX()-window.getWidth()/2, window.getHeight()/2-this.position.getY());
 	}
 	
 	protected void notifyMouseMovement(Vector2f v) {

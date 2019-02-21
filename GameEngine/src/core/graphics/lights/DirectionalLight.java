@@ -4,20 +4,20 @@ import core.graphics.renderUtils.uniforms.*;
 import core.utils.math.Vector;
 import core.utils.math.Vector4f;
 
-public class DirectionalLight extends Light{
-	private Vector specular;
-	private Vector diffuse;
-	private Vector ambient;
-	private Vector position;
+public class DirectionalLight extends Light<Vector4f>{
+	private Vector4f specular;
+	private Vector4f diffuse;
+	private Vector4f ambient;
+	private Vector4f position;
 	/**
 	 * 
 	 * @param position - The position.
 	 * @param diffuse - Diffuse lighting.
 	 * @param ambient - Ambient lighting.
 	 */
-	public DirectionalLight (Vector position, Vector diffuse, Vector ambient, Vector specular, String uniformFile) {
-		super(uniformFile, position.normalize().toVec4f(), diffuse.toVec4f(), ambient.toVec4f(), specular.toVec4f());
-		this.position = position.normalize();
+	public DirectionalLight (Vector4f position, Vector4f diffuse, Vector4f ambient, Vector4f specular, String uniformFile) {
+		super(uniformFile, (Vector4f)position.getNormalized(), diffuse.toVec4f(), ambient.toVec4f(), specular.toVec4f());
+		this.position = (Vector4f)position.getNormalized();
 		this.ambient = ambient;
 		this.diffuse = diffuse;
 		this.specular = specular;
@@ -26,7 +26,7 @@ public class DirectionalLight extends Light{
 
 	@Override
 	public void updatePosition() {
-		float[] data = super.to1dArray(new float[][] {this.position.asFloat(), this.ambient.asFloat(), this.diffuse.asFloat(), this.specular.asFloat()});
+		float[] data = super.to1dArray(new float[][] {this.position.asFloats(), this.ambient.asFloats(), this.diffuse.asFloats(), this.specular.asFloats()});
 		super.updateUniform(data);
 	}
 	
@@ -37,12 +37,9 @@ public class DirectionalLight extends Light{
 	
 	@Override
 	public void setPosition(float x, float y, float z, float w) {
-		this.position.x = x;
-		this.position.y = y;
-		this.position.z = z;
-		this.position.w = w;
+		this.position.set(x, y, z, w);
 		this.position.normalize();
-		float[] data = super.to1dArray(new float[][] {this.position.asFloat(), this.ambient.asFloat(), this.diffuse.asFloat(), this.specular.asFloat()});
+		float[] data = super.to1dArray(new float[][] {this.position.asFloats(), this.ambient.asFloats(), this.diffuse.asFloats(), this.specular.asFloats()});
 		super.updateUniform(data);
 	}
 	
@@ -52,7 +49,7 @@ public class DirectionalLight extends Light{
 	}
 	
 	@Override
-	public Vector getPosition() {
+	public Vector4f getPosition() {
 		// TODO Auto-generated method stub
 		return this.position;
 	}
