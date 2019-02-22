@@ -6,12 +6,12 @@ import java.nio.FloatBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
 
+import core.graphics.misc.Texture;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.uniforms.UniformSource;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
-import core.utils.other.Texture;
 
 import static org.lwjgl.opengl.GL15.*;
 

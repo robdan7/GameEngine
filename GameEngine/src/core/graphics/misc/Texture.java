@@ -1,4 +1,4 @@
-package core.utils.other;
+package core.graphics.misc;
 
 import static org.lwjgl.opengl.GL11.*;
 

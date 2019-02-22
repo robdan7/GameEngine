@@ -2,10 +2,10 @@ package core.graphics.renderUtils;
 
 import core.graphics.lights.DirectionalLight;
 import core.graphics.lights.Light;
+import core.graphics.misc.Texture;
 import core.graphics.renderUtils.buffers.Drawbuffer;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
-import core.utils.other.Texture;
 
 public class ShadowMap {
 	

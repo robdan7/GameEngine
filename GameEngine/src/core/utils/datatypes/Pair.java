@@ -1,4 +1,4 @@
-package core.utils.other;
+package core.utils.datatypes;
 
 public class Pair<A, B> {
 	A a;

@@ -4,8 +4,8 @@ import java.nio.FloatBuffer;
 
 import core.graphics.models.OBJLoader;
 import core.graphics.renderUtils.Shaders;
+import core.utils.datatypes.Pair;
 import core.utils.other.BufferTools;
-import core.utils.other.Pair;
 
 import static org.lwjgl.opengl.GL30.*;
 

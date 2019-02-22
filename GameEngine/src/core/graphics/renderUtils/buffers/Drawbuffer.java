@@ -7,8 +7,8 @@ import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL32;
 
+import core.graphics.misc.Texture;
 import core.graphics.renderUtils.Shaders;
-import core.utils.other.Texture;
 
 public class Drawbuffer {
 
