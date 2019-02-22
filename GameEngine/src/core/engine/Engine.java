@@ -3,6 +3,7 @@ package core.engine;
 import static org.lwjgl.glfw.GLFW.*;
 
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWCursorPosCallback;
 
 import core.graphics.lights.DirectionalLight;
 import core.graphics.misc.Color;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 import core.graphics.ui.old.MenuSystem;
 import core.graphics.ui.old.UIPanel;
 
-
+import org.lwjgl.glfw.GLFWCursorPosCallback;
 public class Engine {
 	static Window window;
 	private Keyboard keyboard;
@@ -155,6 +156,7 @@ public class Engine {
 		
 		this.player.getModel().bindTransformMatrix(translateMatrix);
 		m.bindTransformMatrix(translateMatrix);
+		
 		//this.setupUI();
 		this.renderloop();
 		m.discard();
@@ -199,9 +201,6 @@ public class Engine {
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
 			player.resetMovement();
 			keyboard.getInput();
-			if (!mouse.isVisible()) {
-				player.rotateCamera(-mouse.getDX(),-mouse.getDY());
-			}
 			player.updateMovement();
 			//player.getCamera().updateUniform();
 			

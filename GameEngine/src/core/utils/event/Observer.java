@@ -1,4 +1,4 @@
-package core.input.listeners;
+package core.utils.event;
 
 import java.util.ArrayList;
 
@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * @param <O>
  * @param <L>
  */
-class Observer<O extends Observer<O,L>, L extends Listener<L,O>> {
+public class Observer<T, O extends Observer<T,O,L>, L extends Listener<T,L,O>> {
 	ArrayList<L> listeners;
 	int i;
 	
@@ -19,7 +19,7 @@ class Observer<O extends Observer<O,L>, L extends Listener<L,O>> {
 		this.listeners = new ArrayList<L>();
 	}
 	
-	public void notifyListeners(Object arg) {
+	public void notifyListeners(T arg) {
 		for (L listener : this.listeners) {
 			listener.update(this, arg);
 		}

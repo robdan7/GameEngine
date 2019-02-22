@@ -4,8 +4,8 @@ package core.graphics.models;
 import core.graphics.renderUtils.Camera;
 import core.graphics.renderUtils.Shaders;
 import core.input.Mouse;
-import core.input.listeners.MouseObserver;
-import core.input.listeners.MouseListener;
+import core.input.MouseListener;
+import core.input.MouseObserver;
 import core.utils.math.Line;
 import core.utils.math.Plane;
 import core.utils.math.Vector2f;
@@ -284,38 +284,33 @@ public class Pawn extends MouseListener {
 	public ModelBlueprint getModel() {
 		return this.model;
 	}
-	
-	@Override
-	public void leftClick(MouseObserver obs) {
-		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public void leftClickRelease(MouseObserver obs) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void rightClick(MouseObserver obs) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void rightClickRelease(MouseObserver obs) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
+	@Deprecated
 	public void mouseMovement(MouseObserver obs, Vector2f v) {
 		Vector3f pointer = ((Mouse)obs).getNormalizedPosition().toVec3f();
 		pointer.setZ(-1);
 		l.setDirection(pointer);
 		Vector3f v2 = this.cam.getForward().asMultiplied(this.cam.getCamOffset());
 		l.setStart(this.position.asSubtracted(v2));
+	}
+
+	@Override
+	public void buttonclick(int button) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void buttonRelease(int button) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deltaMovement(MouseObserver obs, Vector2f v) {
+		if (!obs.isVisible()) {
+			this.rotateCamera(-v.getX(), -v.getY());
+		}
 	}
 }
 
