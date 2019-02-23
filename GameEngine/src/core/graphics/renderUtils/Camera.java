@@ -61,7 +61,7 @@ public class Camera extends UniformSource {
 		lookAtMatrix = new Matrix4f();
 		perspectiveMatrix = new Matrix4f();
 		// TODO fix this
-		forward = upVector.crossProduct(right).getNormalized().toVec3f();
+		forward = upVector.crossProduct(right).asNormalized().toVec3f();
 		
 		
 		this.uniformBuffer = BufferUtils.createFloatBuffer(this.updateType.getSize());
@@ -125,7 +125,7 @@ public class Camera extends UniformSource {
 	 * @param v - The vector v to look at.
 	 */
 	public void lookAt(Vector3f v) {
-		this.forward = v.getNormalized().toVec3f();
+		this.forward = v.asNormalized().toVec3f();
 		this.lookAt();
 	}	
 	

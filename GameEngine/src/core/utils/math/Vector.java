@@ -57,7 +57,8 @@ public abstract  class Vector<T extends Vector<T>> {
 		}
 	}
 	
-	public T getNormalized() {
+	
+	public T asNormalized() {
 		T v2 = this.copy();
 		v2.normalize();
 		return v2;

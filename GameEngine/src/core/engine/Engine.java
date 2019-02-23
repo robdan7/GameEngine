@@ -23,6 +23,7 @@ import core.utils.math.Matrix4f;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
+import core.utils.other.Timer;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -193,14 +194,13 @@ public class Engine {
 		this.staticShadowMap.getTexture().bindAsUniforms(shader, deffered);
 		this.dynamicShadowMap.getTexture().bindAsUniforms(this.shader,deffered);
 		//window.renderStaticShadowMap(this.staticShadowMap);
-		
 		// Render static shadows.
 		window.renderShadowMap(this.staticShadowMap, this.staticRenderStack);
 		
 		
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
-			player.resetMovement();
-			keyboard.getInput();
+			
+			//keyboard.getInput();
 			player.updateMovement();
 			//player.getCamera().updateUniform();
 			
@@ -216,33 +216,47 @@ public class Engine {
 			window.renderTextured(this.dynamicShadowMap, this.dynamicRenderStack, this.staticRenderStack);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			window.prepareToRender();
-			glClearColor(0, 0, 1, 1);
+
 			screenQuad.drawQuad();
 			//menu.render(this.transformMatrix);
 			window.endRender();
 
 			// Poll for window events. The key callback above will only be
 			// invoked during this call.
+			//player.resetMovement();
 			glfwPollEvents();
 		}
 	}
 	
 	public void addPlayer() {
 		player = new Pawn(new Vector3f(0, 1, 0), new Vector3f(-1,0,0), 45, (float)window.getWidth()/window.getHeight(), 0.1f, 200f);
-		keyboard.addKeyFunction(GLFW_KEY_W,Key.actionType.HOLD, () -> player.setZvelocity(1)); 
-		keyboard.addKeyFunction(GLFW_KEY_S,Key.actionType.HOLD, () -> player.setZvelocity(-1));
-		keyboard.addKeyFunction(GLFW_KEY_A,Key.actionType.HOLD, () -> player.setXvelocity(1));
-		keyboard.addKeyFunction(GLFW_KEY_D,Key.actionType.HOLD, () -> player.setXvelocity(-1));
-		keyboard.addKeyFunction(GLFW_KEY_SPACE,Key.actionType.HOLD, () -> player.setYvelocity(1));
-		keyboard.addKeyFunction(GLFW.GLFW_KEY_LEFT_SHIFT,Key.actionType.HOLD, () -> player.setYvelocity(-1));
-		keyboard.addKeyFunction(GLFW_KEY_ESCAPE, Key.actionType.TYPE, () -> mouse.toggleGrab());
+		
+		keyboard.addKeyPressFunction(GLFW_KEY_W,Key.actionType.HOLD, () -> player.addZvelocity(1)); 
+		keyboard.addKeyReleaseFunction(GLFW_KEY_W, () -> player.addZvelocity(-1));
+		
+		keyboard.addKeyPressFunction(GLFW_KEY_S,Key.actionType.HOLD, () -> player.addZvelocity(-1));
+		keyboard.addKeyReleaseFunction(GLFW_KEY_S, () -> player.addZvelocity(1));
+		
+		keyboard.addKeyPressFunction(GLFW_KEY_A,Key.actionType.HOLD, () -> player.addXvelocity(1));
+		keyboard.addKeyReleaseFunction(GLFW_KEY_A, () -> player.addXvelocity(-1));
+		
+		keyboard.addKeyPressFunction(GLFW_KEY_D,Key.actionType.HOLD, () -> player.addXvelocity(-1));
+		keyboard.addKeyReleaseFunction(GLFW_KEY_D, () -> player.addXvelocity(1));
+		
+		keyboard.addKeyPressFunction(GLFW_KEY_SPACE,Key.actionType.HOLD, () -> player.addYvelocity(1));
+		keyboard.addKeyReleaseFunction(GLFW_KEY_SPACE, () -> player.addYvelocity(-1));
+		
+		keyboard.addKeyPressFunction(GLFW_KEY_LEFT_SHIFT,Key.actionType.HOLD, () -> player.addYvelocity(-1));
+		keyboard.addKeyReleaseFunction(GLFW_KEY_LEFT_SHIFT, () -> player.addYvelocity(1));
+		
+		keyboard.addKeyPressFunction(GLFW_KEY_ESCAPE, Key.actionType.TYPE, () -> mouse.toggleGrab());
+		
 		try {
 			player.addModel(ModelCompiler.loadModelBlueprint("/Assets/Models/temp.ini"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		player.thirdPersonPreset(0.3f, new Vector3f(0,2,0), 10,5);
+		player.thirdPersonPreset(0.35f, new Vector3f(0,2,0), 10,5);
 		player.bindTexture(this.shader);
 	}
 

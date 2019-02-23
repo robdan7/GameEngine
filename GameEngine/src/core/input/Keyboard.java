@@ -19,11 +19,23 @@ public class Keyboard extends GLFWKeyCallback{
 	public void invoke(long window, int key, int scancode, int action, int mods) {
 		// TODO Auto-generated method stub
 		if (key >= 0 && keys[key] != null) {	// Key is negative when performing certain shortcuts.
-			if(keys[key].getType() == Key.actionType.TYPE && action == 2) {
-				keys[key].setState(0);
-			} else {
-				keys[key].setState(action);
+			
+			switch(action) {
+			case 0:
+				keys[key].onRelease();
+				break;
+			case 1:
+				keys[key].onPress();
+				break;
+			case 2:
+				if (keys[key].getState() != 2) {
+					keys[key].onHold();
+				}
+				break;
+			default:
+					break;
 			}
+			keys[key].setState(action);
 		}
 	}	
 	
@@ -44,17 +56,33 @@ public class Keyboard extends GLFWKeyCallback{
 	 * @param type - Press once or hold down key. True = press. False = hold.
 	 * @param action - A runnable method.
 	 */
+	@Deprecated
 	public void addKeyFunction(int key, Key.actionType type, Runnable action) {
 		keys[key] = new Key(type, action);
+	}
+	
+	public void addKeyReleaseFunction(int key, Runnable action) {
+		if (keys[key] == null) {
+			keys[key] = new Key(null);
+		}
+		keys[key].setReleaseAction(action);
+	}
+	
+	public void addKeyPressFunction(int key, Key.actionType type, Runnable action) {
+		if (keys[key] == null) {
+			keys[key] = new Key(type);
+		}
+		keys[key].setPressAction(action);
 	}
 	
 	
 	/**
 	 * Search for any pressed keys.
 	 */
+	@Deprecated
 	public void getInput() {
 		for (int i = 0; i < keys.length; i++) {
-			if (keys[i] != null && keys[i].getPress()) {
+			if (keys[i] != null && keys[i].isPressed()) {
 				keys[i].run();
 				switch (keys[i].getType()) {
 				case TYPE:

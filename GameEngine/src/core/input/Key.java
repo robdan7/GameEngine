@@ -3,7 +3,7 @@ package core.input;
 public class Key{
 	private actionType actiontype;
 	public short state;
-	private Runnable action;
+	private Runnable action, pressAction, releaseAction, holdAction;
 	
 	
 	/**
@@ -13,14 +13,21 @@ public class Key{
 	 */
 	public Key(actionType actiontype, Runnable action) {
 		this.actiontype = actiontype;
-		this.action = action;
+		//this.action = action;
+	}
+	
+	public Key(actionType actionType) {
+		this.actiontype = actionType;
+	}
+	
+	public Key() {		
 	}
 	
 	/**
 	 * 
 	 * @return Return true if the key is either pressed or held down.
 	 */
-	public boolean getPress() {
+	public boolean isPressed() {
 		return (this.state != 0);
 	}
 	
@@ -46,17 +53,49 @@ public class Key{
 	 * 
 	 * @param state - The state to set.
 	 */
-	public void setState(int state) {
+	void setState(int state) {
 		this.state = (short)state;
+	}
+	
+	void setPressAction(Runnable action) {
+		this.pressAction = action;
+	}
+	
+	void setHoldAction(Runnable action) {
+		
+	}
+	
+	void setReleaseAction(Runnable action ) {
+		this.releaseAction = action;
 	}
 	
 	/**
 	 *  Run action associated with the key.
 	 */
+	@Deprecated
 	public void run() {
 		action.run();
 	}
 	
+	public void onPress() {
+		if (this.pressAction != null) {
+			this.pressAction.run();
+		}
+	}
+	
+	public void onRelease() {
+		if (this.releaseAction != null) {
+			this.releaseAction.run();
+		}
+	}
+	
+	public void onHold() {
+		if (this.holdAction != null) {
+			this.holdAction.run();
+		}
+	}
+	
+	@Deprecated
 	public static enum actionType {
 		TYPE, HOLD
 		

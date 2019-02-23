@@ -15,6 +15,7 @@ import core.utils.math.Vector2f;
 
 /**
  * This class represents the actual mouse.
+ * N.B. No mouse input will be received unless glfwPollEvents is called.
  * @author Robin
  *
  */

@@ -7,6 +7,7 @@ import core.input.Mouse;
 import core.input.MouseListener;
 import core.input.MouseObserver;
 import core.utils.math.Line;
+import core.utils.math.Matrix4f;
 import core.utils.math.Plane;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
@@ -21,6 +22,7 @@ public class Pawn extends MouseListener {
 	private Vector3f[] moveDirection;
 	private Vector3f position;
 	private float movementSmoothing = 0;
+	private Matrix4f rotationMatrix;
 	
 	private float moveVelocity;
 	
@@ -49,14 +51,16 @@ public class Pawn extends MouseListener {
 		cam = new Camera(upVector, right, fovy, aspect, zNear, zFar, Camera.updateType.BOTH);
 		this.cam.bindFocusPos(this.position);
 		moveDirection = new Vector3f[3];
-		moveDirection[0] = new Vector3f(); // The current movement direction.
-		moveDirection[1] = new Vector3f(); // The new movement direction.
+		moveDirection[0] = new Vector3f(); // The current movement direction after smoothing.
+		moveDirection[1] = new Vector3f(); // New movement direction before smoothing.
 		moveDirection[2] = new Vector3f(); // Movement direction from actuators.
 		moveVelocity = 1;
 		this.followmode = camFollow.FPV;
 		clock = new Timer();
+		clock.start();
 		this.l = new Line(new Vector3f(0,0,0), new Vector3f(0,0,1));
 		p = new Plane(new Vector3f(0,2,0), new Vector3f(0,1,0));
+		rotationMatrix = new Matrix4f();
 	}
 	
 	/**
@@ -120,7 +124,7 @@ public class Pawn extends MouseListener {
 	 * 
 	 * @param f - Velocity X in view space coordinates.
 	 */
-	public void setXvelocity(float f) {
+	public void addXvelocity(float f) {
 		this.moveDirection[2].setX(this.moveDirection[2].getX()+f);
 	}
 	
@@ -128,7 +132,7 @@ public class Pawn extends MouseListener {
 	 * 
 	 * @param f - Velocity Y in view space coordinates.
 	 */
-	public void setYvelocity(float f) {
+	public void addYvelocity(float f) {
 		this.moveDirection[2].setY(this.moveDirection[2].getY()+f);
 	}
 	
@@ -136,7 +140,7 @@ public class Pawn extends MouseListener {
 	 * 
 	 * @param f - Velocity Z in view space coordinates.
 	 */
-	public void setZvelocity(float f) {
+	public void addZvelocity(float f) {
 		this.moveDirection[2].setZ(this.moveDirection[2].getZ()+f);
 	}
 	
@@ -149,20 +153,13 @@ public class Pawn extends MouseListener {
 	 *
 	 */
 	public void updateMovement() {
-		float tempX = this.moveDirection[2].getX();
-		float tempZ = this.moveDirection[2].getZ();
-		this.moveDirection[2].setX((float)Math.sin(this.cam.gethAngle())*tempZ + (float)Math.cos(this.cam.gethAngle())*tempX); 	// Rotate x.
-		this.moveDirection[2].setZ((float)Math.sin(this.cam.gethAngle())*(-tempX) + (float)Math.cos(this.cam.gethAngle())*tempZ);	// Rotate z.
-		this.moveDirection[2].normalize();
 		if (this.movementSmoothing != 0) {
 			this.moveSmooth();
 		} else {
 			this.move();
 		}
-		this.model.translate(this.position);
-		//if (!this.position.equals(oldPos)) {
+		this.model.translate(this.getPosition());
 		this.updateCamera();
-		//}
 	}
 	
 	/**
@@ -170,18 +167,18 @@ public class Pawn extends MouseListener {
 	 * A "smoothing" variable can be set to determine the time for a change in direction. 
 	 */
 	private void moveSmooth() {
-		float delta = clock.getDeltaT();
-		this.time += delta;
-		if (this.time > this.movementSmoothing) this.time = this.movementSmoothing;
-			
 		if (!this.moveDirection[2].equals(this.moveDirection[1])) {
-			this.moveDirection[0] = this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing).toVec3f();
-			this.moveDirection[1] = this.moveDirection[2].toVec3f();
-			this.time = 0;
-		}
-		Vector3f v = this.smoothMovement(this.moveDirection[0], this.moveDirection[1], this.time/this.movementSmoothing);
+			this.clock.reset();
+			this.moveDirection[1].set(this.moveDirection[2]);
+		} 
 		
-		this.position.add(v.asMultiplied(delta*this.moveVelocity));
+		Vector3f v = this.moveDirection[0].interpolate(this.moveDirection[1].asNormalized(), (float)(this.clock.getTime()/this.movementSmoothing));
+		this.moveDirection[0].set(v);
+
+		this.rotationMatrix.rotate(this.cam.gethAngle(), 0, 1, 0);
+		v = rotationMatrix.multiply(v.toVec4f()).toVec3f();
+
+		this.position.add(v.asMultiplied((float)clock.getDelta()*this.moveVelocity));
 	}
 	
 	private void move() {
@@ -222,6 +219,7 @@ public class Pawn extends MouseListener {
 	 */
 	public void setSmoothAmount(float v) {
 		this.movementSmoothing = v;
+		this.clock.setTargetTime(v);
 	}
 	
 	/**
