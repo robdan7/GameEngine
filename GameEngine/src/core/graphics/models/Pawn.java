@@ -22,11 +22,12 @@ public class Pawn extends MouseListener {
 	private Vector3f[] moveDirection;
 	private Vector3f position;
 	private float movementSmoothing = 0;
+	
+	//matrix for rotating the player movement velocity
 	private Matrix4f rotationMatrix;
 	
 	private float moveVelocity;
-	
-	private float time;
+
 	private Timer clock;
 	
 	private Camera cam;
@@ -167,13 +168,14 @@ public class Pawn extends MouseListener {
 	 * A "smoothing" variable can be set to determine the time for a change in direction. 
 	 */
 	private void moveSmooth() {
-		if (!this.moveDirection[2].equals(this.moveDirection[1])) {
-			this.clock.reset();
-			this.moveDirection[1].set(this.moveDirection[2]);
-		} 
-		
 		Vector3f v = this.moveDirection[0].interpolate(this.moveDirection[1].asNormalized(), (float)(this.clock.getTime()/this.movementSmoothing));
-		this.moveDirection[0].set(v);
+		
+		// The direction has changed, reset.
+		if (!this.moveDirection[2].equals(this.moveDirection[1])) {
+			this.moveDirection[0].set(v);
+			this.moveDirection[1].set(this.moveDirection[2]);
+			this.clock.reset();
+		} 
 
 		this.rotationMatrix.rotate(this.cam.gethAngle(), 0, 1, 0);
 		v = rotationMatrix.multiply(v.toVec4f()).toVec3f();
@@ -223,22 +225,17 @@ public class Pawn extends MouseListener {
 	}
 	
 	/**
-	 * Use this for smooth movement.
-	 * It interpolates the current movement vector with the previous movement direction.
-	 * @param t - Time that should pass before the movement direction has changed completely. Set to 0 for no smoothing and 1 for ice skating.
-	 */
-	public Vector3f smoothMovement(Vector3f v, Vector3f v2, float t) {
-		return v.interpolate(v2, t);
-	}
-	
-	/**
-	 * Set the position.
+	 * Get a copy of the position.
 	 * @return Position in world coordinates.
 	 */
 	public Vector3f getPosition() {
-		return this.position;
+		return this.position.copy();
 	}
 	
+	/**
+	 * Set the player position.
+	 * @param pos
+	 */
 	public void setPosition(Vector3f pos) {
 		this.position.set(pos);
 	}
@@ -254,42 +251,9 @@ public class Pawn extends MouseListener {
 	public enum camFollow {
 		STATIC, FPV, THIRDVIEW
 	}
-/*
-	@Override
-	public void setShader(Shaders shader) {
-		
-		this.model.setShader(shader);
-	}
 
-	@Override
-	public int getShader() {
-		
-		return this.model.getShader();
-	}
-
-	@Override
-	public void setDepthShader(Shaders shader) {
-		
-		this.model.setDepthShader(shader);
-	}
-
-	@Override
-	public int getDepthShader() {
-		
-		return this.model.getDepthShader();
-	}
-*/
 	public ModelBlueprint getModel() {
 		return this.model;
-	}
-
-	@Deprecated
-	public void mouseMovement(MouseObserver obs, Vector2f v) {
-		Vector3f pointer = ((Mouse)obs).getNormalizedPosition().toVec3f();
-		pointer.setZ(-1);
-		l.setDirection(pointer);
-		Vector3f v2 = this.cam.getForward().asMultiplied(this.cam.getCamOffset());
-		l.setStart(this.position.asSubtracted(v2));
 	}
 
 	@Override

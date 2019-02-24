@@ -18,9 +18,22 @@ public abstract class MouseListener implements Listener<Object, MouseListener, M
 		//this.mouseMovement(((MouseObserver)b), ((MouseObserver)b).getPosition());
 	}
 	
+	/**
+	 * A button has been pressed on the mouse.
+	 * @param button
+	 */
 	public abstract void buttonclick(int button);
 
+	/**
+	 * A button has been released on the mouse.
+	 * @param button
+	 */
 	public abstract void buttonRelease(int button);
 	
+	/**
+	 * This method is called when the mouse has moved.
+	 * @param obs - The mouse observer.
+	 * @param v - The vector with delta x and y.
+	 */
 	public abstract void deltaMovement(MouseObserver obs, Vector2f v);
 }

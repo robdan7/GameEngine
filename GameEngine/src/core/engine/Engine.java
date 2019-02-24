@@ -2,8 +2,6 @@ package core.engine;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
 
 import core.graphics.lights.DirectionalLight;
 import core.graphics.misc.Color;
@@ -23,7 +21,6 @@ import core.utils.math.Matrix4f;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
-import core.utils.other.Timer;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -35,7 +32,7 @@ import java.util.ArrayList;
 import core.graphics.ui.old.MenuSystem;
 import core.graphics.ui.old.UIPanel;
 
-import org.lwjgl.glfw.GLFWCursorPosCallback;
+
 public class Engine {
 	static Window window;
 	private Keyboard keyboard;
@@ -197,14 +194,11 @@ public class Engine {
 		// Render static shadows.
 		window.renderShadowMap(this.staticShadowMap, this.staticRenderStack);
 		
-		
+
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
-			
 			//keyboard.getInput();
 			player.updateMovement();
 			//player.getCamera().updateUniform();
-			
-			
 
 			//window.renderDynamicShadowMap(this.dynamicShadowMap);
 			window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack);

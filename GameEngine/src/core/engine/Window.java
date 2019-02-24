@@ -4,6 +4,8 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
+import org.lwjgl.glfw.GLFWWindowSizeCallback;
+
 import core.graphics.misc.Color;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.ShadowMap;
@@ -120,6 +122,7 @@ public class Window {
 		// creates the GLCapabilities instance and makes the OpenGL
 		// bindings available for use.
 		GL.createCapabilities();
+		
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL);
@@ -127,6 +130,18 @@ public class Window {
 		
 		glEnable (GL_BLEND);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
+		GLFWWindowSizeCallback callback = new GLFWWindowSizeCallback() {
+
+			@Override
+			public void invoke(long arg0, int arg1, int arg2) {
+				width = arg1;
+				height = arg2;
+			}
+			
+		};
+		
+		GLFW.glfwSetWindowSizeCallback(this.getWindow(), callback);
 	}
 	
 	public void prepareToRender() {
