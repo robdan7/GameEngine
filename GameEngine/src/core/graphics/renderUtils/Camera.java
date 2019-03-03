@@ -4,7 +4,7 @@ import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
 
-import core.graphics.renderUtils.uniforms.UniformSource;
+import core.graphics.renderUtils.uniforms.old.UniformSource;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
 
@@ -264,7 +264,7 @@ public class Camera extends UniformSource {
 	 *
 	 */
 	public static enum updateType {
-		CAMERA(Matrix4f.getSize()),VIEW(Matrix4f.getSize()),BOTH(Matrix4f.getSize()*2);
+		CAMERA(Matrix4f.SIZE),VIEW(Matrix4f.SIZE),BOTH(Matrix4f.SIZE*2);
 		private int size;
 		private updateType(int size) {
 			this.size = size;

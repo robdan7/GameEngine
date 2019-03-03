@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL20;
  * 
  */
 public class Matrix4f{
+	public final static int SIZE = 16;
 	private float left, right, top, bottom, zFar, zNear, fovy;
 	
 	protected float m00;
@@ -437,7 +438,7 @@ public class Matrix4f{
 	
 	public float[] toFloatArray() {
 		if (this.dest == null) {
-			this.dest = new float[Matrix4f.getSize()];
+			this.dest = new float[SIZE];
 		}
 		dest[0] = this.m00;
 		dest[1] = this.m01;
@@ -466,14 +467,6 @@ public class Matrix4f{
 		this.put();
 		UniformTools.updateUniformBlock(this.UBO, this.shaderBuffer, this.uniformOffset);
 	}*/
-	
-	/**
-	 * Return the number of variables in a 4x4 matrix.
-	 * @return
-	 */
-	public static int getSize() {
-		return 16;
-	}
 	
 	@Override
 	public String toString() {

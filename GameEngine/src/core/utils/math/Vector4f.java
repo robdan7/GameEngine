@@ -6,6 +6,7 @@ package core.utils.math;
  *
  */
 public class Vector4f extends Vector<Vector4f> {
+	public static final int SIZE = 4;
 	public Vector4f() {
 		super();
 	}

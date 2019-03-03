@@ -5,13 +5,18 @@ import static org.lwjgl.opengl.GL15.*;
 
 import java.nio.FloatBuffer;
 
-import core.graphics.renderUtils.uniforms.UniformObject;
-import core.graphics.renderUtils.uniforms.UniformSource;
+import core.graphics.renderUtils.uniforms.old.UniformObject;
+import core.graphics.renderUtils.uniforms.old.UniformSource;
 import core.utils.math.Vector;
 import core.utils.math.Vector4f;
 import core.utils.other.BufferTools;
 
-
+/**
+ * This class represents a general light object, which is essentially a uniform block 
+ * with defined properties inside.
+ * @author Robin
+ *
+ */
 public abstract class Light extends UniformSource {
 	private UniformObject lightUniform;
 
@@ -24,7 +29,8 @@ public abstract class Light extends UniformSource {
 	 * @param diffuse - Diffuse lighting.
 	 * @param ambient - Ambient lighting.
 	 */
-	public Light (Vector4f vector, Vector4f diffuse, Vector4f ambient, Vector4f specular, String uniformFile) {
+	@Deprecated
+	protected Light (Vector4f vector, Vector4f diffuse, Vector4f ambient, Vector4f specular, String uniformFile) {
 		super(16);
 
 		lightUniform = new UniformObject(uniformFile, GL_STATIC_DRAW);
@@ -37,7 +43,7 @@ public abstract class Light extends UniformSource {
 	 * @param uniformFile
 	 * @param lightProperties
 	 */
-	public Light(String uniformFile, Vector4f... lightProperties) {
+	protected Light(String uniformFile, Vector4f... lightProperties) {
 		super(lightProperties.length*Float.BYTES);
 		this.lightProperties = lightProperties;
 		this.lightUniform = new UniformObject(uniformFile, GL_STATIC_DRAW);

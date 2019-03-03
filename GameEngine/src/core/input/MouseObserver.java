@@ -1,6 +1,5 @@
 package core.input;
 
-import core.engine.Window;
 import core.utils.math.Vector2f;
 import core.utils.event.*;
 
@@ -23,7 +22,7 @@ public abstract class MouseObserver extends Observer<Object, MouseObserver, Mous
 	 * Return position delta since last mouse ping.
 	 * @return
 	 */
-	abstract Vector2f getDeltaP();
+	public abstract Vector2f getDeltaP();
 	
 	public abstract boolean isVisible();
 	

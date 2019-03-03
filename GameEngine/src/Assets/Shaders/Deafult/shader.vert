@@ -1,7 +1,7 @@
 #version 450 core
 
-#import uniform = Light;
-#import uniform = Matrices;
+#uniform Light;
+#uniform Matrices;
 
 uniform sampler2D modelTexture;
 

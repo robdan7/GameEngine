@@ -31,7 +31,6 @@ public class Mouse extends MouseObserver{
 	private boolean isHidden = false;
 	private boolean isGrabbed = false;
 	
-	private int leftClickState = 0;
 	private Vector2f position, deltaPosition;
 	
 	
@@ -218,7 +217,7 @@ public class Mouse extends MouseObserver{
 	}
 
 	@Override
-	Vector2f getDeltaP() {
+	public Vector2f getDeltaP() {
 		return this.deltaPosition;
 	}
 }

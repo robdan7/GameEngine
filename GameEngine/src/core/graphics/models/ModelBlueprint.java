@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL20;
 import core.graphics.misc.Texture;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
-import core.graphics.renderUtils.uniforms.UniformSource;
+import core.graphics.renderUtils.uniforms.old.UniformSource;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
 
@@ -37,7 +37,7 @@ public  class ModelBlueprint implements RenderObject{
 			e.printStackTrace();
 		}
 		this.transformMatrix = new Matrix4f();
-		this.transformBuffer = BufferUtils.createFloatBuffer(Matrix4f.getSize());
+		this.transformBuffer = BufferUtils.createFloatBuffer(Matrix4f.SIZE);
 		this.transformMatrix.put(this.transformBuffer); // Initiate the buffer with the identity matrix.
 		//this.transformBuffer.flip();
 	}
@@ -53,7 +53,7 @@ public  class ModelBlueprint implements RenderObject{
 			e.printStackTrace();
 		}
 		this.transformMatrix = new Matrix4f();
-		this.transformBuffer = BufferUtils.createFloatBuffer(Matrix4f.getSize());
+		this.transformBuffer = BufferUtils.createFloatBuffer(Matrix4f.SIZE);
 		this.transformMatrix.put(this.transformBuffer); // Initiate the buffer with the identity matrix.
 		//this.transformBuffer.flip();
 	}
@@ -139,7 +139,7 @@ public  class ModelBlueprint implements RenderObject{
 	 * @param matrixUniform
 	 */
 	public void bindTransformMatrix(UniformSource matrixUniform) {
-		if(matrixUniform.getSize() != Matrix4f.getSize()) {
+		if(matrixUniform.getSize() != Matrix4f.SIZE) {
 			throw new IllegalArgumentException("Unform does not contain a 4x4 matrix");
 		}
 		this.transformUniform = matrixUniform;

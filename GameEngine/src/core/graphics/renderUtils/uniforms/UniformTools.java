@@ -4,6 +4,7 @@ import java.nio.FloatBuffer;
 
 import core.graphics.models.OBJLoader;
 import core.graphics.renderUtils.Shaders;
+import core.graphics.renderUtils.uniforms.old.UniformObject;
 import core.utils.datatypes.Pair;
 import core.utils.other.BufferTools;
 
@@ -61,6 +62,7 @@ public class UniformTools {
 		return new Pair<FloatBuffer, Integer>(buf, UBO);
 	}
 	
+	@Deprecated
 	static void updateUniformBlock(int UBO, FloatBuffer bufferData, int offset) {
 		OBJLoader.updateVBO(UBO, offset, bufferData);
 	}

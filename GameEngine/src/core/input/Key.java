@@ -1,26 +1,11 @@
 package core.input;
 
 public class Key{
-	private actionType actiontype;
 	public short state;
-	private Runnable action, pressAction, releaseAction, holdAction;
+	private Runnable pressAction, releaseAction, holdAction;
 	
 	
-	/**
-	 * 
-	 * @param actiontype - True = only activate on on press.
-	 * @param action - Runnable 
-	 */
-	public Key(actionType actiontype, Runnable action) {
-		this.actiontype = actiontype;
-		//this.action = action;
-	}
-	
-	public Key(actionType actionType) {
-		this.actiontype = actionType;
-	}
-	
-	public Key() {		
+	public Key() {
 	}
 	
 	/**
@@ -42,15 +27,6 @@ public class Key{
 	
 	/**
 	 * 
-	 * @return The key type. true is equal to press only. false is press and/or hold.
-	 *
-	 */
-	public actionType getType() {
-		return this.actiontype;
-	}
-	
-	/**
-	 * 
 	 * @param state - The state to set.
 	 */
 	void setState(int state) {
@@ -68,15 +44,7 @@ public class Key{
 	void setReleaseAction(Runnable action ) {
 		this.releaseAction = action;
 	}
-	
-	/**
-	 *  Run action associated with the key.
-	 */
-	@Deprecated
-	public void run() {
-		action.run();
-	}
-	
+
 	public void onPress() {
 		if (this.pressAction != null) {
 			this.pressAction.run();

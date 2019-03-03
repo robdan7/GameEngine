@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import core.graphics.misc.Texture;
 import core.graphics.renderUtils.Shaders;
 import core.input.Mouse;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector2f;
-import core.utils.other.Texture;
 
 public class UIPanel {
 	ArrayList<UIElement> elements;

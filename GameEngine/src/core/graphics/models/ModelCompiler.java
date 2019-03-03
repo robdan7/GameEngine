@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 import core.graphics.renderUtils.Shaders;
+import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.utils.fileSystem.FileManager;
 
 public class ModelCompiler {
@@ -13,8 +14,9 @@ public class ModelCompiler {
 	 * @param f - The file containing info about the model to load.
 	 * @return a model
 	 * @throws IOException
+	 * @throws ShaderCompileException 
 	 */
-	public static ModelBlueprint loadModelBlueprint(String f) throws IOException {
+	public static ModelBlueprint loadModelBlueprint(String f) throws IOException, ShaderCompileException {
 		if (!f.contains(".ini")) {
 			throw new RuntimeException("Unsupported file excension.");
 		}

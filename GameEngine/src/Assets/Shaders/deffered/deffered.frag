@@ -1,7 +1,7 @@
 #version 450 core
 
-#import uniform = Matrices;
-#import uniform = Light;
+#uniform Light;
+#uniform Matrices;
 
 in vec2 texCoord;
 in vec2 frag;

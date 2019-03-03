@@ -1,4 +1,4 @@
-package core.graphics.renderUtils.uniforms;
+package core.graphics.renderUtils.uniforms.old;
 
 import java.nio.FloatBuffer;
 

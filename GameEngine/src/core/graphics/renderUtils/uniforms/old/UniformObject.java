@@ -1,4 +1,4 @@
-package core.graphics.renderUtils.uniforms;
+package core.graphics.renderUtils.uniforms.old;
 
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
@@ -16,6 +16,7 @@ import java.util.HashMap;
 import org.lwjgl.BufferUtils;
 
 import core.graphics.models.OBJLoader;
+import core.graphics.renderUtils.Shaders;
 import core.utils.fileSystem.FileManager;
 import static core.utils.other.StringUtils.*;
 
@@ -253,7 +254,7 @@ public class UniformObject {
 	 */
 	public static UniformObject requestUniform(String name) {
 		if (!UniformObject.uniformList.containsKey(name)) {
-			throw new IllegalArgumentException("uniform does not exist");
+			throw new IllegalArgumentException("uniform " + name + " does not exist");
 		}
 		return UniformObject.uniformList.get(name);
 	}

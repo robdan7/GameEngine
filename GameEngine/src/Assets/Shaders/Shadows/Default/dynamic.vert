@@ -1,7 +1,7 @@
 #version 450 core
 
 layout(location = 0) in vec4 vertex;
-#import uniform = Matrices;
+#uniform Matrices;
 
 void main() {
 	gl_Position  = dynamicOrthoMatrix* translateMatrix * vertex;

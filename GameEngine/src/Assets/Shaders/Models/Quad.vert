@@ -2,7 +2,8 @@
 
 layout(location = 0) in vec4 vertex;
 
-#define uniform = Matrices;
+
+#uniform Matrices;
 
 
 void main() {

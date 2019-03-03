@@ -3,9 +3,9 @@ package core.graphics.models;
 
 import core.graphics.renderUtils.Camera;
 import core.graphics.renderUtils.Shaders;
-import core.input.Mouse;
 import core.input.MouseListener;
 import core.input.MouseObserver;
+import core.utils.event.Observer;
 import core.utils.math.Line;
 import core.utils.math.Matrix4f;
 import core.utils.math.Plane;
@@ -18,7 +18,7 @@ import core.utils.other.Timer;
  * @author Robin
  *
  */
-public class Pawn extends MouseListener {
+public class Pawn implements MouseListener {
 	private Vector3f[] moveDirection;
 	private Vector3f position;
 	private float movementSmoothing = 0;
@@ -225,11 +225,10 @@ public class Pawn extends MouseListener {
 	}
 	
 	/**
-	 * Get a copy of the position.
 	 * @return Position in world coordinates.
 	 */
 	public Vector3f getPosition() {
-		return this.position.copy();
+		return this.position;
 	}
 	
 	/**
@@ -273,6 +272,11 @@ public class Pawn extends MouseListener {
 		if (!obs.isVisible()) {
 			this.rotateCamera(-v.getX(), -v.getY());
 		}
+	}
+
+	@Override
+	public void update(Observer<Object, MouseObserver, MouseListener> b, Object arg) {
+		this.deltaMovement(((MouseObserver)b), ((MouseObserver)b).getDeltaP());
 	}
 }
 

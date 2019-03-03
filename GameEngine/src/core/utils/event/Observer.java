@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @param <L>
  */
 public class Observer<T, O extends Observer<T,O,L>, L extends Listener<T,L,O>> {
-	ArrayList<L> listeners;
+	protected ArrayList<L> listeners;
 	int i;
 	
 	

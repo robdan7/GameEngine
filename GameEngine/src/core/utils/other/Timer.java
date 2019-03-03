@@ -2,19 +2,16 @@ package core.utils.other;
 //import static org.lwjgl.glfw.GLFW.glfwGetTime;
 import static org.lwjgl.glfw.GLFW.*;
 
-import org.lwjgl.glfw.GLFW;
-
 /**
  * Timer, or stop watch, that counts time in seconds. Nothing fancy here.
  * @author Robin
  *
  */
 public class Timer {
-	private double previousTime, startTime, currentTime, targetTime, frequency, lastDelta;
+	private double startTime, currentTime, targetTime, frequency, lastDelta;
 	private boolean running = false;
 	
 	public Timer() {
-		previousTime = 0;
 		
 		// Store a local frequency.
 		this.frequency = glfwGetTimerFrequency();
@@ -38,7 +35,6 @@ public class Timer {
 	 * Reset the timer.
 	 */
 	public void reset() {
-		previousTime = glfwGetTime();
 		this.startTime = glfwGetTimerValue();
 	}
 	

@@ -11,12 +11,18 @@ import core.graphics.models.Pawn;
 import core.graphics.renderUtils.Quad;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
+import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.graphics.renderUtils.ShadowMap;
-import core.graphics.renderUtils.uniforms.UniformObject;
-import core.graphics.renderUtils.uniforms.UniformSource;
+import core.graphics.renderUtils.UniformBufferObject;
+import core.graphics.renderUtils.UniformBufferSource;
+import core.graphics.renderUtils.uniforms.old.UniformObject;
+import core.graphics.renderUtils.uniforms.old.UniformSource;
 import core.input.Key;
 import core.input.Keyboard;
 import core.input.Mouse;
+import core.input.MouseListener;
+import core.input.MouseObserver;
+import core.utils.event.Observer;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
@@ -29,18 +35,21 @@ import static org.lwjgl.opengl.GL30.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import core.graphics.ui.InputPointer;
+import core.graphics.ui.UiPanel;
 import core.graphics.ui.old.MenuSystem;
 import core.graphics.ui.old.UIPanel;
 
+import java.util.function.BiFunction;
 
 public class Engine {
 	static Window window;
 	private Keyboard keyboard;
-	Mouse mouse;
-	Shaders shader;
-	Shaders dynamicShadows, staticShadows;
-	Shaders quad;
-	Pawn player;
+	private Mouse mouse;
+	private Shaders shader;
+	private Shaders dynamicShadows, staticShadows;
+	private Shaders quad;
+	private Pawn player;
 	
 	//Matrix4f transformMatrix;
 	DirectionalLight sun;
@@ -77,6 +86,24 @@ public class Engine {
 
 	public static void main(String[] args) {
 		new Engine();
+		/*
+		UniformBufferObject obj = new UniformBufferObject("object");
+		
+		UniformBufferSource src1 = new UniformBufferSource("mat1",UniformBufferObject.glVariableType.MATRIX4F);
+		UniformBufferSource src2 = new UniformBufferSource("vector1",UniformBufferObject.glVariableType.VEC3);
+		UniformBufferSource src3 = new UniformBufferSource("vector2",UniformBufferObject.glVariableType.VEC4);
+		
+		src1.bindToBufferObject(obj);
+		src2.bindToBufferObject(obj);
+		src3.bindToBufferObject(obj);
+		try {
+			obj.finalize();
+		} catch (ShaderCompileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(obj.uniformCode);
+		*/
 	}
 	
 	private void run() {
@@ -120,7 +147,7 @@ public class Engine {
 		ModelBlueprint m = null;
 		try {
 			m = ModelCompiler.loadModelBlueprint("/Assets/Models/Env/Maps/map.ini");
-		} catch (IOException e) {
+		} catch (IOException | ShaderCompileException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -139,7 +166,7 @@ public class Engine {
 
 		this.mouse.addListener(this.player);
 		
-		UniformSource translateMatrix = new UniformSource(Matrix4f.getSize());
+		UniformSource translateMatrix = new UniformSource(Matrix4f.SIZE);
 		player.getCamera().bindToUniformObject(uniform);
 		translateMatrix.bindToUniformObject(uniform);
 		
@@ -163,7 +190,7 @@ public class Engine {
 	@Deprecated
 	public void setupUI() {
 		//menu = new MenuSystem(this.window,2);
-		this.mouse.addListener(menu);
+		//this.mouse.addListener(menu);
 		
 		menu.addPanel("settings");
 		menu.setActivePanel("settings");
@@ -194,13 +221,24 @@ public class Engine {
 		// Render static shadows.
 		window.renderShadowMap(this.staticShadowMap, this.staticRenderStack);
 		
+		//UiPanel.switchPanel("");
+		
+		/*
+		UiPanel.init("hello");
+		
 
+		InputPointer p = new InputPointer((Observer<Object, MouseObserver, MouseListener> t, Object u) -> UiPanel.getActive());
+		
+		this.mouse.addListener(p);
+		
+		UiPanel.switchPanel("world");
+*/
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
-			//keyboard.getInput();
+			// Get all window events. This is where key callback is activated.
+			glfwPollEvents();			
+	
 			player.updateMovement();
-			//player.getCamera().updateUniform();
 
-			//window.renderDynamicShadowMap(this.dynamicShadowMap);
 			window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack);
 			glBindFramebuffer(GL_FRAMEBUFFER, screenQuad.getFBO());
 			glClearColor(0, 0, 0, 0); // Set the background to transparent.
@@ -209,45 +247,40 @@ public class Engine {
 			
 			window.renderTextured(this.dynamicShadowMap, this.dynamicRenderStack, this.staticRenderStack);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			
 			window.prepareToRender();
-
 			screenQuad.drawQuad();
-			//menu.render(this.transformMatrix);
-			window.endRender();
-
-			// Poll for window events. The key callback above will only be
-			// invoked during this call.
-			//player.resetMovement();
-			glfwPollEvents();
+			
+			window.endRender();			
 		}
 	}
 	
 	public void addPlayer() {
 		player = new Pawn(new Vector3f(0, 1, 0), new Vector3f(-1,0,0), 45, (float)window.getWidth()/window.getHeight(), 0.1f, 200f);
 		
-		keyboard.addKeyPressFunction(GLFW_KEY_W,Key.actionType.HOLD, () -> player.addZvelocity(1)); 
+		keyboard.addKeyPressFunction(GLFW_KEY_W,() -> player.addZvelocity(1)); 
 		keyboard.addKeyReleaseFunction(GLFW_KEY_W, () -> player.addZvelocity(-1));
 		
-		keyboard.addKeyPressFunction(GLFW_KEY_S,Key.actionType.HOLD, () -> player.addZvelocity(-1));
+		keyboard.addKeyPressFunction(GLFW_KEY_S,() -> player.addZvelocity(-1));
 		keyboard.addKeyReleaseFunction(GLFW_KEY_S, () -> player.addZvelocity(1));
 		
-		keyboard.addKeyPressFunction(GLFW_KEY_A,Key.actionType.HOLD, () -> player.addXvelocity(1));
+		keyboard.addKeyPressFunction(GLFW_KEY_A,() -> player.addXvelocity(1));
 		keyboard.addKeyReleaseFunction(GLFW_KEY_A, () -> player.addXvelocity(-1));
 		
-		keyboard.addKeyPressFunction(GLFW_KEY_D,Key.actionType.HOLD, () -> player.addXvelocity(-1));
+		keyboard.addKeyPressFunction(GLFW_KEY_D, () -> player.addXvelocity(-1));
 		keyboard.addKeyReleaseFunction(GLFW_KEY_D, () -> player.addXvelocity(1));
 		
-		keyboard.addKeyPressFunction(GLFW_KEY_SPACE,Key.actionType.HOLD, () -> player.addYvelocity(1));
+		keyboard.addKeyPressFunction(GLFW_KEY_SPACE, () -> player.addYvelocity(1));
 		keyboard.addKeyReleaseFunction(GLFW_KEY_SPACE, () -> player.addYvelocity(-1));
 		
-		keyboard.addKeyPressFunction(GLFW_KEY_LEFT_SHIFT,Key.actionType.HOLD, () -> player.addYvelocity(-1));
+		keyboard.addKeyPressFunction(GLFW_KEY_LEFT_SHIFT, () -> player.addYvelocity(-1));
 		keyboard.addKeyReleaseFunction(GLFW_KEY_LEFT_SHIFT, () -> player.addYvelocity(1));
 		
-		keyboard.addKeyPressFunction(GLFW_KEY_ESCAPE, Key.actionType.TYPE, () -> mouse.toggleGrab());
+		keyboard.addKeyPressFunction(GLFW_KEY_ESCAPE, () -> mouse.toggleGrab());
 		
 		try {
 			player.addModel(ModelCompiler.loadModelBlueprint("/Assets/Models/temp.ini"));
-		} catch (IOException e) {
+		} catch (IOException | ShaderCompileException e) {
 			e.printStackTrace();
 		}
 		player.thirdPersonPreset(0.35f, new Vector3f(0,2,0), 10,5);

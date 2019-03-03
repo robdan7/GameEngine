@@ -2,6 +2,11 @@ package core.graphics.lights;
 
 import core.utils.math.Vector4f;
 
+/**
+ * This class represents a directional light object.
+ * @author Robin
+ *
+ */
 public class DirectionalLight extends Light{
 	private Vector4f specular;
 	private Vector4f diffuse;

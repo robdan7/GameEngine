@@ -168,6 +168,7 @@ public class OBJLoader {
      * @param offset - The offset measured in floats.
      * @param data - The data to replace.
      */
+    @Deprecated
     public static void updateVBO(int buffer, int offset, FloatBuffer data) {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
 		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset<<2, data);
@@ -180,6 +181,7 @@ public class OBJLoader {
      * @param offset - The offset measured in floats.
      * @param data - The array with data to replace.
      */
+    @Deprecated
     public static void updateVBO(int buffer, int offset, float[] data) {
     	GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
 		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset<<2, data);
@@ -192,6 +194,7 @@ public class OBJLoader {
      * @param offset - The offset in the buffer.
      * @param data - The data to replace.
      */
+    @Deprecated
     public static void updateVBO(int buffer, int offset, ByteBuffer data) {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
 		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset, data);
