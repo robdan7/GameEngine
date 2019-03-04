@@ -78,4 +78,9 @@ public class Vector4f extends Vector<Vector4f> {
 	public float[] asFloats() {
 		return new float[] {this.x,this.y,this.z,this.w};
 	}
+
+	@Override
+	public float[] toFloatArray() {
+    	return new float[] {this.getX(),this.getY(),this.getZ(),this.getW()};
+	}
 }

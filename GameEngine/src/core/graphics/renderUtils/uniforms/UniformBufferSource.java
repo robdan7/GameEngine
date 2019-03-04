@@ -1,8 +1,8 @@
-package core.graphics.renderUtils;
+package core.graphics.renderUtils.uniforms;
 
 import java.nio.FloatBuffer;
 
-import core.graphics.renderUtils.UniformBufferObject.glVariableType;
+import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
 import core.utils.math.*;
 import core.utils.other.BufferTools;
 
@@ -29,33 +29,25 @@ public class UniformBufferSource {
 		this.type = type;
 	}
 	
-	public void updateSource () {
-		this.buffer.flip();	// Make it readable to OpenGL.
-		this.object.updateSource(this);
-	}
-	
+
 	public void updateSource(Vector4f v) {
 		BufferTools.putInBuffer(this.buffer, v, 0);
-		this.buffer.flip();
-		this.updateSource();
+		this.object.updateSource(this);
 	}
 	
 	public void updateSource(Vector3f v) {
 		BufferTools.putInBuffer(this.buffer, v, 0);
-		this.buffer.flip();
-		this.updateSource();
+		this.object.updateSource(this);
 	}
 	
 	public void updateSource(Vector2f v) {
 		BufferTools.putInBuffer(this.buffer, v, 0);
-		this.buffer.flip();
-		this.updateSource();
+		this.object.updateSource(this);
 	}
 	
 	public void updateSource(float... values) {
 		BufferTools.putInBuffer(this.buffer, 0, values);
-		this.buffer.flip();
-		this.updateSource();
+		this.object.updateSource(this);
 	}
 	
 	/**
@@ -70,11 +62,23 @@ public class UniformBufferSource {
 	FloatBuffer getBuffer() {
 		return this.buffer;
 	}
+	
+	int  getStride() {
+		return this.getType().getStride();
+	}
 
+	/**
+	 * Return the buffer offset in machine units, not bytes.
+	 * @return
+	 */
 	int getOffset() {
 		return this.offset;
 	}
 	
+	/**
+	 * Set the offset of this source.
+	 * @param offset - offset in machine units.
+	 */
 	void setOffset(int offset) {
 		this.offset = offset;
 	}

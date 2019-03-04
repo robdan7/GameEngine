@@ -265,22 +265,10 @@ public abstract  class Vector<T extends Vector<T>> {
 	
 	
 	/**
-	 * Generate an array from one or more vectors.
-	 * @param vectors - One or more {@link Vector4f}.
-	 * @return
+	 * 
+	 * @return This vector as an array;
 	 */
-	public static float[] to4fArray(Vector4f... vectors) {
-		float[] result = new float[vectors.length*4];
-		int i  = 0;
-		for (Vector4f v : vectors) {
-			result[i] = v.x;
-			result[i+1] = v.y;
-			result[i+2] = v.z;
-			result[i+3] = v.w;
-			i+=4;
-		}
-		return result;
-	}
+	public abstract float[] toFloatArray();
 	
 	@Override
 	public boolean equals(Object o) {

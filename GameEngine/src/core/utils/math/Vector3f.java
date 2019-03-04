@@ -78,4 +78,9 @@ public class Vector3f extends Vector<Vector3f> {
 	public Vector3f create() {
 		return new Vector3f();
 	}
+
+	@Override
+	public float[] toFloatArray() {
+		return new float[] {this.getX(),this.getY(),this.getZ()};
+	}
 }

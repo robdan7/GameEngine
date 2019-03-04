@@ -1,11 +1,22 @@
-package core.graphics.renderUtils;
+package core.graphics.renderUtils.uniforms;
 
 import static core.utils.other.BufferTools.updateBuffer;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL15.glBufferData;
+import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL30.glBindBufferBase;
+import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.lwjgl.BufferUtils;
+
+import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
+import core.utils.other.BufferTools;
 
 /**
  * This class represents a container for uniform block. 
@@ -17,8 +28,7 @@ import core.graphics.renderUtils.Shaders.ShaderCompileException;
  */
 public class UniformBufferObject {
 	
-	private int size, index, UBO;
-	private String name;
+	private int size, index, UBO;	// size is in machine units.
 	private BufferStatus status;
 	
 	/**
@@ -36,9 +46,10 @@ public class UniformBufferObject {
 	}
 
 	private int drawType;
-	private int bindings;
 	private String uniformName;
 	public StringBuilder uniformCode;
+	
+	private FloatBuffer uniformBuffer;
 	
 	/**
 	 * The uniform index associated with this object.
@@ -50,30 +61,53 @@ public class UniformBufferObject {
 	 * Create a new uniform buffer object.
 	 * @param name - The name GLSL will use to recognize the uniform.
 	 */
-	public UniformBufferObject(String name) {
+	public UniformBufferObject(String name, int drawType) {
 		this.uniformIndex = currentUniformIndex++;
 		this.uniformCode = new StringBuilder();
+		this.drawType = drawType;
 		
 		// Create a header with the proper index.
 		String line = uniformPresets.HEADER.toString().replaceFirst("#index", Integer.toString(this.uniformIndex)).replace("#name", name);
 		this.uniformCode.append(line).append("\n");
 		
 		this.status = BufferStatus.PREPARED;	// The uniform creation has begun. But it is still empty.
-		this.name = name;
+		this.uniformName = name;
+		
+		// Create a currently empty buffer. It will be resized later.
+		this.uniformBuffer = BufferUtils.createFloatBuffer(this.size);
+		this.UBO = glGenBuffers();	
 	}
 	
 	/**
 	 * Upload this uniform block to all pending shaders, and lock it so no more sources can be added.
+	 * This is the last thing that should be done when creating a uniform block.
+	 * Nothing will be done if the uniform is already finished.
 	 * @throws ShaderCompileException 
 	 */
 	public void finalize() throws ShaderCompileException {
+		if (this.getStatus() == BufferStatus.FINISHED) {
+			return;
+		}
 		this.uniformCode.append(uniformPresets.END.toString()).append("\n");
 		
-		uniformList.put(this.name, this);
+		uniformList.put(this.uniformName, this);
 		this.status = BufferStatus.FINISHED;
 		for (Shaders s : pendingShaders) {
-			s.linkWithUniforms(this.name);
+			s.linkWithUniforms(this.uniformName);
 		}
+		
+		this.genBuffer(this.uniformBuffer);
+	}
+	
+	/**
+	 * Wipe all previous data and create a new buffer.
+	 * @param data
+	 */
+	private void genBuffer(FloatBuffer data) {
+		glBindBuffer(GL_ARRAY_BUFFER, this.getUBO());
+		glBufferData(GL_ARRAY_BUFFER, data, this.getDrawType());
+		glBindBufferBase(GL_UNIFORM_BUFFER, this.getIndex(), this.getUBO());
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 	
 	/**
@@ -82,28 +116,67 @@ public class UniformBufferObject {
 	 * @param source - The source to add.
 	 * @throws UnsupportedOperationException
 	 */
-	public void bindBufferSource(UniformBufferSource source) throws UnsupportedOperationException {
+	void bindBufferSource(UniformBufferSource source) throws UnsupportedOperationException {
 		
 		if (this.status == BufferStatus.FINISHED) {
 			throw new UnsupportedOperationException("The uniform block has already been loaded into GLSL");
 		} else {
-			source.setOffset(this.size);
+			source.setOffset(this.size);	// The offset is equal to the old size.
 			
-			// Generate the line containing the new uniform.
-			String properties = "layout(offset = " + Integer.toString(this.size) + ") uniform " + source.getType().toString() + " " + source.getName() + ";\n";
+			// Generate the line containing the new uniform. the size is shifted to get the bytes.
+			String properties = "layout(offset = " + Integer.toString(this.getSize()<<2) + ") uniform " + source.getType().toString() + " " + source.getName() + ";\n";
 			this.uniformCode.append(properties);
 			
-			// Compute the new size in bytes.
-			this.size += source.getType().getStride()<<2;
+			// Update the size so the new source can get some space too.
+			this.size += source.getStride();
+			
+			// The buffer size has changed. Expand it and generate the buffer again.
+			this.uniformBuffer = BufferTools.combineBuffers(this.uniformBuffer, BufferUtils.createFloatBuffer(source.getStride()));
+			this.genBuffer(this.uniformBuffer);
+		}
+	}
+	
+	void bindBufferSource (UniformBufferMultiSource source) {
+		
+		if (this.status == BufferStatus.FINISHED) {
+			throw new UnsupportedOperationException("The uniform block has already been loaded into GLSL");
+		} else {
+			source.setOffset(this.size);	// The offset is equal to the old size.
+			
+			// Generate the line containing the new uniform. the size is shifted to get the bytes.
+			
+			for (String name : source) {
+				String properties = "layout(offset = " + Integer.toString(this.getSize()<<2) + ") uniform " + source.getType().toString() + " " + name + ";\n";
+				this.uniformCode.append(properties);
+				// Update the size so the new source can get some space too.
+				this.size += source.getStride();
+			}
+			
+			// The buffer size has changed. Expand it and generate the buffer again.
+			this.uniformBuffer = BufferTools.combineBuffers(this.uniformBuffer, BufferUtils.createFloatBuffer(source.getStride()));
+			this.genBuffer(this.uniformBuffer);
+		}
+	}
+	
+	/**
+	 * Update an individual source in this buffer.
+	 * The buffer in the source does not have to be flipped.
+	 */
+	void updateSource(UniformBufferSource source) {
+		if (source.getOffset() >= this.getSize()) {
+			updateBuffer(this.getUBO(), source.getOffset(), source.getBuffer().flip());
+		} else {
+			throw new IndexOutOfBoundsException("Source offset is larger than buffer.");
 		}
 		
 	}
 	
-	/**
-	 * Update an individual source in this object.
-	 */
-	void updateSource(UniformBufferSource source) {
-		updateBuffer(this.getUBO(), source.getOffset(), source.getBuffer());
+	void updateSource(UniformBufferMultiSource source) {
+		if (source.getOffset() >= this.getSize()) {
+			updateBuffer(this.getUBO(), source.getOffset(), source.getBuffer().flip());
+		} else {
+			throw new IndexOutOfBoundsException("Source offset is larger than buffer.");
+		}
 	}
 	
 	/**
@@ -111,7 +184,7 @@ public class UniformBufferObject {
 	 * @param sources
 	 */
 	void updateSources(UniformBufferSource... sources) {
-		
+		// TODO fix this, dingus.
 	}
 	
 	private int getUBO() {
@@ -135,6 +208,26 @@ public class UniformBufferObject {
 			//throw new IllegalArgumentException("uniform " + name + " does not exist");
 		}
 		return uniformList.get(name);
+	}
+	
+	private int getIndex() {
+		return this.index;
+	}
+	
+	private int getDrawType() {
+		return this.drawType;
+	}
+	
+	/**
+	 * Get the size of this buffer in basic machine units.
+	 * @return
+	 */
+	private int getSize() {
+		return this.size;
+	}
+	
+	private BufferStatus getStatus() {
+		return this.status;
 	}
 	
 	/**

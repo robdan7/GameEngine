@@ -59,4 +59,9 @@ public class Vector2f extends Vector<Vector2f>{
 		return new Vector2f();
 	}
 
+	@Override
+	public float[] toFloatArray() {
+		return new float[] {this.getX(),this.getY()};
+	}
+
 }

@@ -201,7 +201,7 @@ public class Shaders{
      * @return
      * @throws ShaderCompileException
      */
-    boolean linkWithUniforms(String uniformName) throws ShaderCompileException {  
+    public boolean linkWithUniforms(String uniformName) throws ShaderCompileException {  
     	boolean result = false;
     	if (this.compileStatus == ShaderStatus.PENDING && this.pendingUniforms.contains(uniformName)) {
     		this.pendingUniforms.remove(uniformName);

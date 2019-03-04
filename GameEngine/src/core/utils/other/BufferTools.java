@@ -42,36 +42,36 @@ public class BufferTools {
 	/**
 	 * Update a buffer object that is already in the OpenGL pipeline.
 	 * @param buffer - the target buffer.
-	 * @param offset - byte offset in the buffer.
+	 * @param offset - offset in machine units.
 	 * @param data - the float buffer to write from. It must be readable to OpenGL (not to you!).
 	 */
 	public static void updateBuffer(int buffer, int offset, FloatBuffer data) {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
-		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset, data);
+		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset<<2, data);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 	}
 	
 	/**
 	 * Update a buffer object that is already in the OpenGL pipeline.
 	 * @param buffer - the target buffer.
-	 * @param offset - byte offset in the buffer.
+	 * @param offset - offset in machine units.
 	 * @param data - the array to write from.
 	 */
 	public static void updateBuffer(int buffer, int offset, float[] data) {
     	GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
-		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset, data);
+		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset<<2, data);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
     }
 	
 	/**
 	 * Update a buffer object that is already in the OpenGL pipeline.
 	 * @param buffer - the target buffer.
-	 * @param offset - byte offset in the buffer.
+	 * @param offset - offset in machine units.
 	 * @param data - the byte buffer to write from. It must be readable to OpenGL (not to you!).
 	 */
 	public static void updateBuffer(int buffer, int offset, ByteBuffer data) {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
-		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset, data);
+		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset<<2, data);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 	}
 
@@ -168,6 +168,46 @@ public class BufferTools {
     	buf.put(values);
     }
     
+    public static void putInBuffer(FloatBuffer buf, int offset, Vector4f...values) {
+    	float[] temp = new float[values.length<<2];
+    	int i = 0;
+    	for (Vector4f v : values) {
+    		temp[i] = v.getX();
+    		temp[i+1] = v.getY();
+    		temp[i+2] = v.getZ();
+    		temp[i+3] = v.getW();
+    		i += 4;
+    	}
+    	
+    	putInBuffer(buf, offset, temp);
+    }
+    
+    public static void putInBuffer(FloatBuffer buf, int offset, Vector3f...values) {
+    	float[] temp = new float[values.length<<2];
+    	int i = 0;
+    	for (Vector3f v : values) {
+    		temp[i] = v.getX();
+    		temp[i+1] = v.getY();
+    		temp[i+2] = v.getZ();
+
+    		i += 3;
+    	}
+    	
+    	putInBuffer(buf, offset, temp);
+    }
+
+    public static void putInBuffer(FloatBuffer buf, int offset, Vector2f...values) {
+    	float[] temp = new float[values.length<<2];
+    	int i = 0;
+    	for (Vector2f v : values) {
+    		temp[i] = v.getX();
+    		temp[i+1] = v.getY();
+
+    		i += 2;
+    	}
+    	
+    	putInBuffer(buf, offset, temp);
+    }
     
     /**
      * @param values the float values that are to be turned into a FloatBuffer

@@ -13,8 +13,9 @@ import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.graphics.renderUtils.ShadowMap;
-import core.graphics.renderUtils.UniformBufferObject;
-import core.graphics.renderUtils.UniformBufferSource;
+import core.graphics.renderUtils.uniforms.UniformBufferMultiSource;
+import core.graphics.renderUtils.uniforms.UniformBufferObject;
+import core.graphics.renderUtils.uniforms.UniformBufferSource;
 import core.graphics.renderUtils.uniforms.old.UniformObject;
 import core.graphics.renderUtils.uniforms.old.UniformSource;
 import core.input.Key;
@@ -87,15 +88,19 @@ public class Engine {
 	public static void main(String[] args) {
 		new Engine();
 		/*
-		UniformBufferObject obj = new UniformBufferObject("object");
+		UniformBufferObject obj = new UniformBufferObject("object", 0);
 		
 		UniformBufferSource src1 = new UniformBufferSource("mat1",UniformBufferObject.glVariableType.MATRIX4F);
 		UniformBufferSource src2 = new UniformBufferSource("vector1",UniformBufferObject.glVariableType.VEC3);
 		UniformBufferSource src3 = new UniformBufferSource("vector2",UniformBufferObject.glVariableType.VEC4);
 		
+		UniformBufferMultiSource src4 = new UniformBufferMultiSource(UniformBufferObject.glVariableType.MATRIX4F, "buf","buf2","buf3");
+		
 		src1.bindToBufferObject(obj);
 		src2.bindToBufferObject(obj);
+		src4.bindToBufferObject(obj);
 		src3.bindToBufferObject(obj);
+		
 		try {
 			obj.finalize();
 		} catch (ShaderCompileException e) {
@@ -104,6 +109,7 @@ public class Engine {
 		}
 		System.out.println(obj.uniformCode);
 		*/
+		
 	}
 	
 	private void run() {
