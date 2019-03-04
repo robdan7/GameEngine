@@ -221,8 +221,7 @@ public class Window {
 	 * @param arrayLists
 	 */
 	@SafeVarargs
-	final void renderTextured(ShadowMap dynamicShadowMap, ArrayList<? extends RenderObject>... arrayLists ) {
-		dynamicShadowMap.updateCameraUniform();
+	final void renderTextured(ArrayList<? extends RenderObject>... arrayLists ) {
 
 		int lastShader = 0;
 		for (ArrayList<? extends RenderObject> renderlist : arrayLists) {
@@ -311,17 +310,26 @@ public class Window {
 		}
 	}
 	
-	void enableVertexArray() {
+	public static void enableVertexArray() {
 		glEnableClientState(GL_VERTEX_ARRAY);
 	}
 	
-	void enableNormals() {
+	public static void enableNormals() {
 		glEnableClientState(GL_NORMAL_ARRAY);
 	}
 	
-	void enableTexture() {
+	public static void disableNormals() {
+		glDisableClientState(GL_NORMAL_ARRAY);
+	}
+	
+	public static void enableTexture() {
 		glEnable(GL_TEXTURE_2D);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
+	
+	public static void disableTexture() {
+		glDisable(GL_TEXTURE_2D);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
 	
 	public int getHeight() {

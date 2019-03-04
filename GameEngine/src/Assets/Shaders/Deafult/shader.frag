@@ -1,6 +1,6 @@
 #version 450 core
 
-#uniform Light;
+#uniform Light lightSource;
 #uniform Matrices;
 
 uniform sampler2D staticShadowmap, dynamicShadowmap;
@@ -76,6 +76,7 @@ void main() {
 
 	outNormal = vec4(n.xyz*0.5+0.5,1);
 	outColor = texture(modelTexture, textureCoord);
+	//outColor = vec4(1,0,0,1);
 	worldPosition = vertexPosition;
 	
 	//outColor = texture(modelTexture, textureCoord)*vec4(shadow.xyz,1);

@@ -4,6 +4,8 @@ import java.nio.FloatBuffer;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.lwjgl.BufferUtils;
+
 import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
 import core.utils.math.*;
 import core.utils.other.BufferTools;
@@ -18,10 +20,11 @@ public class UniformBufferMultiSource implements Iterable<String> {
 	public UniformBufferMultiSource(glVariableType type, String... names) {
 		this.names = names;
 		this.type = type;
+		this.buffer = BufferUtils.createFloatBuffer(type.getStride()*names.length);
 	}
 	
 	public void updateSource(Vector4f v, int offset) {
-		if (offset >= this.names.length) {
+		if (offset+glVariableType.VEC4.getStride() > this.names.length) {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v);
@@ -29,7 +32,7 @@ public class UniformBufferMultiSource implements Iterable<String> {
 	}
 	
 	public void updateSource(Vector3f v, int offset) {
-		if (offset >= this.names.length) {
+		if (offset+glVariableType.VEC3.getStride() > this.names.length) {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v.toVec4f());
@@ -37,19 +40,40 @@ public class UniformBufferMultiSource implements Iterable<String> {
 	}
 	
 	public void updateSource(Vector2f v, int offset) {
-		if (offset >= this.names.length) {
+		if (offset+glVariableType.VEC2.getStride() > this.names.length) {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v);
 		this.object.updateSource(this);
 	}
 	
+	public void updateSource(Matrix4f mat, int offset) {
+		if (offset+glVariableType.MATRIX4F.getStride() > this.names.length) {
+			throw new IndexOutOfBoundsException();
+		}
+		
+		BufferTools.putInBuffer(this.buffer, offset, mat);
+		this.object.updateSource(this);
+	}
+	
+	public void updateSource(FloatBuffer buf, int offset) {
+		if (offset+buf.capacity() > this.getStride()) {
+			throw new IndexOutOfBoundsException();
+		}
+		BufferTools.putInBuffer(this.buffer, offset, buf);
+		this.object.updateSource(this);
+	}
+	 
 	public void updateSource(int offset, Vector4f... v) {
 		if (v.length > this.names.length) {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v);
 		this.object.updateSource(this);
+	}
+	
+	public void updateSource(int offset, float... data) {
+		BufferTools.putInBuffer(this.buffer, offset, data);
 	}
 	
 	public void bindToBufferObject(UniformBufferObject o) {
@@ -77,7 +101,7 @@ public class UniformBufferMultiSource implements Iterable<String> {
 		return this.type;
 	}
 	
-	int getStride() {
+	public int getStride() {
 		return this.getType().getStride()*this.names.length;
 	}
 

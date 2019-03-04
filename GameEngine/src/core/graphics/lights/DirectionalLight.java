@@ -18,8 +18,9 @@ public class DirectionalLight extends Light{
 	 * @param diffuse - Diffuse lighting.
 	 * @param ambient - Ambient lighting.
 	 */
-	public DirectionalLight (Vector4f position, Vector4f diffuse, Vector4f ambient, Vector4f specular, String uniformFile) {
-		super(uniformFile, position.asNormalized().toVec4f(), diffuse.toVec4f(), ambient.toVec4f(), specular.toVec4f());
+	public DirectionalLight (Vector4f position, Vector4f diffuse, Vector4f ambient, Vector4f specular, String uniformName, String[] uniforms) {
+		//super(uniformFile, position.asNormalized().toVec4f(), diffuse.toVec4f(), ambient.toVec4f(), specular.toVec4f());
+		super(uniformName, uniforms, position.asNormalized().toVec4f(), diffuse.toVec4f(), ambient.toVec4f(), specular.toVec4f());
 		this.position = position.asNormalized();
 		this.ambient = ambient;
 		this.diffuse = diffuse;

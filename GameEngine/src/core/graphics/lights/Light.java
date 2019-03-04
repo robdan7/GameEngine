@@ -5,8 +5,8 @@ import static org.lwjgl.opengl.GL15.*;
 
 import java.nio.FloatBuffer;
 
-import core.graphics.renderUtils.uniforms.old.UniformObject;
-import core.graphics.renderUtils.uniforms.old.UniformSource;
+import core.graphics.renderUtils.Shaders.ShaderCompileException;
+import core.graphics.renderUtils.uniforms.*;
 import core.utils.math.Vector;
 import core.utils.math.Vector4f;
 import core.utils.other.BufferTools;
@@ -17,8 +17,8 @@ import core.utils.other.BufferTools;
  * @author Robin
  *
  */
-public abstract class Light extends UniformSource {
-	private UniformObject lightUniform;
+public abstract class Light extends UniformBufferMultiSource {
+	private UniformBufferObject lightUniform;
 
 	private FloatBuffer uniformBuffer;
 	private Vector4f[] lightProperties;
@@ -31,31 +31,42 @@ public abstract class Light extends UniformSource {
 	 */
 	@Deprecated
 	protected Light (Vector4f vector, Vector4f diffuse, Vector4f ambient, Vector4f specular, String uniformFile) {
-		super(16);
+		super(UniformBufferObject.glVariableType.VEC4, "", "");
+		//super(16);
 
-		lightUniform = new UniformObject(uniformFile, GL_STATIC_DRAW);
-		super.bindToUniformObject(lightUniform);
-		super.updateUniform(BufferTools.asFlippedFloatBuffer(this.to1dArray(new float[][] {vector.asFloats(), ambient.asFloats(), diffuse.asFloats(), specular.asFloats()})));
+		//lightUniform = new UniformObject(uniformFile, GL_STATIC_DRAW);
+		//super.bindToUniformObject(lightUniform);
+		//super.updateUniform(BufferTools.asFlippedFloatBuffer(this.to1dArray(new float[][] {vector.asFloats(), ambient.asFloats(), diffuse.asFloats(), specular.asFloats()})));
 	}
 	
 	/**
 	 * Create a custom light with several properties.
-	 * @param uniformFile
+	 * @param uniformName - The uniform block name used in GLSL.
 	 * @param lightProperties
 	 */
-	protected Light(String uniformFile, Vector4f... lightProperties) {
-		super(lightProperties.length*Float.BYTES);
+	protected Light(String uniformName, String[] names, Vector4f... lightProperties) {
+		super(UniformBufferObject.glVariableType.VEC4, names);
+		//super(lightProperties.length*Float.BYTES);
 		this.lightProperties = lightProperties;
-		this.lightUniform = new UniformObject(uniformFile, GL_STATIC_DRAW);
+		this.lightUniform = new UniformBufferObject(uniformName, GL_STATIC_DRAW);
 		
-		super.bindToUniformObject(this.lightUniform);		
-		super.updateUniform(BufferTools.asFlippedFloatBuffer(Vector.to4fArray(this.lightProperties)));
+		//super.bindToUniformObject(this.lightUniform);
+		super.bindToBufferObject(this.lightUniform);
+		
+		try {
+			this.lightUniform.finalizeBuffer();
+		} catch (ShaderCompileException e) {
+			e.printStackTrace();
+		}
+		super.updateSource(0, lightProperties);
+		//super.updateUniform(BufferTools.asFlippedFloatBuffer(Vector.to4fArray(this.lightProperties)));
 	}
 	
 
 
 	public void updateUniform(float[] data) {
-		super.updateUniform(data);
+		//super.updateUniform(data);
+		super.updateSource(0, data);
 	}
 	
 	/**

@@ -1,6 +1,6 @@
 #version 450 core
 
-#uniform Light;
+#uniform Light lightSource;
 #uniform Matrices;
 
 uniform sampler2D modelTexture;
@@ -38,4 +38,5 @@ void main() {
 	//mirrorLight = vec4(dot(eye,vec3(0,0,1)),0,0,0);
 	
 	gl_Position  = camera* vertexPosition;
+	//gl_Position = vertexPosition;
 }

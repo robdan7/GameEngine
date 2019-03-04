@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL15;
 
+import core.graphics.models.OBJLoader;
 import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.utils.other.BufferTools;
@@ -28,7 +30,7 @@ import core.utils.other.BufferTools;
  */
 public class UniformBufferObject {
 	
-	private int size, index, UBO;	// size is in machine units.
+	private int size, UBO;	// size is in machine units.
 	private BufferStatus status;
 	
 	/**
@@ -84,11 +86,11 @@ public class UniformBufferObject {
 	 * Nothing will be done if the uniform is already finished.
 	 * @throws ShaderCompileException 
 	 */
-	public void finalize() throws ShaderCompileException {
+	public void finalizeBuffer() throws ShaderCompileException {
 		if (this.getStatus() == BufferStatus.FINISHED) {
 			return;
 		}
-		this.uniformCode.append(uniformPresets.END.toString()).append("\n");
+		this.uniformCode.append(uniformPresets.END.toString());
 		
 		uniformList.put(this.uniformName, this);
 		this.status = BufferStatus.FINISHED;
@@ -104,10 +106,10 @@ public class UniformBufferObject {
 	 * @param data
 	 */
 	private void genBuffer(FloatBuffer data) {
-		glBindBuffer(GL_ARRAY_BUFFER, this.getUBO());
-		glBufferData(GL_ARRAY_BUFFER, data, this.getDrawType());
+		glBindBuffer(GL_UNIFORM_BUFFER, this.getUBO());
+		glBufferData(GL_UNIFORM_BUFFER, data, this.getDrawType());
 		glBindBufferBase(GL_UNIFORM_BUFFER, this.getIndex(), this.getUBO());
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 	
 	/**
@@ -149,7 +151,7 @@ public class UniformBufferObject {
 				String properties = "layout(offset = " + Integer.toString(this.getSize()<<2) + ") uniform " + source.getType().toString() + " " + name + ";\n";
 				this.uniformCode.append(properties);
 				// Update the size so the new source can get some space too.
-				this.size += source.getStride();
+				this.size += source.getType().getStride();
 			}
 			
 			// The buffer size has changed. Expand it and generate the buffer again.
@@ -163,8 +165,19 @@ public class UniformBufferObject {
 	 * The buffer in the source does not have to be flipped.
 	 */
 	void updateSource(UniformBufferSource source) {
-		if (source.getOffset() >= this.getSize()) {
-			updateBuffer(this.getUBO(), source.getOffset(), source.getBuffer().flip());
+		if (this.getStatus() != BufferStatus.FINISHED) {
+			try {
+				throw new Exception("The uniform is not finished");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (source.getOffset() < this.getSize()) {
+			//updateBuffer(this.getUBO(), source.getOffset(), source.getBuffer().clear());
+			//OBJLoader.updateVBO(this.getUBO(), source.getOffset(), source.getBuffer().flip());
+			glBindBuffer(GL_UNIFORM_BUFFER, this.getUBO());
+			GL15.glBufferSubData(GL_UNIFORM_BUFFER, source.getOffset()<<2, source.getBuffer().clear());
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		} else {
 			throw new IndexOutOfBoundsException("Source offset is larger than buffer.");
 		}
@@ -172,8 +185,19 @@ public class UniformBufferObject {
 	}
 	
 	void updateSource(UniformBufferMultiSource source) {
-		if (source.getOffset() >= this.getSize()) {
-			updateBuffer(this.getUBO(), source.getOffset(), source.getBuffer().flip());
+		if (this.getStatus() != BufferStatus.FINISHED) {
+			try {
+				throw new Exception("The uniform is not finished");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (source.getOffset() < this.getSize()) {
+			//updateBuffer(GL_UNIFORM_BUFFER, this.getUBO(), source.getOffset(), source.getBuffer().flip());
+			glBindBuffer(GL_UNIFORM_BUFFER, this.getUBO());
+			GL15.glBufferSubData(GL_UNIFORM_BUFFER, source.getOffset()<<2, source.getBuffer().clear());
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+			//OBJLoader.updateVBO(this.getUBO(), source.getOffset(), source.getBuffer().clear());
 		} else {
 			throw new IndexOutOfBoundsException("Source offset is larger than buffer.");
 		}
@@ -187,7 +211,7 @@ public class UniformBufferObject {
 		// TODO fix this, dingus.
 	}
 	
-	private int getUBO() {
+	public int getUBO() {
 		return this.UBO;
 	}
 	
@@ -200,7 +224,8 @@ public class UniformBufferObject {
 	 * @return The uniform or null if it does not exist.
 	 */
 	public static UniformBufferObject requestUniform(Shaders shader, String name) {
-		if (!uniformList.containsKey(name)) {
+		UniformBufferObject result = uniformList.get(name);
+		if (result == null || result.getStatus() != BufferStatus.FINISHED) {
 			if (!pendingShaders.contains(shader)) {
 				pendingShaders.add(shader);
 			}
@@ -210,8 +235,12 @@ public class UniformBufferObject {
 		return uniformList.get(name);
 	}
 	
-	private int getIndex() {
-		return this.index;
+	public StringBuilder getUniformCode() {
+		return this.uniformCode;
+	}
+	
+	public int getIndex() {
+		return this.uniformIndex;
 	}
 	
 	private int getDrawType() {
@@ -237,7 +266,7 @@ public class UniformBufferObject {
 	 *
 	 */
 	public static enum glVariableType {
-		VEC2("vec2",2), VEC3("vec3",4), VEC4("vec4",4), MATRIX4F("matrix4f",16);
+		VEC2("vec2",2), VEC3("vec3",4), VEC4("vec4",4), MATRIX4F("mat4",16);
 		private String type;
 		private int stride;
 		

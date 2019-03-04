@@ -49,7 +49,7 @@ public class Pawn implements MouseListener {
 	 */
 	public Pawn(Vector3f upVector, Vector3f right, float fovy, float aspect, float zNear, float zFar) {
 		this.position = new Vector3f();
-		cam = new Camera(upVector, right, fovy, aspect, zNear, zFar, Camera.updateType.BOTH);
+		//cam = new Camera(upVector, right, fovy, aspect, zNear, zFar, Camera.updateType.BOTH);
 		this.cam.bindFocusPos(this.position);
 		moveDirection = new Vector3f[3];
 		moveDirection[0] = new Vector3f(); // The current movement direction after smoothing.
@@ -62,6 +62,27 @@ public class Pawn implements MouseListener {
 		this.l = new Line(new Vector3f(0,0,0), new Vector3f(0,0,1));
 		p = new Plane(new Vector3f(0,2,0), new Vector3f(0,1,0));
 		rotationMatrix = new Matrix4f();
+	}
+	
+	public Pawn() {
+		this.position = new Vector3f();
+		//cam = new Camera(upVector, right, fovy, aspect, zNear, zFar, Camera.updateType.BOTH);
+		//this.cam.bindFocusPos(this.position);
+		moveDirection = new Vector3f[3];
+		moveDirection[0] = new Vector3f(); // The current movement direction after smoothing.
+		moveDirection[1] = new Vector3f(); // New movement direction before smoothing.
+		moveDirection[2] = new Vector3f(); // Movement direction from actuators.
+		moveVelocity = 1;
+		this.followmode = camFollow.FPV;
+		clock = new Timer();
+		clock.start();
+		this.l = new Line(new Vector3f(0,0,0), new Vector3f(0,0,1));
+		p = new Plane(new Vector3f(0,2,0), new Vector3f(0,1,0));
+		rotationMatrix = new Matrix4f();
+	}
+	
+	public void bindCamera(Camera cam) {
+		this.cam = cam;
 	}
 	
 	/**

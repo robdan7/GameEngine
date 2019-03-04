@@ -4,7 +4,8 @@ import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
 
-import core.graphics.renderUtils.uniforms.old.UniformSource;
+import core.graphics.renderUtils.uniforms.UniformBufferMultiSource;
+import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
 
@@ -13,7 +14,7 @@ import core.utils.math.Vector3f;
  * @author Robin
  *
  */
-public class Camera extends UniformSource {
+public class Camera {
 	private Matrix4f lookAtMatrix;
 	private Matrix4f perspectiveMatrix;
 	private Vector3f focusPosition;
@@ -28,6 +29,8 @@ public class Camera extends UniformSource {
 	private FloatBuffer uniformBuffer;
 	private updateType updateType;
 	
+	private UniformBufferMultiSource uniformSource;
+	
 	/**
 	 * 
 	 * @param fovy - Field of view.
@@ -36,15 +39,28 @@ public class Camera extends UniformSource {
 	 * @param zFar - far plane.
 	 * @param name - uniform shader name.
 	 */
-	public Camera(Vector3f upVector, Vector3f right, float fovy, float aspect, float zNear, float zFar, updateType update) {
-		super(update.getSize());
+	public Camera(Vector3f upVector, Vector3f right, float fovy, float aspect, float zNear, float zFar, updateType update, UniformBufferMultiSource uniform) {
+		this.uniformSource = uniform;
+		//super(update.getSize());
+		//super(glVariableType.MATRIX4F, name1, name2);
 		cameraPosition = new Vector3f();
 		init(upVector, right, update);
 		perspectiveMatrix.setPerspective(fovy, aspect, zNear, zFar);
 	}
 	
-	public Camera(Vector3f up, Vector3f rightV, float left, float right, float bottom, float top, float zNear, float zFar, updateType update) {
-		super(update.getSize());
+	public Camera(Vector3f up, Vector3f rightV, float left, float right, float bottom, float top, float zNear, float zFar, updateType update, UniformBufferMultiSource uniform) {
+		this.uniformSource = uniform;
+		//super(update.getSize());
+		//super(glVariableType.MATRIX4F, name1, name2);
+		cameraPosition = new Vector3f();
+		init(up, rightV, update);
+		perspectiveMatrix.setOrtho(left, right, bottom, top, zNear, zFar);
+	}
+	
+	@Deprecated
+	public Camera(Vector3f up, Vector3f rightV, float left, float right, float bottom, float top, float zNear, float zFar, updateType update, String name1) {
+		//super(update.getSize());
+		this.uniformSource = new UniformBufferMultiSource(glVariableType.MATRIX4F, name1);
 		cameraPosition = new Vector3f();
 		init(up, rightV, update);
 		perspectiveMatrix.setOrtho(left, right, bottom, top, zNear, zFar);
@@ -129,16 +145,6 @@ public class Camera extends UniformSource {
 		this.lookAt();
 	}	
 	
-	/**
-	 * DO NOT USE THIS
-	 */
-	@Deprecated
-	@Override
-	public void updateUniform(float[] buffer) {
-		if (buffer != null) {
-			throw new RuntimeException("This method is not supported for this instance");
-		}
-	}
 	
 	/**
 	 * Updates the uniform block connected to this camera.
@@ -153,13 +159,15 @@ public class Camera extends UniformSource {
 				break;
 			case BOTH:
 				//put the perspective matrix AND the view matrix on the buffer.
+				
 				this.perspectiveMatrix.multiply(this.lookAtMatrix).put(this.uniformBuffer);
 				this.uniformBuffer.put(this.lookAtMatrix.toFloatArray());
 				break;
 		}
-		
 		//this.perspectiveMatrix.multiply(this.lookAtMatrix).put(this.uniformBuffer);
-		super.updateUniform(this.uniformBuffer);
+		//super.updateUniform(this.uniformBuffer);
+		
+		this.uniformSource.updateSource(this.uniformBuffer, 0);		
 	}
 	
 	/**

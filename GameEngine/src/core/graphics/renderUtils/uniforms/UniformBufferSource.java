@@ -2,6 +2,8 @@ package core.graphics.renderUtils.uniforms;
 
 import java.nio.FloatBuffer;
 
+import org.lwjgl.BufferUtils;
+
 import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
 import core.utils.math.*;
 import core.utils.other.BufferTools;
@@ -27,6 +29,7 @@ public class UniformBufferSource {
 	public UniformBufferSource(String name, glVariableType type) {
 		this.name = name;
 		this.type = type;
+		this.buffer = BufferUtils.createFloatBuffer(type.getStride());
 	}
 	
 
@@ -50,6 +53,12 @@ public class UniformBufferSource {
 		this.object.updateSource(this);
 	}
 	
+	public void updateSource(Matrix4f mat) {
+		BufferTools.putInBuffer(this.buffer, 0, mat);
+
+		this.object.updateSource(this);
+	}
+	 
 	/**
 	 * Bind this buffer source to a buffer object.
 	 */
@@ -63,7 +72,7 @@ public class UniformBufferSource {
 		return this.buffer;
 	}
 	
-	int  getStride() {
+	public int  getStride() {
 		return this.getType().getStride();
 	}
 
@@ -71,7 +80,7 @@ public class UniformBufferSource {
 	 * Return the buffer offset in machine units, not bytes.
 	 * @return
 	 */
-	int getOffset() {
+	public int getOffset() {
 		return this.offset;
 	}
 	

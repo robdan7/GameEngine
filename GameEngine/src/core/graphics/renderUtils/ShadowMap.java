@@ -4,6 +4,7 @@ import core.graphics.lights.DirectionalLight;
 import core.graphics.lights.Light;
 import core.graphics.misc.Texture;
 import core.graphics.renderUtils.buffers.Drawbuffer;
+import core.graphics.renderUtils.uniforms.UniformBufferMultiSource;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
 
@@ -35,10 +36,12 @@ public class ShadowMap {
 	 * @param matrixDimensions - The orthographic camera dimensions.
 	 * @throws Exception
 	 */
-	public ShadowMap(Vector3f up, Vector3f right, String textureName, int width, int height, int imageFilter, Vector4f matrixDimensions) throws Exception {
+	public ShadowMap(Vector3f up, Vector3f right, String textureName, int width, int height, int imageFilter, Vector4f matrixDimensions, UniformBufferMultiSource unf) throws Exception {
 		textureBuffer = new Drawbuffer(textureName, width, height);
 		//buffer.getColorMapTexture().bindAsUniform(shader.getShaderProgram());
-		cam = new Camera(up, right, -matrixDimensions.getX(), matrixDimensions.getX(), -matrixDimensions.getY(), matrixDimensions.getY(), matrixDimensions.getZ(), matrixDimensions.getW(), Camera.updateType.CAMERA);
+		cam = new Camera(
+				up, right, -matrixDimensions.getX(), matrixDimensions.getX(), -matrixDimensions.getY(), matrixDimensions.getY(), matrixDimensions.getZ(), matrixDimensions.getW(), 
+				Camera.updateType.CAMERA, unf);
 		//cam.rotate(0, -(float)Math.PI/2);
 		cam.lookAt(new Vector3f(0.1f,-1f,0));
 		//System.out.println(cam.getForward().toString() + " : " + cam.getPosition().toString());

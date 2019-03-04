@@ -1,6 +1,6 @@
 #version 450 core
 
-#uniform Light;
+#uniform Light lightSource;
 #uniform Matrices;
 
 in vec2 texCoord;
@@ -161,10 +161,9 @@ void main() {
 	sun.ambient = lightSource.ambient;
 	sun.specular = lightSource.specular;
 	
-	//outColor = vec4((texture(positionBuffer, texCoord)*2-1).rgb,1);
+
 	gl_FragColor = fragment.color*composeLight(fragment.sShadowPos, fragment.dShadowPos, fragment.wPosition, fragment.normal, sun.normal,sun.diffuse, sun.ambient, sun.specular, 50);
-	//gl_FragColor = vec4(normalize(viewMatrix*fragment.wPosition).xyz,1);
+	//gl_FragColor = dummy;
 	gl_FragDepth = texture(inDepth, texCoord).r;
 	
-	//gl_FragColor = vec4(texture(inDepth, texCoord).r,0,0,1);
 }

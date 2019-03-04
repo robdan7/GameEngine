@@ -3,13 +3,12 @@ package core.graphics.models;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
 
 import core.graphics.misc.Texture;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
-import core.graphics.renderUtils.uniforms.old.UniformSource;
+import core.graphics.renderUtils.uniforms.UniformBufferSource;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
 
@@ -20,8 +19,10 @@ public  class ModelBlueprint implements RenderObject{
 	private int[] model;
 	private Vector3f position;
 	private Texture texture;
-	private UniformSource transformUniform;
+	private UniformBufferSource transformUniform;
 	private Matrix4f transformMatrix;
+	
+	@Deprecated
 	private FloatBuffer transformBuffer;
 	
 	private Shaders shader;
@@ -33,12 +34,11 @@ public  class ModelBlueprint implements RenderObject{
 			Model m = OBJLoader.loadTexturedModel(modelFile, 1);
 			model = OBJLoader.createVBO(m);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.transformMatrix = new Matrix4f();
-		this.transformBuffer = BufferUtils.createFloatBuffer(Matrix4f.SIZE);
-		this.transformMatrix.put(this.transformBuffer); // Initiate the buffer with the identity matrix.
+		//this.transformBuffer = BufferUtils.createFloatBuffer(Matrix4f.SIZE);
+		//this.transformMatrix.put(this.transformBuffer); // Initiate the buffer with the identity matrix.
 		//this.transformBuffer.flip();
 	}
 	
@@ -49,12 +49,11 @@ public  class ModelBlueprint implements RenderObject{
 			model = OBJLoader.createVBO(m);
 			this.texture = new Texture(m.getTexture(), textureUniformName);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.transformMatrix = new Matrix4f();
-		this.transformBuffer = BufferUtils.createFloatBuffer(Matrix4f.SIZE);
-		this.transformMatrix.put(this.transformBuffer); // Initiate the buffer with the identity matrix.
+		//this.transformBuffer = BufferUtils.createFloatBuffer(Matrix4f.SIZE);
+		//this.transformMatrix.put(this.transformBuffer); // Initiate the buffer with the identity matrix.
 		//this.transformBuffer.flip();
 	}
 	
@@ -77,7 +76,7 @@ public  class ModelBlueprint implements RenderObject{
 	public void translate(Vector3f v) {
 		this.position.set(v);
 		this.transformMatrix.translate(this.position);
-		this.transformMatrix.put(this.transformBuffer);
+		//this.transformMatrix.put(this.transformBuffer);
 	}
 	
 	/*public void move(Vector deltaV) {
@@ -105,12 +104,12 @@ public  class ModelBlueprint implements RenderObject{
 		this.transformMatrix.setIdentity();
 		this.transformMatrix.translate(new Vector3f(0,10,0));
 		this.transformMatrix.put(b);*/
-		this.transformUniform.updateUniform(this.transformBuffer);
+		
+		//this.transformUniform.updateUniform(this.transformBuffer);
+		this.transformUniform.updateSource(this.transformMatrix);
 		
 		this.bind();
-		//glVertexPointer(3, GL_FLOAT, Float.BYTES*8, 0);
-		//glNormalPointer(GL_FLOAT, Float.BYTES*8,Float.BYTES*3);
-		//glTexCoordPointer(2, GL_FLOAT, Float.BYTES*8, Float.BYTES*6);
+
 		GL20.glVertexAttribPointer(0, 3, GL_FLOAT, false, Float.BYTES*8, 0);
 		GL20.glVertexAttribPointer(1, 3, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*3);
 		GL20.glVertexAttribPointer(2, 2, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*6);
@@ -138,8 +137,8 @@ public  class ModelBlueprint implements RenderObject{
 	 * Bind this model to a transform uniform.
 	 * @param matrixUniform
 	 */
-	public void bindTransformMatrix(UniformSource matrixUniform) {
-		if(matrixUniform.getSize() != Matrix4f.SIZE) {
+	public void bindTransformMatrix(UniformBufferSource matrixUniform) {
+		if(matrixUniform.getStride() != Matrix4f.SIZE) {
 			throw new IllegalArgumentException("Unform does not contain a 4x4 matrix");
 		}
 		this.transformUniform = matrixUniform;

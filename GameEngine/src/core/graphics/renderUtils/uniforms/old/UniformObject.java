@@ -29,6 +29,7 @@ import static core.utils.other.StringUtils.*;
  * @author Robin
  *
  */
+@Deprecated
 public class UniformObject {
 	/**
 	 * Every uniform has an index. This variable keeps track of it.
@@ -153,10 +154,10 @@ public class UniformObject {
 	}
 	
 	private void bindBuffer(FloatBuffer data) {
-		glBindBuffer(GL_ARRAY_BUFFER, this.getUBO());
-		glBufferData(GL_ARRAY_BUFFER, data, drawType);
+		glBindBuffer(GL_UNIFORM_BUFFER, this.getUBO());
+		glBufferData(GL_UNIFORM_BUFFER, data, drawType);
 		glBindBufferBase(GL_UNIFORM_BUFFER, this.getIndex(), this.getUBO());
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 	
 	/**

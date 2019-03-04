@@ -31,6 +31,7 @@ package core.utils.other;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL15;
+import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
 import core.utils.math.*;
 
@@ -45,10 +46,10 @@ public class BufferTools {
 	 * @param offset - offset in machine units.
 	 * @param data - the float buffer to write from. It must be readable to OpenGL (not to you!).
 	 */
-	public static void updateBuffer(int buffer, int offset, FloatBuffer data) {
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
-		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset<<2, data);
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+	public static void updateBuffer(int bufferType, int buffer, int offset, FloatBuffer data) {
+		GL15.glBindBuffer(bufferType, buffer);
+		GL15.glBufferSubData(bufferType, offset<<2, data);
+		GL15.glBindBuffer(bufferType, 0);
 	}
 	
 	/**
@@ -57,10 +58,10 @@ public class BufferTools {
 	 * @param offset - offset in machine units.
 	 * @param data - the array to write from.
 	 */
-	public static void updateBuffer(int buffer, int offset, float[] data) {
-    	GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
-		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset<<2, data);
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+	public static void updateBuffer(int bufferType, int buffer, int offset, float[] data) {
+    	GL15.glBindBuffer(bufferType, buffer);
+		GL15.glBufferSubData(bufferType, offset<<2, data);
+		GL15.glBindBuffer(bufferType, 0);
     }
 	
 	/**
@@ -69,10 +70,10 @@ public class BufferTools {
 	 * @param offset - offset in machine units.
 	 * @param data - the byte buffer to write from. It must be readable to OpenGL (not to you!).
 	 */
-	public static void updateBuffer(int buffer, int offset, ByteBuffer data) {
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buffer);
-		GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, offset<<2, data);
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+	public static void updateBuffer(int bufferType, int buffer, int offset, ByteBuffer data) {
+		GL15.glBindBuffer(bufferType, buffer);
+		GL15.glBufferSubData(bufferType, offset<<2, data);
+		GL15.glBindBuffer(bufferType, 0);
 	}
 
     /**
@@ -169,6 +170,7 @@ public class BufferTools {
     }
     
     public static void putInBuffer(FloatBuffer buf, int offset, Vector4f...values) {
+    	buf.clear();
     	float[] temp = new float[values.length<<2];
     	int i = 0;
     	for (Vector4f v : values) {
@@ -183,6 +185,7 @@ public class BufferTools {
     }
     
     public static void putInBuffer(FloatBuffer buf, int offset, Vector3f...values) {
+    	buf.clear();
     	float[] temp = new float[values.length<<2];
     	int i = 0;
     	for (Vector3f v : values) {
@@ -197,6 +200,7 @@ public class BufferTools {
     }
 
     public static void putInBuffer(FloatBuffer buf, int offset, Vector2f...values) {
+    	buf.clear();
     	float[] temp = new float[values.length<<2];
     	int i = 0;
     	for (Vector2f v : values) {
@@ -209,12 +213,24 @@ public class BufferTools {
     	putInBuffer(buf, offset, temp);
     }
     
+    public static void putInBuffer(FloatBuffer buf, int offset, Matrix4f mat) {
+    	FloatBuffer data = BufferUtils.createFloatBuffer(Matrix4f.SIZE);
+    	mat.put(data);
+    	putInBuffer(buf,offset,data);
+    }
+    
+    public static void putInBuffer(FloatBuffer dest, int offset, FloatBuffer data) {
+    	dest.clear();
+    	dest.position(offset);
+    	data.clear();
+    	dest.put(data);
+    }
+    
     /**
      * @param values the float values that are to be turned into a FloatBuffer
      *
      * @return a FloatBuffer readable to OpenGL (not to you!) containing values
      */
-    @Deprecated
     public static FloatBuffer asFlippedFloatBuffer(float... values) {
         FloatBuffer buffer = BufferUtils.createFloatBuffer(values.length);
         buffer.put(values);
@@ -227,7 +243,6 @@ public class BufferTools {
      *
      * @return a FloatBuffer representation of matrix4f
      */
-    @Deprecated
     public static FloatBuffer asFlippedFloatBuffer(Matrix4f matrix4f) {
         FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
         matrix4f.put(buffer);

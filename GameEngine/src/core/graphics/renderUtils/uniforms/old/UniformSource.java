@@ -8,6 +8,7 @@ import java.nio.FloatBuffer;
  * @author Robin
  *
  */
+@Deprecated
 public class UniformSource {
 	
 	/**

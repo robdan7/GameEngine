@@ -2,7 +2,7 @@ package core.graphics.renderUtils;
 
 import org.lwjgl.opengl.GL20;
 
-import core.graphics.renderUtils.uniforms.old.UniformObject;
+import core.graphics.renderUtils.uniforms.*;
 import core.utils.fileSystem.FileManager;
 import core.utils.other.StringUtils;
 
@@ -29,10 +29,13 @@ public class Shaders{
 	 * @param frag - Fragment shader file name.
 	 */
     public Shaders(String vert, String frag) {
+    	this.pendingUniforms = new ArrayList<String>();
     	this.init(vert, frag);
     }
     
     public Shaders(String shaderFile) throws IOException, ShaderCompileException {
+    	
+    	
     	BufferedReader reader = null;
     	try {
     		reader = FileManager.getReader(shaderFile);
@@ -72,25 +75,26 @@ public class Shaders{
      * @param frag
      */
     private void init(String vert, String frag) {
-    	
-    	int vertex = 0;
-    	int fragment = 0;
-    	try {
-    		vertex = createShader(vert, GL_VERTEX_SHADER);
-        	fragment = createShader(frag, GL_FRAGMENT_SHADER);
-    	} catch (ShaderUniformException e) {
-    		this.compileStatus = ShaderStatus.PENDING;
-    		vertex = 0;
-    		fragment = 0;
-    		return;
-    	}
     	shaderProgram = glCreateProgram();
-    	glAttachShader(shaderProgram, vertex);
-    	glAttachShader(shaderProgram, fragment);
-    	linkProgram();
-    	glDeleteShader(vertex);
-        glDeleteShader(fragment);
-        this.compileStatus = ShaderStatus.FINISHED;
+    	this.vertexFile = vert;
+    	this.fragmentFile = frag;
+    	int vertex = createShader(vert, GL_VERTEX_SHADER);
+    	int fragment = createShader(frag, GL_FRAGMENT_SHADER);
+    	
+    	if (vertex == -1 || fragment == -1) {
+    		// The shaders require uniforms that does not exist (yet).
+    		this.compileStatus = ShaderStatus.PENDING;
+    		//return;
+    	} else {
+    		this.compileStatus = ShaderStatus.FINISHED;
+    		//glUseProgram(shaderProgram);
+    		glAttachShader(shaderProgram, vertex);
+        	glAttachShader(shaderProgram, fragment);
+        	
+        	//glDeleteShader(vertex);
+    		//glDeleteShader(fragment);
+    	}   	
+        linkProgram();
     }
     
     public void linkProgram() {
@@ -103,10 +107,8 @@ public class Shaders{
      * @param file - Shader file.
      * @param shaderType - The GL shader type. GL_VERTEX_SHADER or GL_FRAGMENT_SHADER etc.
      * @return - The shader's number.
-     * @throws ShaderUniformException
      */
-    private int createShader(String file, int shaderType) throws ShaderUniformException{
-
+    private int createShader(String file, int shaderType) {
         StringBuilder shaderSource = new StringBuilder();
         BufferedReader reader = null;
 
@@ -118,18 +120,20 @@ public class Shaders{
             	command = line.replaceFirst("\\s*", "");
             	
             	if (command.startsWith(commands.IMPORT.getString())) {
-            		String uniform = readBetween(command,commands.UNIFORM.getString(),commands.END.getString());
+            		//String uniform = readBetween(command,commands.UNIFORM.getString(),commands.END.getString());
+            		String rest = command.replace(commands.IMPORT.getString(), "").replaceFirst("\\s*", "");
+            		String[] uniform = rest.replace(";", "").split("\\s+");
             		
-            		/*
-            		UniformBufferObject buffer = UniformBufferObject.requestUniform(this, uniform);
+            		UniformBufferObject buffer = UniformBufferObject.requestUniform(this, uniform[0]);
             		if (buffer == null) {
-            			if (!this.pendingUniforms.contains(uniform)) {
-            				this.pendingUniforms.add(uniform);
+            			if (!this.pendingUniforms.contains(uniform[0])) {
+            				this.pendingUniforms.add(uniform[0]);
             			}
-            			throw new ShaderUniformException("uniform object (" + uniform + ") is not finalized!");
-            		}
-            		*/
-            		shaderSource.append(UniformObject.requestUniform(uniform).getUniformCode()).append("\n");
+            			return -1;
+            			//throw new ShaderUniformException("uniform object (" + uniform + ") is not finalized!");
+            		}            		
+            		shaderSource.append(buffer.getUniformCode()).append(rest.replace(uniform[0], "") + "\n");
+            		//shaderSource.append(UniformObject.requestUniform(uniform).getUniformCode()).append("\n");
             	} else if (command.startsWith(commands.INCLUDE.getString())) {
             		shaderSource.append(Shaders.getImport(StringUtils.readBetween(command, commands.INCLUDE.getString(), commands.END.getString())));
             	} else {
@@ -154,7 +158,7 @@ public class Shaders{
         glCompileShader(shader);
         if (glGetShaderi(shader, GL_COMPILE_STATUS) == GL_FALSE) {
             System.err.println("Shader wasn't able to be compiled correctly: " + file);
-            System.out.println(shaderSource);
+            
         }
         return shader;
 	}
@@ -201,7 +205,7 @@ public class Shaders{
      * @return
      * @throws ShaderCompileException
      */
-    public boolean linkWithUniforms(String uniformName) throws ShaderCompileException {  
+    public boolean linkWithUniforms(String uniformName) throws ShaderCompileException {
     	boolean result = false;
     	if (this.compileStatus == ShaderStatus.PENDING && this.pendingUniforms.contains(uniformName)) {
     		this.pendingUniforms.remove(uniformName);
@@ -266,10 +270,20 @@ public class Shaders{
     public void dispose() {
         glDeleteProgram(this.shaderProgram);
     }
-
 	
 	public int getShaderProgram() {
+		if (this.getStatus() != ShaderStatus.FINISHED) {
+			try {
+				throw new ShaderUniformException("Shader requires unfinished uniforms!");
+			} catch (ShaderUniformException e) {
+				e.printStackTrace();
+			}
+		}
 		return this.shaderProgram;
+	}
+	
+	public ShaderStatus getStatus() {
+		return this.compileStatus;
 	}
 	
 	public static enum Settings {
