@@ -1,7 +1,6 @@
 package core.graphics.renderUtils.uniforms;
 
-import static core.utils.other.BufferTools.updateBuffer;
-import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL15.glBufferData;
 import static org.lwjgl.opengl.GL15.glGenBuffers;
@@ -15,7 +14,6 @@ import java.util.HashMap;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL15;
 
-import core.graphics.models.OBJLoader;
 import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.utils.other.BufferTools;
@@ -118,27 +116,7 @@ public class UniformBufferObject {
 	 * @param source - The source to add.
 	 * @throws UnsupportedOperationException
 	 */
-	void bindBufferSource(UniformBufferSource source) throws UnsupportedOperationException {
-		
-		if (this.status == BufferStatus.FINISHED) {
-			throw new UnsupportedOperationException("The uniform block has already been loaded into GLSL");
-		} else {
-			source.setOffset(this.size);	// The offset is equal to the old size.
-			
-			// Generate the line containing the new uniform. the size is shifted to get the bytes.
-			String properties = "layout(offset = " + Integer.toString(this.getSize()<<2) + ") uniform " + source.getType().toString() + " " + source.getName() + ";\n";
-			this.uniformCode.append(properties);
-			
-			// Update the size so the new source can get some space too.
-			this.size += source.getStride();
-			
-			// The buffer size has changed. Expand it and generate the buffer again.
-			this.uniformBuffer = BufferTools.combineBuffers(this.uniformBuffer, BufferUtils.createFloatBuffer(source.getStride()));
-			this.genBuffer(this.uniformBuffer);
-		}
-	}
-	
-	void bindBufferSource (UniformBufferMultiSource source) {
+	void bindBufferSource (UniformBufferSource source) {
 		
 		if (this.status == BufferStatus.FINISHED) {
 			throw new UnsupportedOperationException("The uniform block has already been loaded into GLSL");
@@ -166,31 +144,7 @@ public class UniformBufferObject {
 	 */
 	void updateSource(UniformBufferSource source) {
 		if (this.getStatus() != BufferStatus.FINISHED) {
-			try {
-				throw new Exception("The uniform is not finished");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		if (source.getOffset() < this.getSize()) {
-			//updateBuffer(this.getUBO(), source.getOffset(), source.getBuffer().clear());
-			//OBJLoader.updateVBO(this.getUBO(), source.getOffset(), source.getBuffer().flip());
-			glBindBuffer(GL_UNIFORM_BUFFER, this.getUBO());
-			GL15.glBufferSubData(GL_UNIFORM_BUFFER, source.getOffset()<<2, source.getBuffer().clear());
-			glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		} else {
-			throw new IndexOutOfBoundsException("Source offset is larger than buffer.");
-		}
-		
-	}
-	
-	void updateSource(UniformBufferMultiSource source) {
-		if (this.getStatus() != BufferStatus.FINISHED) {
-			try {
-				throw new Exception("The uniform is not finished");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			throw new UniformReadException("The uniform is not finalized!");
 		}
 		if (source.getOffset() < this.getSize()) {
 			//updateBuffer(GL_UNIFORM_BUFFER, this.getUBO(), source.getOffset(), source.getBuffer().flip());
@@ -202,14 +156,7 @@ public class UniformBufferObject {
 			throw new IndexOutOfBoundsException("Source offset is larger than buffer.");
 		}
 	}
-	
-	/**
-	 * Update several uniform sources at once.
-	 * @param sources
-	 */
-	void updateSources(UniformBufferSource... sources) {
-		// TODO fix this, dingus.
-	}
+
 	
 	public int getUBO() {
 		return this.UBO;
@@ -310,5 +257,18 @@ public class UniformBufferObject {
 	 */
 	private static enum BufferStatus {
 		INITIATED, FINISHED, PREPARED
+	}
+	
+	public static class UniformReadException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+		
+		public UniformReadException() {
+			super();
+		}
+		
+		public UniformReadException(String arg)  {
+			super(arg);
+		}
+		
 	}
 }
