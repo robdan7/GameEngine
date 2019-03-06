@@ -14,10 +14,10 @@ import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
 
+import core.graphics.misc.Texture;
 import core.graphics.renderUtils.Shaders;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector2f;
-import core.utils.other.Texture;
 import core.input.Mouse;
 
 import static org.lwjgl.opengl.GL11.*;

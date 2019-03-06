@@ -17,7 +17,7 @@ import core.utils.other.BufferTools;
  * @author Robin
  *
  */
-public abstract class Light extends UniformBufferMultiSource {
+public abstract class Light extends UniformBufferSource {
 	private UniformBufferObject lightUniform;
 
 	private FloatBuffer uniformBuffer;

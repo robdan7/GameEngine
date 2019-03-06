@@ -6,8 +6,6 @@ import core.graphics.renderUtils.uniforms.*;
 import core.utils.fileSystem.FileManager;
 import core.utils.other.StringUtils;
 
-import static core.utils.other.StringUtils.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +31,7 @@ public class Shaders{
     	this.init(vert, frag);
     }
     
-    public Shaders(String shaderFile) throws IOException, ShaderCompileException {
+    public Shaders(String shaderFile) throws IOException {
     	
     	
     	BufferedReader reader = null;
@@ -273,11 +271,7 @@ public class Shaders{
 	
 	public int getShaderProgram() {
 		if (this.getStatus() != ShaderStatus.FINISHED) {
-			try {
-				throw new ShaderUniformException("Shader requires unfinished uniforms!");
-			} catch (ShaderUniformException e) {
-				e.printStackTrace();
-			}
+			throw new ShaderUniformException("Shader requires unfinished uniforms!");
 		}
 		return this.shaderProgram;
 	}
@@ -300,7 +294,7 @@ public class Shaders{
 		}
 	}
 	
-	public static class ShaderUniformException extends Exception {
+	public static class ShaderUniformException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 		
 		public ShaderUniformException() {
@@ -313,7 +307,7 @@ public class Shaders{
 		
 	}
 	
-	public static class ShaderCompileException extends Exception {
+	public static class ShaderCompileException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 		
 		public ShaderCompileException() {

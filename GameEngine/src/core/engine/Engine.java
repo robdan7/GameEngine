@@ -14,18 +14,11 @@ import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.graphics.renderUtils.ShadowMap;
-import core.graphics.renderUtils.uniforms.UniformBufferMultiSource;
-import core.graphics.renderUtils.uniforms.UniformBufferObject;
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
-import core.graphics.renderUtils.uniforms.*;
+import core.graphics.renderUtils.uniforms.UniformBufferObject;
 import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
-import core.input.Key;
 import core.input.Keyboard;
 import core.input.Mouse;
-import core.input.MouseListener;
-import core.input.MouseObserver;
-import core.utils.event.Observer;
-import core.utils.math.Matrix4f;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
@@ -33,28 +26,20 @@ import core.utils.math.Vector4f;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL31.*;
 
 import java.io.IOException;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import core.graphics.ui.InputPointer;
-import core.graphics.ui.UiPanel;
+
 import core.graphics.ui.old.MenuSystem;
 import core.graphics.ui.old.UIPanel;
 
-import java.util.function.BiFunction;
-
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL15;
 
 public class Engine {
 	static Window window;
 	private Keyboard keyboard;
 	private Mouse mouse;
 	private Shaders dynamicShadows, staticShadows;
-	private Shaders quad;
 	private Pawn player;
 	
 	//Matrix4f transformMatrix;
@@ -141,22 +126,17 @@ public class Engine {
 		}
 		String[] sunNames = new String[]{"position","diffuse","ambient","specular"};
 		sun = new DirectionalLight(new Vector4f(0.2f,1,0.5f,0), new Vector4f(1f,1f,1f,1), window.getSkyColor().asMultiplied(0.4f), new Vector4f(2,2,2,0), "Light", sunNames);
-
 		
 		// Init uniforms
 		UniformBufferObject uniform = new UniformBufferObject("Matrices", GL_DYNAMIC_DRAW);
 
-		UniformBufferMultiSource camUniform = new UniformBufferMultiSource(glVariableType.MATRIX4F, "camera", "viewMatrix");
-		camUniform.bindToBufferObject(uniform);
+		UniformBufferSource camUniform = new UniformBufferSource(uniform, glVariableType.MATRIX4F, "camera", "viewMatrix");
 		
-		UniformBufferSource translateMatrix = new UniformBufferSource("translateMatrix", glVariableType.MATRIX4F);
-		translateMatrix.bindToBufferObject(uniform);
+		UniformBufferSource translateMatrix = new UniformBufferSource(uniform, glVariableType.MATRIX4F, "translateMatrix");
 		
-		UniformBufferMultiSource staticUniform = new UniformBufferMultiSource(glVariableType.MATRIX4F, "staticOrthoMatrix");
-		staticUniform.bindToBufferObject(uniform);
+		UniformBufferSource staticUniform = new UniformBufferSource(uniform, glVariableType.MATRIX4F, "staticOrthoMatrix");
 		
-		UniformBufferMultiSource dynamicUniform = new UniformBufferMultiSource(glVariableType.MATRIX4F, "dynamicOrthoMatrix");
-		dynamicUniform.bindToBufferObject(uniform);
+		UniformBufferSource dynamicUniform = new UniformBufferSource(uniform, glVariableType.MATRIX4F, "dynamicOrthoMatrix");
 		
 		try {
 			uniform.finalizeBuffer();
@@ -216,7 +196,7 @@ public class Engine {
 		this.staticShadowMap.getTexture().bindAsUniforms( deffered);
 		this.dynamicShadowMap.getTexture().bindAsUniforms(deffered);
 
-		
+
 		this.renderloop();
 		m.discard();
 	}
@@ -281,11 +261,12 @@ public class Engine {
 			window.prepareToRender();
 			screenQuad.drawQuad();
 			
-			window.endRender();			
+			window.endRender();		
+			
 		}
 	}
 	
-	public void addPlayer(UniformBufferMultiSource camUniform) {
+	public void addPlayer(UniformBufferSource camUniform) {
 		player = new Pawn();
 		
 		keyboard.addKeyPressFunction(GLFW_KEY_W,() -> player.addZvelocity(1)); 

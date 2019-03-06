@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import core.engine.Window;
+import core.graphics.misc.Texture;
 import core.graphics.renderUtils.uniforms.UniformTools;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector2f;
 import core.utils.other.BufferTools;
-import core.utils.other.Texture;
-import core.input.listeners.MouseListener;
-import core.input.listeners.MouseObserver;
+import core.input.MouseListener;
+import core.input.MouseObserver;
 
 import static org.lwjgl.opengl.GL15.*;
 

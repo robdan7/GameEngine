@@ -1,7 +1,6 @@
 package core.graphics.models;
 
 import java.io.IOException;
-import java.nio.FloatBuffer;
 
 import org.lwjgl.opengl.GL20;
 
@@ -21,9 +20,7 @@ public  class ModelBlueprint implements RenderObject{
 	private Texture texture;
 	private UniformBufferSource transformUniform;
 	private Matrix4f transformMatrix;
-	
-	@Deprecated
-	private FloatBuffer transformBuffer;
+
 	
 	private Shaders shader;
 	private int depthshader;

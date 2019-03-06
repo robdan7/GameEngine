@@ -213,6 +213,16 @@ public class BufferTools {
     	putInBuffer(buf, offset, temp);
     }
     
+    public static void putInBuffer(FloatBuffer buf, int offset, Matrix4f... matrices) {
+    	FloatBuffer data = BufferUtils.createFloatBuffer(matrices.length*Matrix4f.SIZE);
+    	
+    	for (Matrix4f m : matrices) {
+    		m.put(data);
+    	}
+    	
+    	putInBuffer(buf,offset, data);
+    }
+    
     public static void putInBuffer(FloatBuffer buf, int offset, Matrix4f mat) {
     	FloatBuffer data = BufferUtils.createFloatBuffer(Matrix4f.SIZE);
     	mat.put(data);

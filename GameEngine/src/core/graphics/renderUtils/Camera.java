@@ -4,7 +4,7 @@ import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
 
-import core.graphics.renderUtils.uniforms.UniformBufferMultiSource;
+import core.graphics.renderUtils.uniforms.UniformBufferSource;
 import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
@@ -29,7 +29,7 @@ public class Camera {
 	private FloatBuffer uniformBuffer;
 	private updateType updateType;
 	
-	private UniformBufferMultiSource uniformSource;
+	private UniformBufferSource uniformSource;
 	
 	/**
 	 * 
@@ -39,7 +39,7 @@ public class Camera {
 	 * @param zFar - far plane.
 	 * @param name - uniform shader name.
 	 */
-	public Camera(Vector3f upVector, Vector3f right, float fovy, float aspect, float zNear, float zFar, updateType update, UniformBufferMultiSource uniform) {
+	public Camera(Vector3f upVector, Vector3f right, float fovy, float aspect, float zNear, float zFar, updateType update, UniformBufferSource uniform) {
 		this.uniformSource = uniform;
 		//super(update.getSize());
 		//super(glVariableType.MATRIX4F, name1, name2);
@@ -48,7 +48,7 @@ public class Camera {
 		perspectiveMatrix.setPerspective(fovy, aspect, zNear, zFar);
 	}
 	
-	public Camera(Vector3f up, Vector3f rightV, float left, float right, float bottom, float top, float zNear, float zFar, updateType update, UniformBufferMultiSource uniform) {
+	public Camera(Vector3f up, Vector3f rightV, float left, float right, float bottom, float top, float zNear, float zFar, updateType update, UniformBufferSource uniform) {
 		this.uniformSource = uniform;
 		//super(update.getSize());
 		//super(glVariableType.MATRIX4F, name1, name2);
@@ -60,7 +60,7 @@ public class Camera {
 	@Deprecated
 	public Camera(Vector3f up, Vector3f rightV, float left, float right, float bottom, float top, float zNear, float zFar, updateType update, String name1) {
 		//super(update.getSize());
-		this.uniformSource = new UniformBufferMultiSource(glVariableType.MATRIX4F, name1);
+		this.uniformSource = new UniformBufferSource(glVariableType.MATRIX4F, name1);
 		cameraPosition = new Vector3f();
 		init(up, rightV, update);
 		perspectiveMatrix.setOrtho(left, right, bottom, top, zNear, zFar);
@@ -150,6 +150,7 @@ public class Camera {
 	 * Updates the uniform block connected to this camera.
 	 */
 	public void updateUniform() {
+		this.uniformBuffer.clear();
 		switch(this.updateType) {
 			case CAMERA:
 				this.perspectiveMatrix.multiply(this.lookAtMatrix).put(this.uniformBuffer);

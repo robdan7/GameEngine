@@ -415,9 +415,10 @@ public class Matrix4f{
 	
 	/**
 	 * Store this matrix in a float buffer.
+	 * The buffer is not cleared before writing, make sure to set the writing position first.
 	 */
 	public void put(FloatBuffer dest) {
-		dest.clear();
+		//dest.clear();
         dest.put(this.m00);
         dest.put(this.m01);
         dest.put(this.m02);
