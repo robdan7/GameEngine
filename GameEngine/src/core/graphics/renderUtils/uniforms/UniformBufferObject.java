@@ -49,6 +49,7 @@ public class UniformBufferObject {
 	private String uniformName;
 	public StringBuilder uniformCode;
 	
+	/* The private buffer is only used for allocating space. Every source should have its own buffer.*/
 	private FloatBuffer uniformBuffer;
 	
 	/**
@@ -97,6 +98,7 @@ public class UniformBufferObject {
 		}
 		
 		this.genBuffer(this.uniformBuffer);
+		this.uniformBuffer = null;
 	}
 	
 	/**
@@ -123,8 +125,6 @@ public class UniformBufferObject {
 		} else {
 			source.setOffset(this.size);	// The offset is equal to the old size.
 			
-			// Generate the line containing the new uniform. the size is shifted to get the bytes.
-			
 			for (String name : source) {
 				String properties = "layout(offset = " + Integer.toString(this.getSize()<<2) + ") uniform " + source.getType().toString() + " " + name + ";\n";
 				this.uniformCode.append(properties);
@@ -141,24 +141,21 @@ public class UniformBufferObject {
 	/**
 	 * Update an individual source in this buffer.
 	 * The buffer in the source does not have to be flipped.
+	 * @param source - The source to update.
 	 */
 	void updateSource(UniformBufferSource source) {
 		if (this.getStatus() != BufferStatus.FINISHED) {
 			throw new UniformReadException("The uniform is not finalized!");
 		}
 		if (source.getOffset() < this.getSize()) {
-			//updateBuffer(GL_UNIFORM_BUFFER, this.getUBO(), source.getOffset(), source.getBuffer().flip());
-			glBindBuffer(GL_UNIFORM_BUFFER, this.getUBO());
-			GL15.glBufferSubData(GL_UNIFORM_BUFFER, source.getOffset()<<2, source.getBuffer().clear());
-			glBindBuffer(GL_UNIFORM_BUFFER, 0);
-			//OBJLoader.updateVBO(this.getUBO(), source.getOffset(), source.getBuffer().clear());
+			BufferTools.updateBuffer(GL_UNIFORM_BUFFER, this.getUBO(), source.getOffset(), source.getBuffer());
 		} else {
 			throw new IndexOutOfBoundsException("Source offset is larger than buffer.");
 		}
 	}
 
 	
-	public int getUBO() {
+	int getUBO() {
 		return this.UBO;
 	}
 	
@@ -177,7 +174,6 @@ public class UniformBufferObject {
 				pendingShaders.add(shader);
 			}
 			return null;
-			//throw new IllegalArgumentException("uniform " + name + " does not exist");
 		}
 		return uniformList.get(name);
 	}
