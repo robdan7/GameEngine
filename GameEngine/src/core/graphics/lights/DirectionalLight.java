@@ -17,6 +17,9 @@ public class DirectionalLight extends Light{
 	 * @param position - The position.
 	 * @param diffuse - Diffuse lighting.
 	 * @param ambient - Ambient lighting.
+	 * @param specular - Specular lighting.
+	 * @param uniformName - The uniform block name.
+	 * @param uniforms - The individual uniform names for position etc.
 	 */
 	public DirectionalLight (Vector4f position, Vector4f diffuse, Vector4f ambient, Vector4f specular, String uniformName, String[] uniforms) {
 		//super(uniformFile, position.asNormalized().toVec4f(), diffuse.toVec4f(), ambient.toVec4f(), specular.toVec4f());
