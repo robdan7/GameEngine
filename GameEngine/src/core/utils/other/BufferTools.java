@@ -42,38 +42,40 @@ public class BufferTools {
 	
 	/**
 	 * Update a buffer object that is already in the OpenGL pipeline.
-	 * @param buffer - the target buffer.
-	 * @param offset - offset in machine units.
-	 * @param data - the float buffer to write from. It must be readable to OpenGL (not to you!).
+	 * @param buffer - the OpenGL target type.
+	 * @param offset - offset in machine units, not bytes.
+	 * @param data - the float buffer to write from. Flipping it is not required.
 	 */
-	public static void updateBuffer(int bufferType, int buffer, int offset, FloatBuffer data) {
-		GL15.glBindBuffer(bufferType, buffer);
-		GL15.glBufferSubData(bufferType, offset<<2, data);
-		GL15.glBindBuffer(bufferType, 0);
+	public static void updateBuffer(int target, int buffer, int offset, FloatBuffer data) {
+		data.flip();
+		GL15.glBindBuffer(target, buffer);
+		GL15.glBufferSubData(target, offset<<2, data);
+		GL15.glBindBuffer(target, 0);
 	}
 	
 	/**
 	 * Update a buffer object that is already in the OpenGL pipeline.
-	 * @param buffer - the target buffer.
-	 * @param offset - offset in machine units.
+	 * @param buffer - the OpenGL target type.
+	 * @param offset - offset in machine units, not bytes.
 	 * @param data - the array to write from.
 	 */
-	public static void updateBuffer(int bufferType, int buffer, int offset, float[] data) {
-    	GL15.glBindBuffer(bufferType, buffer);
-		GL15.glBufferSubData(bufferType, offset<<2, data);
-		GL15.glBindBuffer(bufferType, 0);
+	public static void updateBuffer(int target, int buffer, int offset, float[] data) {
+    	GL15.glBindBuffer(target, buffer);
+		GL15.glBufferSubData(target, offset<<2, data);
+		GL15.glBindBuffer(target, 0);
     }
 	
 	/**
 	 * Update a buffer object that is already in the OpenGL pipeline.
-	 * @param buffer - the target buffer.
-	 * @param offset - offset in machine units.
-	 * @param data - the byte buffer to write from. It must be readable to OpenGL (not to you!).
+	 * @param buffer - the OpenGL target type.
+	 * @param offset - offset in machine units, not bytes.
+	 * @param data - the byte buffer to write from. Flipping it is not required.
 	 */
-	public static void updateBuffer(int bufferType, int buffer, int offset, ByteBuffer data) {
-		GL15.glBindBuffer(bufferType, buffer);
-		GL15.glBufferSubData(bufferType, offset<<2, data);
-		GL15.glBindBuffer(bufferType, 0);
+	public static void updateBuffer(int target, int buffer, int offset, ByteBuffer data) {
+		data.flip();
+		GL15.glBindBuffer(target, buffer);
+		GL15.glBufferSubData(target, offset<<2, data);
+		GL15.glBindBuffer(target, 0);
 	}
 
     /**
