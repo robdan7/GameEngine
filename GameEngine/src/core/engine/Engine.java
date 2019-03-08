@@ -77,30 +77,7 @@ public class Engine {
 	}
 
 	public static void main(String[] args) {
-		new Engine();
-		/*
-		UniformBufferObject obj = new UniformBufferObject("object", 0);
-		
-		UniformBufferSource src1 = new UniformBufferSource("mat1",UniformBufferObject.glVariableType.MATRIX4F);
-		UniformBufferSource src2 = new UniformBufferSource("vector1",UniformBufferObject.glVariableType.VEC3);
-		UniformBufferSource src3 = new UniformBufferSource("vector2",UniformBufferObject.glVariableType.VEC4);
-		
-		UniformBufferMultiSource src4 = new UniformBufferMultiSource(UniformBufferObject.glVariableType.MATRIX4F, "buf","buf2","buf3");
-		
-		src1.bindToBufferObject(obj);
-		src2.bindToBufferObject(obj);
-		src4.bindToBufferObject(obj);
-		src3.bindToBufferObject(obj);
-		
-		try {
-			obj.finalize();
-		} catch (ShaderCompileException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println(obj.uniformCode);
-		*/
-		
+		new Engine();		
 	}
 	
 	private void run() {
@@ -151,7 +128,7 @@ public class Engine {
 		staticShadows = new Shaders("/Assets/Shaders/Shadows/Default/static.vert", "/Assets/Shaders/Shadows/Default/shader.frag");
 		
 		try {
-			staticShadowMap = new ShadowMap(new Vector3f(0,1,0), new Vector3f(-1,0,0),"staticShadowmap", 1080*3, 1080*3, GL_NEAREST, new Vector4f(40,40,-100,100), staticUniform);
+			staticShadowMap = new ShadowMap(new Vector3f(0,1,0), new Vector3f(-1,0,0),"staticShadowmap", 1080*4, 1080*4, GL_NEAREST, new Vector4f(40,40,-100,100), staticUniform);
 			dynamicShadowMap = new ShadowMap(new Vector3f(0,1,0), new Vector3f(-1,0,0),"dynamicShadowmap", 2048, 2048, GL_NEAREST, new Vector4f(7,7,-100,100), dynamicUniform);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -300,6 +277,8 @@ public class Engine {
 		
 		player.thirdPersonPreset(0.35f, new Vector3f(0,2,0), 10,5);
 		cam.bindFocusPos(player.getPosition());
+		
+		player.setPosition(new Vector3f(10,10,0));
 	}
 
 }
