@@ -31,10 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-import core.graphics.ui.old.MenuSystem;
-import core.graphics.ui.old.UIPanel;
-
-
 public class Engine {
 	static Window window;
 	private Keyboard keyboard;
@@ -50,8 +46,6 @@ public class Engine {
 	
 	Quad screenQuad;
 	
-	@Deprecated
-	MenuSystem menu;
 	
 	
 	/**
@@ -182,7 +176,7 @@ public class Engine {
 	public void setupUI() {
 		//menu = new MenuSystem(this.window,2);
 		//this.mouse.addListener(menu);
-		
+		/*
 		menu.addPanel("settings");
 		menu.setActivePanel("settings");
 		menu.getActivePanel().addShader("/Assets/Shaders/UI/button.vert","/Assets/Shaders/UI/button.frag", UIPanel.Elements.BUTTON);
@@ -199,6 +193,7 @@ public class Engine {
 		
 		menu.getActivePanel().addButton(new Vector2f(-1080/2,-360), () -> System.out.println("hej"), menu.getActivePanel().getTexture(UIPanel.Elements.BUTTON));
 		menu.getActivePanel().addButton(new Vector2f(-540,180), () -> menu.setActivePanel("settings"), menu.getActivePanel().getTexture(UIPanel.Elements.BUTTON));
+		*/
 	}
 	
 	public void renderloop() {
