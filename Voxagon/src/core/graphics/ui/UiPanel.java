@@ -4,13 +4,15 @@ import java.util.ArrayList;
 
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
+import core.input.InputInterface;
+import core.input.KeyboardListener;
 import core.input.MouseListener;
 import core.input.MouseObserver;
 import core.utils.datatypes.Stack;
 import core.utils.event.Observer;
 import core.utils.math.Vector2f;
 
-public class UiPanel implements RenderObject, MouseListener {
+public class UiPanel extends  InputInterface implements RenderObject, MouseListener {
 	private static Stack<UiPanel> uiStack;
 	private boolean visible = false;
 	private ArrayList<UiItem> items;
@@ -31,7 +33,41 @@ public class UiPanel implements RenderObject, MouseListener {
 		return uiStack.getTop();
 	}
 	
+	public static MouseListener getActiveMouseListener() {
+		return uiStack.getTop().getMouseListener();
+	}
+	
+	public static KeyboardListener getActiveKeyboardListener() {
+		return uiStack.getTop().getKeyboardListener();
+	}
+	
 	public UiPanel(String panelfile) {
+		super(new MouseListener() {
+
+			@Override
+			public void update(Observer<Object, MouseObserver, MouseListener> b, Object arg) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void buttonclick(int button) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void buttonRelease(int button) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void deltaMovement(MouseObserver obs, Vector2f v) {
+				UiPanel.getActiveMouseListener().deltaMovement(obs, v);
+			}
+			
+		});
 		items = new ArrayList<UiItem>();
 		this.panelfile = panelfile;
 	}
@@ -58,10 +94,6 @@ public class UiPanel implements RenderObject, MouseListener {
 	private void switchPanel(UiPanel panel) {
 		this.hide();
 		uiStack.push(panel);
-	}
-	
-	public UiPanel() {
-		
 	}
 	
 	public void hide() {

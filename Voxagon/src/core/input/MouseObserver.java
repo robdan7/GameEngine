@@ -3,13 +3,16 @@ package core.input;
 import core.utils.math.Vector2f;
 import core.utils.event.*;
 
+/**
+ * This is a place holder for any class that can 
+ * notify listeners when a mouse action has been activated.
+ * @author Robin
+ *
+ */
 public abstract class MouseObserver extends Observer<Object, MouseObserver, MouseListener>{
-	//ArrayList<MouseListener> listeners;
-
 	
 	public MouseObserver() {
 		super();
-		//this.position = new Vector2f();
 	}
 
 	/**
