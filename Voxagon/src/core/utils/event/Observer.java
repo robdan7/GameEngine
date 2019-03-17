@@ -19,6 +19,10 @@ public class Observer<T, O extends Observer<T,O,L>, L extends Listener<T,L,O>> {
 		this.listeners = new ArrayList<L>();
 	}
 	
+	/**
+	 * Notify all listeners that are currently connected to this observer.
+	 * @param arg - T an argument of pre-specified type.
+	 */
 	public void notifyListeners(T arg) {
 		for (L listener : this.listeners) {
 			listener.update(this, arg);
