@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
+
 public class Engine {
 	static Window window;
 	private Keyboard keyboard;
@@ -45,7 +46,6 @@ public class Engine {
 	ShadowMap dynamicShadowMap;
 	
 	Quad screenQuad;
-	
 	
 	
 	/**
