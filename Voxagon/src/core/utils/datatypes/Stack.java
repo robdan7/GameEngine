@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 public class Stack <E> implements Iterable<E>{
 	private Node first, last;
+	private int size;
 
 	public Stack() {
 		this.first = new Node(null, null);
@@ -11,15 +12,18 @@ public class Stack <E> implements Iterable<E>{
 	}
 	
 	public void push (E object) {
+		this.size ++;
 		this.last.setObject(object);
 		Node newLast = new Node(null, this.last);
 		this.last = newLast;
 	}
 	
 	public E pull() {
-		if (!this.last.previous.equals(this.first)) {
+		if (this.last.getPrevious().equals(this.first)) {
 			return null;
 		}
+		this.size --;
+		System.out.println(this.last.getPrevious().getObject().toString());
 		E result = this.last.getPrevious().getObject();
 		this.last = this.last.getPrevious();
 		this.last.setObject(null);
@@ -28,6 +32,10 @@ public class Stack <E> implements Iterable<E>{
 	
 	public E getTop() {
 		return this.last.getPrevious().getObject();
+	}
+	
+	public int getSize() {
+		return this.size;
 	}
 	
 	private class Node {
