@@ -23,11 +23,32 @@ public class Stack <E> implements Iterable<E>{
 			return null;
 		}
 		this.size --;
-		System.out.println(this.last.getPrevious().getObject().toString());
 		E result = this.last.getPrevious().getObject();
 		this.last = this.last.getPrevious();
 		this.last.setObject(null);
 		return result;
+	}
+	
+	/**
+	 * Remove an item from the stack. Null is returned if the item does not exist.
+	 * @param item - The item to remove.
+	 * @return True if the item was remove, false otherwise.
+	 */
+	public boolean extract(E item) {
+		if (item == null) throw new IllegalArgumentException();
+		Node iterator = this.last;
+
+		while(!iterator.getPrevious().equals(this.first)) {
+			
+			if (iterator.getPrevious().getObject().equals(item)) {
+				/* We found the object. Remove the node */
+				iterator.setPrevious(iterator.getPrevious().getPrevious());
+				return true;
+			}
+			
+			iterator = iterator.getPrevious();
+		}
+		return false;
 	}
 	
 	public E getTop() {
@@ -59,6 +80,9 @@ public class Stack <E> implements Iterable<E>{
 			return this.previous;
 		}
 		
+		private void setPrevious(Node n) {
+			this.previous = n;
+		}
 		
 	}
 
