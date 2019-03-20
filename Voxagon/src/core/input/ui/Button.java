@@ -1,4 +1,4 @@
-package core.graphics.ui;
+package core.input.ui;
 
 public class Button implements UiItem {
 

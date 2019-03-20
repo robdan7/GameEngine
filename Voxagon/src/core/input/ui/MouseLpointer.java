@@ -1,4 +1,4 @@
-package core.graphics.ui;
+package core.input.ui;
 
 import core.input.MouseListener;
 import core.input.MouseObserver;
@@ -7,10 +7,10 @@ import core.utils.math.Vector2f;
 
 import java.util.function.BiFunction;
 
-public class InputPointer implements MouseListener, Runnable {
+public class MouseLpointer implements MouseListener, Runnable {
 	BiFunction<Observer<Object, MouseObserver, MouseListener>, Object, MouseListener> action;
 
-	public InputPointer(BiFunction<Observer<Object, MouseObserver, MouseListener>, Object, MouseListener> action) {
+	public MouseLpointer(BiFunction<Observer<Object, MouseObserver, MouseListener>, Object, MouseListener> action) {
 		this.action = action;
 	}
 

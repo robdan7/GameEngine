@@ -19,6 +19,12 @@ import core.graphics.renderUtils.uniforms.UniformBufferObject;
 import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
 import core.input.Keyboard;
 import core.input.Mouse;
+import core.input.MouseListener;
+import core.input.MouseObserver;
+import core.input.ui.KeyLpointer;
+import core.input.ui.MouseLpointer;
+import core.input.ui.UiPanel;
+import core.utils.event.Observer;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
@@ -135,7 +141,14 @@ public class Engine {
 
 		// Create player.
 		this.addPlayer(camUniform);
-		this.mouse.addListener(this.player);
+		this.addMenuSystem();
+		UiPanel playerPanel = this.addPlayerKeys();
+		UiPanel.getActive().setHideAction(() -> UiPanel.getActive().switchPanel(playerPanel));
+		
+
+		//this.keyboard.addListener(l);
+		
+		//this.mouse.addListener(this.player);
 		player.getModel().setDepthShader(this.dynamicShadows);
 
 		// Create scene.
@@ -238,28 +251,8 @@ public class Engine {
 		}
 	}
 	
-	public void addPlayer(UniformBufferSource camUniform) {
+	private void addPlayer(UniformBufferSource camUniform) {
 		player = new Pawn();
-		
-		keyboard.addKeyPressFunction(GLFW_KEY_W,() -> player.addZvelocity(1)); 
-		keyboard.addKeyReleaseFunction(GLFW_KEY_W, () -> player.addZvelocity(-1));
-		
-		keyboard.addKeyPressFunction(GLFW_KEY_S,() -> player.addZvelocity(-1));
-		keyboard.addKeyReleaseFunction(GLFW_KEY_S, () -> player.addZvelocity(1));
-		
-		keyboard.addKeyPressFunction(GLFW_KEY_A,() -> player.addXvelocity(1));
-		keyboard.addKeyReleaseFunction(GLFW_KEY_A, () -> player.addXvelocity(-1));
-		
-		keyboard.addKeyPressFunction(GLFW_KEY_D, () -> player.addXvelocity(-1));
-		keyboard.addKeyReleaseFunction(GLFW_KEY_D, () -> player.addXvelocity(1));
-		
-		keyboard.addKeyPressFunction(GLFW_KEY_SPACE, () -> player.addYvelocity(1));
-		keyboard.addKeyReleaseFunction(GLFW_KEY_SPACE, () -> player.addYvelocity(-1));
-		
-		keyboard.addKeyPressFunction(GLFW_KEY_LEFT_SHIFT, () -> player.addYvelocity(-1));
-		keyboard.addKeyReleaseFunction(GLFW_KEY_LEFT_SHIFT, () -> player.addYvelocity(1));
-		
-		keyboard.addKeyPressFunction(GLFW_KEY_ESCAPE, () -> mouse.toggleGrab());
 		
 		try {
 			player.addModel(ModelCompiler.loadModelBlueprint("/Assets/Models/temp.ini"));
@@ -275,5 +268,47 @@ public class Engine {
 		
 		player.setPosition(new Vector3f(10,10,0));
 	}
-
+	
+	private void addMenuSystem() {
+		UiPanel.init(this.player, "playerUI");
+		
+		MouseLpointer mousePointer = new MouseLpointer((Observer<Object, MouseObserver, MouseListener> t, Object u) -> UiPanel.getActiveMouseListener());
+		KeyLpointer keypointer  = new KeyLpointer(() -> UiPanel.getActiveKeyboardListener());
+		
+		this.mouse.addListener(mousePointer);
+		this.keyboard.addListener(keypointer);
+		
+		UiPanel.getActive().addKeyPressFunction(GLFW_KEY_ESCAPE, () -> UiPanel.getActive().hide());
+		
+		//mouse.toggleGrab();
+	}
+	
+	private UiPanel addPlayerKeys() {
+		UiPanel panel = new UiPanel(player, "");
+		
+		panel.addKeyPressFunction(GLFW_KEY_W,() -> player.addZvelocity(1)); 
+		panel.addKeyReleaseFunction(GLFW_KEY_W, () -> player.addZvelocity(-1));
+		
+		panel.addKeyPressFunction(GLFW_KEY_S,() -> player.addZvelocity(-1));
+		panel.addKeyReleaseFunction(GLFW_KEY_S, () -> player.addZvelocity(1));
+		
+		panel.addKeyPressFunction(GLFW_KEY_A,() -> player.addXvelocity(1));
+		panel.addKeyReleaseFunction(GLFW_KEY_A, () -> player.addXvelocity(-1));
+		
+		panel.addKeyPressFunction(GLFW_KEY_D, () -> player.addXvelocity(-1));
+		panel.addKeyReleaseFunction(GLFW_KEY_D, () -> player.addXvelocity(1));
+		
+		panel.addKeyPressFunction(GLFW_KEY_SPACE, () -> player.addYvelocity(1));
+		panel.addKeyReleaseFunction(GLFW_KEY_SPACE, () -> player.addYvelocity(-1));
+		
+		panel.addKeyPressFunction(GLFW_KEY_LEFT_SHIFT, () -> player.addYvelocity(-1));
+		panel.addKeyReleaseFunction(GLFW_KEY_LEFT_SHIFT, () -> player.addYvelocity(1));
+		
+		panel.addKeyPressFunction(GLFW_KEY_ESCAPE, () -> UiPanel.popPanel());
+		
+		panel.setHideAction(() -> mouse.showCursor(window));
+		panel.setShowAction(() -> mouse.grabCursor(window));
+		
+		return panel;
+	}
 }

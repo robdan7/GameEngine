@@ -192,7 +192,7 @@ public class Mouse extends MouseObserver{
 	 * Hide the mouse cursor. The cursor can still move when it is hidden.
 	 * @param window
 	 */
-	private void hideCursor(Window window) {
+	public void hideCursor(Window window) {
 		this.isHidden = true;
 		glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	}
@@ -201,7 +201,7 @@ public class Mouse extends MouseObserver{
 	 * Show the mouse cursor. This is pretty self explanatory.
 	 * @param window
 	 */
-	private void showCursor(Window window) {
+	public void showCursor(Window window) {
 		this.isHidden = false;
 		this.isGrabbed = false;
 		glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -211,7 +211,7 @@ public class Mouse extends MouseObserver{
 	 * Grab the mouse cursor. This disables cursor movement.
 	 * @param window
 	 */
-	private void grabCursor(Window window) {
+	public void grabCursor(Window window) {
 		this.isGrabbed = true;
 		glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}

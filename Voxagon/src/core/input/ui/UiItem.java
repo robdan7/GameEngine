@@ -1,4 +1,4 @@
-package core.graphics.ui;
+package core.input.ui;
 
 public interface UiItem {
 	

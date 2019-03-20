@@ -16,21 +16,22 @@ public class Keyboard extends KeyboardObserver {
 	
 	private GLFWKeyCallback callback;
 	
-	private Key[] keys;
+	public final static int KEYS = 65536;
+	
+	private int[] keys;
 	
 	/**
 	 * Create a keyboard controller.
 	 * @param window
 	 */
 	public Keyboard(Window window) {
-		keys = new Key[65536];		// Total set of keys supported.
+		keys = new int[KEYS];		// Total set of keys supported.
 		
 		this.callback = new GLFWKeyCallback() {
 			
 			@Override
 			public void invoke(long window, int key, int scancode, int action, int mods) {
-				if (key >= 0 && keys[key] != null) {	// Key is negative when performing certain shortcuts.
-					
+				if (key >= 0) {	// Key is negative when performing certain shortcuts.
 					switch(action) {
 					case 0:
 						//keys[key].onRelease();
@@ -41,7 +42,7 @@ public class Keyboard extends KeyboardObserver {
 						notifyKeyPress(key, null);
 						break;
 					case 2:
-						if (keys[key].getState() != 2) {
+						if (keys[key] != 2) {
 							//keys[key].onHold();
 							notifyKeyHold(key, null);
 						}
@@ -49,7 +50,7 @@ public class Keyboard extends KeyboardObserver {
 					default:
 							break;
 					}
-					keys[key].setState(action);
+					keys[key] = action;
 				}
 			}
 			
@@ -57,8 +58,8 @@ public class Keyboard extends KeyboardObserver {
 		
 		glfwSetKeyCallback(window.getWindow(), this.callback);
 	}
-
 	
+	/*
 	@Deprecated
 	public void invoke(long window, int key, int scancode, int action, int mods) {
 		if (key >= 0 && keys[key] != null) {	// Key is negative when performing certain shortcuts.
@@ -97,7 +98,7 @@ public class Keyboard extends KeyboardObserver {
 		}
 		keys[key].setPressAction(action);
 	}
-
+*/
 
 	@Override
 	protected void notifyKeyPress(int key, Object arg) {

@@ -1,4 +1,4 @@
-package core.graphics.ui;
+package core.input.ui;
 
 import java.util.ArrayList;
 
@@ -12,17 +12,21 @@ import core.utils.datatypes.Stack;
 import core.utils.event.Observer;
 import core.utils.math.Vector2f;
 
-public class UiPanel extends  InputInterface implements RenderObject, MouseListener {
+public class UiPanel extends  InputInterface implements RenderObject {
 	private static Stack<UiPanel> uiStack;
 	private boolean visible = false;
 	private ArrayList<UiItem> items;
 	private String panelfile;
-	
-	private ArrayList<MouseListener> mouseListeners;
+	Runnable onHide, onShow;
 	
 	public static void init(String panelfile) {
 		uiStack = new Stack<UiPanel>();
 		uiStack.push(new UiPanel(panelfile));
+	}
+	
+	public static void init(MouseListener listener, String panelFile) {
+		uiStack = new Stack<UiPanel>();
+		uiStack.push(new UiPanel(listener, panelFile));
 	}
 	
 	/**
@@ -39,6 +43,23 @@ public class UiPanel extends  InputInterface implements RenderObject, MouseListe
 	
 	public static KeyboardListener getActiveKeyboardListener() {
 		return uiStack.getTop().getKeyboardListener();
+	}
+	
+	public UiPanel(MouseListener listener, String panelFile) {
+		super(listener);
+		items = new ArrayList<UiItem>();
+		this.panelfile = panelFile;
+		
+		this.onHide = new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		};
+		this.onShow = this.onHide;
 	}
 	
 	public UiPanel(String panelfile) {
@@ -64,44 +85,99 @@ public class UiPanel extends  InputInterface implements RenderObject, MouseListe
 
 			@Override
 			public void deltaMovement(MouseObserver obs, Vector2f v) {
-				UiPanel.getActiveMouseListener().deltaMovement(obs, v);
+				
 			}
 			
 		});
 		items = new ArrayList<UiItem>();
 		this.panelfile = panelfile;
-	}
-	
-	@Override
-	public String toString() {
-		return this.panelfile;
+		
+		this.onHide = new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		};
+		
+		this.onShow = this.onHide;
 	}
 	
 	/**
-	 * Switch to a new UI panel and hide the previous.
+	 * Switch to a new UI panel and hide the previous one.
 	 * @param panelfile
 	 */
-	public static void switchPanel(String panelfile) {
+	public static void addPanel(String panelfile) {
 		UiPanel panel = new UiPanel(panelfile);
-		uiStack.getTop().switchPanel(panel);
-		
+		addPanel(panel);
 	}
 	
 	/**
-	 * Switch to a new UI panel and hide this one.
+	 * Add a pre-defined panel to the top and activate it.
 	 * @param panel
 	 */
-	private void switchPanel(UiPanel panel) {
-		this.hide();
-		uiStack.push(panel);
+	public static void addPanel(UiPanel panel) {
+		uiStack.getTop().hide();
+		uiStack.getTop().switchPanel(panel);
 	}
 	
+	/**
+	 * Remove the active panel (first in the stack) and re-activate the
+	 * previous one.
+	 */
+	public static void popPanel() {
+		uiStack.getTop().hide();
+		UiPanel p = uiStack.pull();
+		p.releaseAllButtons();
+		UiPanel.getActive().show();
+	}
+	
+	
+	/**
+	 * Switch to a new UI panel. This panel will stay visible 
+	 * unless it is hidden first.
+	 * @param panel
+	 */
+	public void switchPanel(UiPanel panel) {
+		this.releaseAllButtons();
+		uiStack.push(panel);
+		panel.show();
+	}
+	
+	/**
+	 * Hide this panel. This will activate the hide-action if enabled. 
+	 * This can be used to add a new panel and hide this one at the same time, thus 
+	 * enabling automatic panel switching when a button is pressed.
+	 */
 	public void hide() {
+		this.onHide.run();
 		this.visible = false;
 	}
 	
+	/**
+	 * Show this panel. This will activate the show-action if enabled.
+	 */
 	public void show() {
+		this.onShow.run();
 		this.visible = true;
+	}
+	
+	/**
+	 * Enable a certain action when this panel is disabled.
+	 * @param r
+	 */
+	public void setHideAction(Runnable r) {
+		this.onHide = r;
+	}
+	
+	/**
+	 * Enable a certain action then this panel is enabled.
+	 * @param r
+	 */
+	public void setShowAction(Runnable r) {
+		this.onShow = r;
 	}
 	
 	public boolean isVisible() {
@@ -153,31 +229,9 @@ public class UiPanel extends  InputInterface implements RenderObject, MouseListe
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	@Override
-	public void update(Observer<Object, MouseObserver, MouseListener> b, Object arg) {
-
-		/*
-		for (MouseListener l : this.mouseListeners) {
-			l.update(b, arg);
-		}
-		*/
-		System.out.println(this.toString());
-		//this.deltaMovement(((MouseObserver)b), ((MouseObserver)b).getDeltaP());
-	}
-
-	@Override
-	public void buttonclick(int button) {
-
-	}
-
-	@Override
-	public void buttonRelease(int button) {
 	
-	}
-
 	@Override
-	public void deltaMovement(MouseObserver obs, Vector2f v) {
-		
+	public String toString() {
+		return this.panelfile;
 	}
 }
