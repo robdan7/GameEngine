@@ -18,5 +18,33 @@ public class MathTools {
 				(info.getX()*l.getPointer().x + info.getY()*l.getPointer().y + info.getZ()*l.getPointer().z);
 		return l.getTranslated(t);
 	}
+	
+	/**
+	 * Calculate the distance between a point and a plane.
+	 * @param p - The plane
+	 * @param point - The point
+	 * @return Minimum distance between the point and the plane.
+	 */
+	public static float pointToPlaneDistance(Plane p, Vector3f point) {
+		Vector3f dist = p.getOgirin();
+		dist.subtract(point);
+		dist.flip();
+		return dist.dotProduct(p.getOgirin());
+	}
+	
+	
+	/**
+	 * Project a point to a plane through the shortest distance.
+	 * @param p - The plane.
+	 * @param point - The point.
+	 * @return A projected point onto the plane p.
+	 */
+	public static Vector3f pointToPlaneProjection(Plane p, Vector3f point) {
+		Vector3f distance = p.getNormalCopy();
+		distance.flip();
+		distance.multiply(pointToPlaneDistance(p, point));
+		distance.add(point);
+		return distance;
+	}
 
 }
