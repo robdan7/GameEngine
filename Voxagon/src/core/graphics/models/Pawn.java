@@ -5,6 +5,7 @@ import core.graphics.renderUtils.Camera;
 import core.graphics.renderUtils.Shaders;
 import core.input.MouseListener;
 import core.input.MouseObserver;
+import core.physics.Gravity;
 import core.utils.event.Observer;
 import core.utils.math.Line;
 import core.utils.math.Matrix4f;
@@ -34,9 +35,9 @@ public class Pawn implements MouseListener {
 	camFollow followmode;
 	
 	ModelBlueprint model;
+	
+	Gravity gravity = new Gravity(new Vector3f(0,1,0));
 
-	Plane p;
-	Line l;
 	
 	/**
 	 * Camera follow mode: FPV.
@@ -59,8 +60,6 @@ public class Pawn implements MouseListener {
 		this.followmode = camFollow.FPV;
 		clock = new Timer();
 		clock.start();
-		this.l = new Line(new Vector3f(0,0,0), new Vector3f(0,0,1));
-		p = new Plane(new Vector3f(0,2,0), new Vector3f(0,1,0));
 		rotationMatrix = new Matrix4f();
 	}
 	
@@ -76,8 +75,6 @@ public class Pawn implements MouseListener {
 		this.followmode = camFollow.FPV;
 		clock = new Timer();
 		clock.start();
-		this.l = new Line(new Vector3f(0,0,0), new Vector3f(0,0,1));
-		p = new Plane(new Vector3f(0,2,0), new Vector3f(0,1,0));
 		rotationMatrix = new Matrix4f();
 	}
 	
@@ -200,8 +197,11 @@ public class Pawn implements MouseListener {
 
 		this.rotationMatrix.rotate(this.cam.gethAngle(), 0, 1, 0);
 		v = rotationMatrix.multiply(v.toVec4f()).toVec3f();
-
-		this.position.add(v.asMultiplied((float)clock.getDelta()*this.moveVelocity));
+		
+		double delta = clock.getDelta();
+		
+		this.position.add(v.asMultiplied((float)delta*this.moveVelocity));
+		this.position.add(this.gravity.calcFallDistance((float)delta));
 	}
 	
 	private void move() {
@@ -274,6 +274,10 @@ public class Pawn implements MouseListener {
 
 	public ModelBlueprint getModel() {
 		return this.model;
+	}
+	
+	public void setGravity(float g) {
+		this.gravity.setLocalGravity(g);
 	}
 
 	@Override
