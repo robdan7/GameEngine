@@ -1,8 +1,9 @@
 package core.utils.math;
 
 public class Plane {
-	private Vector3f normal, start;
+	private Vector3f normal, origin;
 	private float a, b, c, d;
+	private Vector4f informationVector;
 
 	/**
 	 * Create a plane from three known points.
@@ -10,20 +11,24 @@ public class Plane {
 	 * @param p2
 	 * @param p3
 	 */
-	public Plane(Vector p1, Vector p2, Vector p3) {
+	public Plane(Vector3f p1, Vector3f p2, Vector3f p3) {
 		float u1 = p2.x-p1.x, u2 = p2.y-p1.y, u3 = p2.z-p1.z;
 		float v1 = p3.x-p1.x, v2 = p3.y-p1.y, v3 = p3.z-p1.z;
 		Vector3f normal = new Vector3f(u2*v3-u3*v2, u3*v1-u1*v3, u1*v2-u2*v1);
+		normal.normalize();
 		this.init(p1, normal);
 	}
 	
-	private void init(Vector start, Vector3f n) {
-		this.a = n.x;
+	private void init(Vector3f start, Vector3f n) {
+		informationVector = new Vector4f(n.getX(), n.getY(), n.getZ(), start.dotProduct(n));
+		/*this.a = n.x;
 		this.b = n.y;
 		this.c = n.z;
-		this.d = n.x*start.x + n.y*start.y + n.z*start.z;
+		//this.d = n.x*start.x + n.y*start.y + n.z*start.z;
+		this.d = start.dotProduct(n);
+		*/
 		this.normal = n;
-		this.start = start.toVec3f();
+		this.origin = start.toVec3f();
 	}
 	
 	/**
@@ -31,27 +36,23 @@ public class Plane {
 	 * @param start
 	 * @param n
 	 */
-	public Plane(Vector start, Vector3f n) {
+	public Plane(Vector3f start, Vector3f n) {
 		this.init(start, n);
+	}
+	
+	public Vector4f getInformation() {
+		return this.informationVector.copy();
 	}
 	
 	/**
 	 * Return a copy of the starting point.
 	 * @return
 	 */
-	Vector3f getStart() {
-		return this.start;
+	public Vector3f getOgirin() {
+		return this.origin;
 	}
 	
-	Vector3f getNormal() {
-		return this.normal;
-	}
-	
-	public Vector3f projectToPlane(Line l) {
-		if ((l.getPointer().x*normal.x + l.getPointer().y*normal.y + l.getPointer().z*normal.z) == 0) {
-			throw new RuntimeException("Line and plane are orthogonal");
-		}
-		float t = (d - a*l.getStart().x-b*l.getStart().y-c*l.getStart().z) / (a*l.getPointer().x + b*l.getPointer().y + c*l.getPointer().z);
-		return l.getTranslated(t);
+	public Vector3f getNormalCopy() {
+		return this.normal.copy();
 	}
 }
