@@ -127,6 +127,17 @@ public abstract  class Vector<T extends Vector<T>> {
 	}
 	
 	/**
+	 * Return a copy of this vector added to v.
+	 * @param v - The vector to add.
+	 * @return This vector plus v.
+	 */
+	public T asAdded(T v) {
+		T result = this.copy();
+		result.add(v);
+		return result;
+	}
+	
+	/**
 	 * Multiply this vector by a value.
 	 * @param m
 	 * @return
