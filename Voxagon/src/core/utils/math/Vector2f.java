@@ -32,6 +32,11 @@ public class Vector2f extends Vector<Vector2f>{
 		this.y = y;
 	}
 	
+	public void set(float x, float y) {
+		this.x = x;
+		this.y = y;
+	}
+	
 	@Override
 	public void set(Vector2f v) {
 		this.x = v.x;

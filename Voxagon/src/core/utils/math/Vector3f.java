@@ -49,6 +49,17 @@ public class Vector3f extends Vector<Vector3f> {
 		this.z = z;
 	}
 	
+	public void set(float x, float y, float z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+	
+	public void set(float x, float y) {
+		this.x = x;
+		this.y = y;
+	}
+	
 	@Override
 	public void set(Vector3f v) {
 		this.x = v.x;

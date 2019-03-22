@@ -56,6 +56,17 @@ public class Vector4f extends Vector<Vector4f> {
 		this.w = w;
 	}
 	
+	public void set(float x, float y, float z) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+	
+	public void set(float x, float y) {
+		this.x = x;
+		this.y = y;
+	}
+	
 	@Override
 	public void set(Vector4f v) {
 		this.x = v.x;
