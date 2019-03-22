@@ -5,6 +5,8 @@ import core.graphics.lights.Light;
 import core.graphics.misc.Texture;
 import core.graphics.renderUtils.buffers.Drawbuffer;
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
+import core.utils.math.MathTools;
+import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
 
@@ -25,6 +27,10 @@ public class ShadowMap {
 	 */
 	private DirectionalLight light;
 	
+	private Vector3f position, computedPosition;
+	
+	private float xResolution, yResolution;
+	
 	/**
 	 * @param up - up vector.
 	 * @param right - right Vector. Must not be the same as up.
@@ -33,7 +39,7 @@ public class ShadowMap {
 	 * @param width - pixel width.
 	 * @param height - pixel height.
 	 * @param imageFilter - Image filer. GL_LINEAR or GL_NEAREST.
-	 * @param matrixDimensions - The orthographic camera dimensions.
+	 * @param matrixDimensions - The orthographic camera dimensions (width, height, near, far)
 	 * @throws Exception
 	 */
 	public ShadowMap(Vector3f up, Vector3f right, String textureName, int width, int height, int imageFilter, Vector4f matrixDimensions, UniformBufferSource unf) throws Exception {
@@ -46,6 +52,13 @@ public class ShadowMap {
 		cam.lookAt(new Vector3f(0.1f,-1f,0));
 		//System.out.println(cam.getForward().toString() + " : " + cam.getPosition().toString());
 		cam.lookAt();
+		
+		this.position = new Vector3f();
+		this.computedPosition = new Vector3f();
+		this.cam.bindFocusPos(this.computedPosition);
+		
+		this.xResolution = matrixDimensions.getX()*2.0f/(float)width;
+		this.yResolution = matrixDimensions.getY()*2.0f/(float)height;
 	}
 	
 	public void lookAt(Vector3f v) {
@@ -74,7 +87,8 @@ public class ShadowMap {
 	 * @param v - The vector to bind.
 	 */
 	public void bindPositionTo(Vector3f v) {
-		this.cam.bindFocusPos(v);
+		//this.cam.bindFocusPos(v);
+		this.position = v;
 	}
 	
 	/**
@@ -89,6 +103,7 @@ public class ShadowMap {
 	 * Update the camera view. This must be done before the shadow map position can change.
 	 */
 	public void updateCameraUniform() {
+		roundOffPosition();
 		if (this.light != null) {
 			/**
 			 * Use the flipped light position to look in the opposite direction.
@@ -97,6 +112,18 @@ public class ShadowMap {
 			cam.lookAt(light.getPosition().asFlipped().toVec3f());
 		}
 		cam.updateUniform();
+	}
+	
+	private void roundOffPosition() {
+		Vector3f roundOffV = this.getCamera().getLookAtMatrix().multiply(this.position);
+		roundOffV.setX(MathTools.floorToMultiple(roundOffV.getX(), this.xResolution));
+		roundOffV.setY(MathTools.floorToMultiple(roundOffV.getY(), this.yResolution));
+		
+		Matrix4f inverse = this.getCamera().getLookAtMatrix().getInverse();
+		
+		roundOffV = inverse.multiply(roundOffV);
+		
+		this.computedPosition.set(roundOffV);
 	}
 	
 	/**
