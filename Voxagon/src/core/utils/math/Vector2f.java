@@ -42,6 +42,18 @@ public class Vector2f extends Vector<Vector2f>{
 		this.x = v.x;
 		this.y = v.y;
 	}
+	
+	@Override
+	public void set(Vector3f v) {
+		this.x = v.x;
+		this.y = v.y;
+	}
+
+	@Override
+	public void set(Vector4f v) {
+		this.x = v.x;
+		this.y = v.y;
+	}
 
 	@Override
 	public float[] asFloats() {
@@ -68,5 +80,7 @@ public class Vector2f extends Vector<Vector2f>{
 	public float[] toFloatArray() {
 		return new float[] {this.getX(),this.getY()};
 	}
+
+
 
 }

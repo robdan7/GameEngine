@@ -74,7 +74,19 @@ public class Vector4f extends Vector<Vector4f> {
 		this.z = v.z;
 		this.w = v.w;
 	}
+	
+	@Override
+	public void set(Vector2f v) {
+		this.x = v.x;
+		this.y = v.y;
+	}
 
+	@Override
+	public void set(Vector3f v) {
+		this.x = v.x;
+		this.y = v.y;
+		this.z = v.z;
+	}
 	@Override
 	public Vector4f copy() {
 		return new Vector4f(this.x, this.y, this.z, this.w);
@@ -94,4 +106,6 @@ public class Vector4f extends Vector<Vector4f> {
 	public float[] toFloatArray() {
     	return new float[] {this.getX(),this.getY(),this.getZ(),this.getW()};
 	}
+
+
 }

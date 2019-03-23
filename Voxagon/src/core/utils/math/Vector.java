@@ -36,7 +36,19 @@ public abstract  class Vector<T extends Vector<T>> {
 	 * Set the values of this vector to be the same as another.
 	 * @param v
 	 */
-	public abstract void set(T v);
+	public abstract void set(Vector2f v);
+	
+	/**
+	 * Set the values of this vector to be the same as another.
+	 * @param v
+	 */
+	public abstract void set(Vector3f v);
+	
+	/**
+	 * Set the values of this vector to be the same as another.
+	 * @param v
+	 */
+	public abstract void set(Vector4f v);
 	
 	/**
 	 * Create a new vector of the same data type.
@@ -50,7 +62,7 @@ public abstract  class Vector<T extends Vector<T>> {
 	 */
 	public final void normalize() {
 		float length = this.length();
-		if (length != 0) {
+		if (this.length() != 0) {
 			this.x = this.x / length;
 			this.y = this.y / length;
 			this.z = this.z / length;
