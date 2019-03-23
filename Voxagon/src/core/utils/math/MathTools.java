@@ -1,5 +1,8 @@
 package core.utils.math;
 
+import core.utils.math.geometry.Line;
+import core.utils.math.geometry.Plane;
+
 public class MathTools {
 
 	/**
@@ -45,6 +48,16 @@ public class MathTools {
 		distance.multiply(pointToPlaneDistance(p, point));
 		distance.add(point);
 		return distance;
+	}
+	
+	/**
+	 * Floor a float value to a specified multiple.
+	 * @param value - The value to floor.
+	 * @param floor - The floor multiple.
+	 * @return The floored value.
+	 */
+	public static float floorToMultiple(float value, float floor) {
+		return value - (value % floor);
 	}
 
 }
