@@ -1,4 +1,6 @@
-package core.utils.math;
+package core.utils.math.geometry;
+
+import core.utils.math.Vector3f;
 
 /**
  * this class represents an infinite line in 3D space.
@@ -24,7 +26,7 @@ public class Line {
 	 * @return
 	 */
 	public Vector3f getTranslated(float t) {
-		return new Vector3f(this.start.x + this.pointer.x*t,this.start.y + this.pointer.y*t,this.start.z + this.pointer.z*t);
+		return new Vector3f(this.start.getX() + this.pointer.getX()*t,this.start.getY() + this.pointer.getY()*t,this.start.getZ() + this.pointer.getZ()*t);
 	}
 	
 	public Vector3f getStart() {
@@ -40,9 +42,7 @@ public class Line {
 	 * @param direction - A normalized vector.
 	 */
 	public void setDirection(Vector3f direction) {
-		this.pointer.x = direction.x;
-		this.pointer.y = direction.y;
-		this.pointer.z = direction.z;
+		this.pointer.set(direction);
 	}
 	
 	/**
@@ -50,8 +50,6 @@ public class Line {
 	 * @param start
 	 */
 	public void setStart(Vector3f start) {
-		this.start.x = start.x;
-		this.start.y = start.y;
-		this.start.z = start.z;
+		this.start.set(start);
 	}
 }
