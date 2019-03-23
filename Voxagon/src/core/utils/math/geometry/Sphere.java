@@ -1,13 +1,13 @@
-package core.physics.geometry;
+package core.utils.math.geometry;
 
 import core.utils.math.Vector;
 import core.utils.math.Vector3f;
 
-public class Circle {
+public class Sphere {
 	private float radius;
 	Vector3f position;
 	
-	public Circle(float radius) {
+	public Sphere(float radius) {
 		this.radius = radius;
 	}
 	
