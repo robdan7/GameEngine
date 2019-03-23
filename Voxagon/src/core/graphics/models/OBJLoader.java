@@ -87,14 +87,33 @@ public class OBJLoader {
         return BufferUtils.createFloatBuffer(size);
     }
 
-    public static int[] createVBO(Model model) {
+    public static int createVBO(Model model) {
         int vbo = glGenBuffers();
         int vertices = 0;
         int vertPerFace = 3;
         int floatsPerFace = vertPerFace*8; // 8 is the number of floats per vertex. Vertex + normal + texture = 3 + 3 + 2
-        FloatBuffer data = reserveData(model.getFaces().size() * floatsPerFace);
+        FloatBuffer data = createCompleteModelBuffer(model);
+        data.flip(); 
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, data, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //return vbo;
+        //return new int[] {vbo,model.getIndicesCount()};
+        return vbo;
+    }
+  
+    
+    /**
+     * Create a complete float buffer with vertices, normals and texture coords.
+     * @param model
+     * @return
+     */
+    static FloatBuffer createCompleteModelBuffer(Model model) {
+    	int vertPerFace = 3;
+    	int floatsPerFace = vertPerFace*8;
+    	FloatBuffer data = reserveData(model.getFaces().size() * floatsPerFace);
         for (Model.Face face : model.getFaces()) {
-        	for (int i = 0; i < 3; i++) {
+        	for (int i = 0; i < vertPerFace; i++) {
         		
 				data.put(model.getVertices().get(face.getVertexIndices()[i] - 1).asFloats());
 
@@ -109,16 +128,51 @@ public class OBJLoader {
 					data.put(new float[] {0,0});
 				}
 			}
-           vertices += vertPerFace;
         }
-        data.flip(); 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, data, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        //return vbo;
-        return new int[] {vbo,vertices};
+        return data;
     }
-  
+    
+    /**
+     * Create a float buffer with only the model vertices.
+     * @param model
+     * @return
+     */
+    public FloatBuffer createVertexModelBuffer(Model model) {
+    	int vertPerFace = 3;
+    	int floatsPerFace = vertPerFace*8;
+    	FloatBuffer data = reserveData(model.getFaces().size() * floatsPerFace);
+        for (Model.Face face : model.getFaces()) {
+        	for (int i = 0; i < vertPerFace; i++) {
+        		
+				data.put(model.getVertices().get(face.getVertexIndices()[i] - 1).asFloats());
+			}
+        }
+        return data;
+    }
+    
+    /**
+     * Create a float buffer with model vertices and normals.
+     * @param model
+     * @return
+     */
+    public FloatBuffer createVertexNormalModelBuffer(Model model) {
+    	int vertPerFace = 3;
+    	int floatsPerFace = vertPerFace*8;
+    	FloatBuffer data = reserveData(model.getFaces().size() * floatsPerFace);
+        for (Model.Face face : model.getFaces()) {
+        	for (int i = 0; i < vertPerFace; i++) {
+        		
+				data.put(model.getVertices().get(face.getVertexIndices()[i] - 1).asFloats());
+
+				if (face.hasNormals()) {
+					data.put(model.getNormals().get(face.getNormalIndices()[i] - 1).asFloats());
+        		} else {
+        			data.put(new float[] {0,0,0});
+        		}
+			}
+        }
+        return data;
+    }
     
     /**@author Robin
      * Create a buffer object containing several instances.
@@ -471,6 +525,8 @@ public class OBJLoader {
                 // Float.valueOf(faceIndices[3].split("/")[2]));
                 m.getFaces().add(new Model.Face(vertexIndicesArray, normalIndicesArray,
                         textureCoordinateIndicesArray, currentMaterial));
+                
+                m.setIndicesCount(m.getIndicesCount() + 3);	// Update the total number of indices in one instance of the model.
             } else if (line.startsWith("s ")) {
                 boolean enableSmoothShading = !line.contains("off");
                 m.setSmoothShadingEnabled(enableSmoothShading);
