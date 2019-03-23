@@ -45,14 +45,15 @@ public class Texture {
 	 * 
 	 * @param file - Texture file.
 	 * @param textureName - Name in shaders. 
+	 * @throws IOException 
 	 */
-	public Texture(String file, String textureName) {
+	public Texture(String file, String textureName) throws IOException {
 		ByteBuffer buf = null;
 		int tWidth = 0;
 		int tHeight = 0;
+		// Open the PNG file as an InputStream
+		InputStream in = FileManager.getStream(file);;
 		try {
-		    // Open the PNG file as an InputStream
-		    InputStream in = FileManager.getStream(file);
 		    // Link the PNG decoder to this stream
 		    PNGDecoder decoder = new PNGDecoder(in);
 		    this.height = decoder.getHeight();
@@ -66,9 +67,10 @@ public class Texture {
 		    buf = ByteBuffer.allocateDirect(4 * decoder.getWidth() * decoder.getHeight());
 		    decoder.decode(buf, decoder.getWidth() * 4, PNGDecoder.Format.RGBA);
 		    buf.flip();
-		    in.close();
 		} catch (IOException e) {
 		    e.printStackTrace();
+		} finally {
+			in.close();
 		}
 		
 		
