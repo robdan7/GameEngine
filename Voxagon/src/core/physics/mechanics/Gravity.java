@@ -1,4 +1,4 @@
-package core.physics;
+package core.physics.mechanics;
 
 import core.utils.math.Vector3f;
 
