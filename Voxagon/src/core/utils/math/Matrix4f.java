@@ -252,10 +252,11 @@ public class Matrix4f{
 	 * @param v
 	 */
 	public void multiply(Vector4f v) {
-		v.x = m00*v.x+m10*v.y+m20*v.z+m30*v.w;
-		v.y = m01*v.x+m11*v.y+m21*v.z+m31*v.w;
-		v.z = m02*v.x+m12*v.y+m22*v.z+m32*v.w;
-		v.w = m03*v.x+m13*v.y+m23*v.z+m33*v.w;
+		float x = v.x, y = v.y, z = v.z, w = v.w;
+		v.x = m00*x+m10*y+m20*z+m30*w;
+		v.y = m01*x+m11*y+m21*z+m31*w;
+		v.z = m02*x+m12*y+m22*z+m32*w;
+		v.w = m03*x+m13*y+m23*z+m33*w;
 	}
 	
 	/**
@@ -263,9 +264,10 @@ public class Matrix4f{
 	 * @param v
 	 */
 	public void multiply(Vector3f v) {
-		v.x = m00*v.x+m10*v.y+m20*v.z;
-		v.y = m01*v.x+m11*v.y+m21*v.z;
-		v.z = m02*v.x+m12*v.y+m22*v.z;
+		float x = v.x, y = v.y, z = v.z;
+		v.x = m00*x+m10*y+m20*z;
+		v.y = m01*x+m11*y+m21*z;
+		v.z = m02*x+m12*y+m22*z;
 	}
 	
 	/**
