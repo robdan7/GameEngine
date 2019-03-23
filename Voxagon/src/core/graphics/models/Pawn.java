@@ -188,29 +188,23 @@ public class Pawn implements MouseListener {
 	 * A "smoothing" variable can be set to determine the time for a change in direction. 
 	 */
 	private void moveSmooth() {
-		Vector3f v = this.moveDirection[0].interpolate(this.moveDirection[1].asNormalized(), (float)(this.clock.getTime()/this.movementSmoothing));
+		//Vector3f v = this.moveDirection[0].interpolate(this.moveDirection[1].asNormalized(), (float)(this.clock.getTime()/this.movementSmoothing));
+		this.position.storeBufferedPosition(this.moveDirection[0].interpolate(this.moveDirection[1].asNormalized(), (float)(this.clock.getTime()/this.movementSmoothing)));
 		
 		// The direction has changed, reset.
 		if (!this.moveDirection[2].equals(this.moveDirection[1])) {
-			this.moveDirection[0].set(v);
+			this.moveDirection[0].set(this.position.getBufferedPosition());
 			this.moveDirection[1].set(this.moveDirection[2]);
 			this.clock.reset();
 		} 
 
 		this.rotationMatrix.rotate(this.cam.gethAngle(), 0, 1, 0);
-		//v = rotationMatrix.multiply(v.toVec4f()).toVec3f();
-		//v = Matrix4f.multiply(this.rotationMatrix, v);
-		this.rotationMatrix.multiply(v);
+		this.rotationMatrix.multiply(this.position.getBufferedPosition());
 		
-		double delta = clock.getDelta();
+		this.position.getBufferedPosition().multiply((float)clock.getDelta()*this.moveVelocity);
+		this.position.getBufferedPosition().add(this.position.getTargetPosition());
 		
-		v.multiply((float)delta*this.moveVelocity);
-		v.add(this.position.getBufferedPosition());
-		this.position.storeBufferedPosition(v);
 		this.position.unloadBufferedPosition();
-		
-		//this.position.add(v.asMultiplied((float)delta*this.moveVelocity));
-		//this.position.add(this.gravity.calcFallDistance((float)delta));
 	}
 	
 	private void move() {
