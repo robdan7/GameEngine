@@ -1,4 +1,7 @@
-package core.utils.math;
+package core.utils.math.geometry;
+
+import core.utils.math.Vector3f;
+import core.utils.math.Vector4f;
 
 public class Plane {
 	private Vector3f normal, origin;
@@ -12,8 +15,8 @@ public class Plane {
 	 * @param p3
 	 */
 	public Plane(Vector3f p1, Vector3f p2, Vector3f p3) {
-		float u1 = p2.x-p1.x, u2 = p2.y-p1.y, u3 = p2.z-p1.z;
-		float v1 = p3.x-p1.x, v2 = p3.y-p1.y, v3 = p3.z-p1.z;
+		float u1 = p2.getX()-p1.getX(), u2 = p2.getY()-p1.getY(), u3 = p2.getZ()-p1.getZ();
+		float v1 = p3.getX()-p1.getX(), v2 = p3.getY()-p1.getY(), v3 = p3.getZ()-p1.getZ();
 		Vector3f normal = new Vector3f(u2*v3-u3*v2, u3*v1-u1*v3, u1*v2-u2*v1);
 		normal.normalize();
 		this.init(p1, normal);
