@@ -234,17 +234,51 @@ public class Matrix4f{
     }
 	
 	/**
-	 * 
+	 * Multiply this matrix by a 4-point vector.
 	 * @param v
-	 * @return
+	 * @return The multiplied vector.
 	 */
-	public Vector4f multiply(Vector4f v) {
+	public static Vector4f multiply(Matrix4f m, Vector4f v) {
 		Vector4f v2 = new Vector4f();
-		v2.x = m00*v.x+m10*v.y+m20*v.z+m30*v.w;
-		v2.y = m01*v.x+m11*v.y+m21*v.z+m31*v.w;
-		v2.z = m02*v.x+m12*v.y+m22*v.z+m32*v.w;
-		v2.w = m03*v.x+m13*v.y+m23*v.z+m33*v.w;
+		v2.x = m.m00*v.x+m.m10*v.y+m.m20*v.z+m.m30*v.w;
+		v2.y = m.m01*v.x+m.m11*v.y+m.m21*v.z+m.m31*v.w;
+		v2.z = m.m02*v.x+m.m12*v.y+m.m22*v.z+m.m32*v.w;
+		v2.w = m.m03*v.x+m.m13*v.y+m.m23*v.z+m.m33*v.w;
 		return v2;
+	}
+	
+	/**
+	 * Multiply a vector by this matrix. The effect is immediate.
+	 * @param v
+	 */
+	public void multiply(Vector4f v) {
+		v.x = m00*v.x+m10*v.y+m20*v.z+m30*v.w;
+		v.y = m01*v.x+m11*v.y+m21*v.z+m31*v.w;
+		v.z = m02*v.x+m12*v.y+m22*v.z+m32*v.w;
+		v.w = m03*v.x+m13*v.y+m23*v.z+m33*v.w;
+	}
+	
+	/**
+	 * Multiply a vector by this matrix. The effect is immediate.
+	 * @param v
+	 */
+	public void multiply(Vector3f v) {
+		v.x = m00*v.x+m10*v.y+m20*v.z;
+		v.y = m01*v.x+m11*v.y+m21*v.z;
+		v.z = m02*v.x+m12*v.y+m22*v.z;
+	}
+	
+	/**
+	 * Multiply this matrix by a 3-point vector.
+	 * @param v
+	 * @return The multiplied vector.
+	 */
+	public static Vector3f multiply(Matrix4f m, Vector3f v) {
+		Vector3f result = new Vector3f();
+		result.x = m.m00*v.x+m.m10*v.y+m.m20*v.z;
+		result.y = m.m01*v.x+m.m11*v.y+m.m21*v.z;
+		result.z = m.m02*v.x+m.m12*v.y+m.m22*v.z;
+		return result;
 	}
 	
 	/**
