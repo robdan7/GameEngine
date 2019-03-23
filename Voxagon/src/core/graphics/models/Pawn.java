@@ -39,8 +39,6 @@ public class Pawn implements MouseListener {
 	Gravity gravity = new Gravity(new Vector3f(0,1,0));
 	
 	private BufferedMotionContainer position;
-	
-	Vector3f positionTest;
 
 	
 	/**
@@ -55,7 +53,7 @@ public class Pawn implements MouseListener {
 	public Pawn(Vector3f upVector, Vector3f right, float fovy, float aspect, float zNear, float zFar) {
 		this.position = new BufferedMotionContainer();
 		//cam = new Camera(upVector, right, fovy, aspect, zNear, zFar, Camera.updateType.BOTH);
-		this.cam.bindFocusPos(this.positionTest);
+		this.cam.bindFocusPos(this.getPosition());
 		moveDirection = new Vector3f[3];
 		moveDirection[0] = new Vector3f(); // The current movement direction after smoothing.
 		moveDirection[1] = new Vector3f(); // New movement direction before smoothing.
@@ -65,7 +63,6 @@ public class Pawn implements MouseListener {
 		clock = new Timer();
 		clock.start();
 		rotationMatrix = new Matrix4f();
-		positionTest = new Vector3f();
 	}
 	
 	public Pawn() {
@@ -81,7 +78,6 @@ public class Pawn implements MouseListener {
 		clock = new Timer();
 		clock.start();
 		rotationMatrix = new Matrix4f();
-		positionTest = new Vector3f();
 	}
 	
 	public void bindCamera(Camera cam) {
@@ -203,8 +199,8 @@ public class Pawn implements MouseListener {
 
 		this.rotationMatrix.rotate(this.cam.gethAngle(), 0, 1, 0);
 		//v = rotationMatrix.multiply(v.toVec4f()).toVec3f();
-		v = Matrix4f.multiply(this.rotationMatrix, v);
-		//this.rotationMatrix.multiply(v);
+		//v = Matrix4f.multiply(this.rotationMatrix, v);
+		this.rotationMatrix.multiply(v);
 		
 		double delta = clock.getDelta();
 		
@@ -215,7 +211,6 @@ public class Pawn implements MouseListener {
 		
 		//this.position.add(v.asMultiplied((float)delta*this.moveVelocity));
 		//this.position.add(this.gravity.calcFallDistance((float)delta));
-		positionTest.set(this.position.getTargetPosition());
 	}
 	
 	private void move() {
@@ -263,8 +258,7 @@ public class Pawn implements MouseListener {
 	 * @return Position in world coordinates.
 	 */
 	public Vector3f getPosition() {
-		//return this.position.getTargetPosition();
-		return positionTest;
+		return this.position.getTargetPosition();
 	}
 	
 	/**
@@ -272,9 +266,8 @@ public class Pawn implements MouseListener {
 	 * @param pos
 	 */
 	public void setPosition(Vector3f pos) {
-		//this.position.storeBufferedPosition(pos);
-		//this.position.unloadBufferedPosition();
-		this.positionTest.set(pos);
+		this.position.storeBufferedPosition(pos);
+		this.position.unloadBufferedPosition();
 	}
 	
 	public Camera getCamera() {
