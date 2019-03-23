@@ -158,19 +158,29 @@ public class Engine {
 		} catch (IOException | ShaderCompileException e) {
 
 			e.printStackTrace();
-		}
-		
+		}		
 		m.setDepthShader(this.staticShadows);
 		this.dynamicShadowMap.bindPositionTo(player.getPosition());
 		
+		ModelBlueprint test = null;
+		try {
+			test = ModelCompiler.loadModelBlueprint("/Assets/Models/temp.ini");
+		} catch (IOException | ShaderCompileException e) {
+			e.printStackTrace();
+		}
+		test.setDepthShader(this.dynamicShadows);
+		
 		// add models to renderStack.
 		this.dynamicRenderStack.add(player.getModel());
+		this.dynamicRenderStack.add(test);
 		this.staticRenderStack.add(m);
 		
 
 		// bind models to global transform matrix.
 		this.player.getModel().bindTransformMatrix(translateMatrix);
 		m.bindTransformMatrix(translateMatrix);
+		test.bindTransformMatrix(translateMatrix);
+		test.translate(new Vector3f(10,10,0));
 		
 		// Create deffered shader and quad.
 		Shaders deffered = new Shaders("/Assets/Shaders/deffered/deffered.vert","/Assets/Shaders/deffered/deffered.frag");
@@ -229,16 +239,13 @@ public class Engine {
 */
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
 			// Get all window events. This is where key callback is activated.
-			glfwPollEvents();			
-			
 			player.updateMovement();
-
 			window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack);
 			glBindFramebuffer(GL_FRAMEBUFFER, screenQuad.getFBO());
 			glClearColor(0, 0, 0, 0); // Set the background to transparent.
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
-			this.dynamicShadowMap.updateCameraUniform();
+			
 			window.renderTextured(this.dynamicRenderStack, this.staticRenderStack);
 			//glUseProgram(0);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -247,7 +254,7 @@ public class Engine {
 			screenQuad.drawQuad();
 			
 			window.endRender();		
-			
+			glfwPollEvents();
 		}
 	}
 	
@@ -305,6 +312,8 @@ public class Engine {
 		panel.addKeyReleaseFunction(GLFW_KEY_LEFT_SHIFT, () -> player.addYvelocity(1));
 		
 		panel.addKeyPressFunction(GLFW_KEY_ESCAPE, () -> UiPanel.popPanel());
+		
+		panel.addKeyPressFunction(GLFW_KEY_ENTER, ()-> window.renderShadowMap(this.staticShadowMap, this.staticRenderStack));
 		
 		panel.setHideAction(() -> mouse.showCursor(window));
 		panel.setShowAction(() -> mouse.grabCursor(window));
