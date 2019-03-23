@@ -27,9 +27,9 @@ public class ShadowMap {
 	 */
 	private DirectionalLight light;
 	
-	private Vector3f position, computedPosition;
+	private Vector3f position;
 	
-	private float xResolution, yResolution;
+	private float xPPI, yPPI;
 	
 	/**
 	 * @param up - up vector.
@@ -54,11 +54,9 @@ public class ShadowMap {
 		cam.lookAt();
 		
 		this.position = new Vector3f();
-		this.computedPosition = new Vector3f();
-		this.cam.bindFocusPos(this.computedPosition);
 		
-		this.xResolution = matrixDimensions.getX()*2.0f/(float)width;
-		this.yResolution = matrixDimensions.getY()*2.0f/(float)height;
+		this.xPPI = matrixDimensions.getX()*2.0f/(float)width;
+		this.yPPI = matrixDimensions.getY()*2.0f/(float)height;
 	}
 	
 	public void lookAt(Vector3f v) {
@@ -103,7 +101,7 @@ public class ShadowMap {
 	 * Update the camera view. This must be done before the shadow map position can change.
 	 */
 	public void updateCameraUniform() {
-		roundOffPosition();
+		rounfOffAndUpdateCamPos();
 		if (this.light != null) {
 			/**
 			 * Use the flipped light position to look in the opposite direction.
@@ -114,16 +112,19 @@ public class ShadowMap {
 		cam.updateUniform();
 	}
 	
-	private void roundOffPosition() {
+	/**
+	 * This rounds off the shadow map position before it updates 
+	 * the camera position. This ensures that all shadow edges look the same 
+	 * on non-moving objects in the scene.
+	 */
+	private void rounfOffAndUpdateCamPos() {
 		Vector3f roundOffV = this.getCamera().getLookAtMatrix().multiply(this.position);
-		roundOffV.setX(MathTools.floorToMultiple(roundOffV.getX(), this.xResolution));
-		roundOffV.setY(MathTools.floorToMultiple(roundOffV.getY(), this.yResolution));
+		roundOffV.setX(MathTools.floorToMultiple(roundOffV.getX(), this.xPPI));
+		roundOffV.setY(MathTools.floorToMultiple(roundOffV.getY(), this.yPPI));
 		
 		Matrix4f inverse = this.getCamera().getLookAtMatrix().getInverse();
-		
-		roundOffV = inverse.multiply(roundOffV);
-		
-		this.computedPosition.set(roundOffV);
+
+		this.cam.getFocusPos().set(inverse.multiply(roundOffV));
 	}
 	
 	/**
