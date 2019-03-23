@@ -106,6 +106,7 @@ public class UniformBufferSource implements Iterable<String> {
 	
 	public void updateSource(int offset, Matrix4f... matrices) {
 		BufferTools.putInBuffer(this.buffer, offset, matrices);
+		this.object.updateSource(this);
 	}
 	
 	public void bindToBufferObject(UniformBufferObject o) {

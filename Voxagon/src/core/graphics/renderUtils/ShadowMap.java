@@ -52,7 +52,10 @@ public class ShadowMap {
 				up, right, -matrixDimensions.getX(), matrixDimensions.getX(), -matrixDimensions.getY(), matrixDimensions.getY(), matrixDimensions.getZ(), matrixDimensions.getW(), 
 				Camera.updateType.CAMERA, unf);
 		//cam.rotate(0, -(float)Math.PI/2);
-		cam.lookAt(new Vector3f(0.1f,-1f,0));
+		//cam.lookAt(new Vector3f(0.1f,-1f,0).normalize());
+		Vector3f v = new Vector3f(0.1f,-1f,0);
+		v.normalize();
+		this.lookAt(v);
 		//System.out.println(cam.getForward().toString() + " : " + cam.getPosition().toString());
 		cam.lookAt();
 		
@@ -63,6 +66,10 @@ public class ShadowMap {
 		this.yPPI = matrixDimensions.getY()*2.0f/(float)height;
 	}
 	
+	/**
+	 * 
+	 * @param v - A normalized vector.
+	 */
 	public void lookAt(Vector3f v) {
 		cam.lookAt(v);
 	}
@@ -113,19 +120,18 @@ public class ShadowMap {
 			 * Use the flipped light position to look in the opposite direction.
 			 * The camera will now look in the same direction as the light source.
 			 */
-			cam.lookAt(light.getPosition().asFlipped().toVec3f());
+			cam.lookAt(light.getPosition().asFlipped());
 		}
 		cam.updateUniform();
 	}
+	
 	
 	/**
 	 * This rounds off the shadow map position before it updates 
 	 * the camera position. This ensures that all shadow edges look the same 
 	 * on non-moving objects in the scene.
 	 */
-	
 	private void roundOffAndUpdateCamPos() {
-		//Vector3f roundOffV = this.getCamera().getLookAtMatrix().multiply(this.position);
 		this.positionContainer.resetBuffer();
 		this.getCamera().getLookAtMatrix().multiply(this.positionContainer.getBufferedPosition());
 		

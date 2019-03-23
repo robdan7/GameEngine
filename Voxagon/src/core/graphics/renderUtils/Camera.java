@@ -1,13 +1,10 @@
 package core.graphics.renderUtils;
 
-import java.nio.FloatBuffer;
-
-import org.lwjgl.BufferUtils;
-
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
 import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
+import core.utils.math.Vector4f;
 
 /**
  * 
@@ -25,8 +22,7 @@ public class Camera {
 	private  float hAngle;
 	private float vAngle;
 	private float focusoffset;
-	
-	private FloatBuffer uniformBuffer;
+
 	private updateType updateType;
 	
 	private UniformBufferSource uniformSource;
@@ -76,12 +72,9 @@ public class Camera {
 		this.right = right;
 		lookAtMatrix = new Matrix4f();
 		perspectiveMatrix = new Matrix4f();
-		// TODO fix this
-		forward = upVector.crossProduct(right).asNormalized().toVec3f();
 		
-		
-		this.uniformBuffer = BufferUtils.createFloatBuffer(this.updateType.getSize());
-		
+		forward = upVector.crossProduct(right);
+		forward.normalize();
 	}
 	
 	public void perspective(float fovy, float aspect, float zNear, float zFar, String name) {
@@ -141,46 +134,43 @@ public class Camera {
 	 * @param v - The vector v to look at.
 	 */
 	public void lookAt(Vector3f v) {
-		this.forward = v.asNormalized().toVec3f();
+		this.forward.set(v);
 		this.lookAt();
 	}	
 	
+	/**
+	 * Look at a vector relative to camera position.
+	 * @param v - The vector v to look at.
+	 */
+	public void lookAt(Vector4f v) {
+		this.forward.set(v);
+		this.lookAt();
+	}	
 	
 	/**
 	 * Updates the uniform block connected to this camera.
 	 */
 	public void updateUniform() {
-		this.uniformBuffer.clear();
 		switch(this.updateType) {
 			case CAMERA:
-				this.perspectiveMatrix.multiply(this.lookAtMatrix).put(this.uniformBuffer);
+				this.uniformSource.updateSource(this.perspectiveMatrix.multiply(this.lookAtMatrix));
 				break;
 			case VIEW:
-				this.lookAtMatrix.put(this.uniformBuffer);
+				this.uniformSource.updateSource(this.lookAtMatrix);
 				break;
 			case BOTH:
-				//put the perspective matrix AND the view matrix on the buffer.
-				
-				this.perspectiveMatrix.multiply(this.lookAtMatrix).put(this.uniformBuffer);
-				this.uniformBuffer.put(this.lookAtMatrix.toFloatArray());
+				this.uniformSource.updateSource(0, this.perspectiveMatrix.multiply(this.lookAtMatrix), this.lookAtMatrix);
 				break;
-		}
-		//this.perspectiveMatrix.multiply(this.lookAtMatrix).put(this.uniformBuffer);
-		//super.updateUniform(this.uniformBuffer);
-		
-		this.uniformSource.updateSource(this.uniformBuffer, 0);		
+		}	
 	}
 	
 	/**
 	 * Updates the camera position in regards to the focus position and offset to it.
 	 */
 	private void updateCamPos() {
-		if (this.focusoffset == 0) {
-			//Vector.copy(this.getFocusPos(), this.cameraPosition);
-			this.cameraPosition.set(this.getFocusPos());
-		} else {
-			Vector3f offset = this.forward.copy().asMultiplied(this.focusoffset);
-			this.cameraPosition.set(this.getFocusPos().asSubtracted( offset));
+		this.cameraPosition.set(this.getFocusPos());
+		if (this.focusoffset > 0) {			
+			this.cameraPosition.subtract(this.forward.asMultiplied(this.focusoffset));
 		}
 	}
 	
