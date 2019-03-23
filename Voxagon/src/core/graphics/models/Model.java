@@ -49,6 +49,7 @@ public class Model {
     private final List<Face> faces = new ArrayList<Face>();
     private final HashMap<String, Material> materials = new HashMap<String, Material>();
     private String texture = "";
+    private int indices;
     private boolean enableSmoothShading = true;
 
     public void enableStates() {
@@ -74,8 +75,25 @@ public class Model {
         return vertices;
     }
     
+    @Deprecated
     public int getVertCount() {
     	return vertices.size();
+    }
+    
+    void setIndicesCount(int i )  {
+    	this.indices = i;
+    }
+    
+    public int getIndicesCount() {
+    	return this.indices;
+    }
+    
+    public int getNormalCount() {
+    	return this.normals.size();
+    }
+    
+    public int getTextureCount() {
+    	return this.textureCoordinates.size();
     }
 
     public List<Vector2f> getTextureCoordinates() {
