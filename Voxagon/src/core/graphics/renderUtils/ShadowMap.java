@@ -106,7 +106,7 @@ public class ShadowMap {
 	 * Update the camera view. This must be done before the shadow map position can change.
 	 */
 	public void updateCameraUniform() {
-		rounfOffAndUpdateCamPos();
+		roundOffAndUpdateCamPos();
 		//this.cam.getFocusPos().set(this.position);
 		if (this.light != null) {
 			/**
@@ -124,7 +124,7 @@ public class ShadowMap {
 	 * on non-moving objects in the scene.
 	 */
 	
-	private void rounfOffAndUpdateCamPos() {
+	private void roundOffAndUpdateCamPos() {
 		//Vector3f roundOffV = this.getCamera().getLookAtMatrix().multiply(this.position);
 		this.positionContainer.resetBuffer();
 		this.getCamera().getLookAtMatrix().multiply(this.positionContainer.getBufferedPosition());
