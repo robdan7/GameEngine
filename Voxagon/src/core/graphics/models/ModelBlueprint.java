@@ -15,7 +15,7 @@ import static org.lwjgl.opengl.GL15.*;
 
 public  class ModelBlueprint implements RenderObject{
 
-	private int[] model;
+	private int modelVBO, modelIndices;
 	private Vector3f position;
 	private Texture texture;
 	private UniformBufferSource transformUniform;
@@ -29,7 +29,8 @@ public  class ModelBlueprint implements RenderObject{
 		this.position = new Vector3f();
 		try {
 			Model m = OBJLoader.loadTexturedModel(modelFile, 1);
-			model = OBJLoader.createVBO(m);
+			modelVBO = OBJLoader.createVBO(m);
+			this.modelIndices = m.getIndicesCount();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -43,7 +44,8 @@ public  class ModelBlueprint implements RenderObject{
 		this.position = new Vector3f();
 		try {
 			Model m = OBJLoader.loadTexturedModel(modelFile, 1);
-			model = OBJLoader.createVBO(m);
+			modelVBO = OBJLoader.createVBO(m);
+			this.modelIndices = m.getIndicesCount();
 			this.texture = new Texture(m.getTexture(), textureUniformName);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -85,9 +87,9 @@ public  class ModelBlueprint implements RenderObject{
 	@Override
 	public void discard() {
 		this.texture.cleanup();
-		if(model.length != 0) {
-			OBJLoader.deleteVBO(model[0]);
-		}
+		//if(model.length != 0) {
+			OBJLoader.deleteVBO(modelVBO);
+		//}
 		if (texture != null) {
 			texture.cleanup();
 		}
@@ -110,7 +112,7 @@ public  class ModelBlueprint implements RenderObject{
 		GL20.glVertexAttribPointer(0, 3, GL_FLOAT, false, Float.BYTES*8, 0);
 		GL20.glVertexAttribPointer(1, 3, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*3);
 		GL20.glVertexAttribPointer(2, 2, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*6);
-		glDrawArrays(GL_TRIANGLES, 0, model[1]);
+		glDrawArrays(GL_TRIANGLES, 0, this.modelIndices);
 		this.unbind();
 	}
 	
@@ -142,7 +144,7 @@ public  class ModelBlueprint implements RenderObject{
 	}
 	
 	private void bind() {
-		glBindBuffer(GL_ARRAY_BUFFER, this.model[0]);
+		glBindBuffer(GL_ARRAY_BUFFER, this.modelVBO);
 	}
 	
 	private void unbind() {
