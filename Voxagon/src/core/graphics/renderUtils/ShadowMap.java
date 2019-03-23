@@ -5,6 +5,7 @@ import core.graphics.lights.Light;
 import core.graphics.misc.Texture;
 import core.graphics.renderUtils.buffers.Drawbuffer;
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
+import core.physics.mechanics.BufferedMotionContainer;
 import core.utils.math.MathTools;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
@@ -27,7 +28,9 @@ public class ShadowMap {
 	 */
 	private DirectionalLight light;
 	
-	private Vector3f position;
+	//private Vector3f position;
+	
+	private BufferedMotionContainer positionContainer;
 	
 	private float xPPI, yPPI;
 	
@@ -53,7 +56,8 @@ public class ShadowMap {
 		//System.out.println(cam.getForward().toString() + " : " + cam.getPosition().toString());
 		cam.lookAt();
 		
-		this.position = new Vector3f();
+		//this.position = new Vector3f();
+		this.positionContainer = new BufferedMotionContainer();
 		
 		this.xPPI = matrixDimensions.getX()*2.0f/(float)width;
 		this.yPPI = matrixDimensions.getY()*2.0f/(float)height;
@@ -86,7 +90,8 @@ public class ShadowMap {
 	 */
 	public void bindPositionTo(Vector3f v) {
 		//this.cam.bindFocusPos(v);
-		this.position = v;
+		//this.position = v;
+		this.positionContainer = new BufferedMotionContainer(v);
 	}
 	
 	/**
@@ -102,6 +107,7 @@ public class ShadowMap {
 	 */
 	public void updateCameraUniform() {
 		rounfOffAndUpdateCamPos();
+		//this.cam.getFocusPos().set(this.position);
 		if (this.light != null) {
 			/**
 			 * Use the flipped light position to look in the opposite direction.
@@ -117,14 +123,20 @@ public class ShadowMap {
 	 * the camera position. This ensures that all shadow edges look the same 
 	 * on non-moving objects in the scene.
 	 */
+	
 	private void rounfOffAndUpdateCamPos() {
-		Vector3f roundOffV = this.getCamera().getLookAtMatrix().multiply(this.position);
-		roundOffV.setX(MathTools.floorToMultiple(roundOffV.getX(), this.xPPI));
-		roundOffV.setY(MathTools.floorToMultiple(roundOffV.getY(), this.yPPI));
+		//Vector3f roundOffV = this.getCamera().getLookAtMatrix().multiply(this.position);
+		this.positionContainer.resetBuffer();
+		this.getCamera().getLookAtMatrix().multiply(this.positionContainer.getBufferedPosition());
+		
+		this.positionContainer.storeBufferedPositionX(MathTools.floorToMultiple(this.positionContainer.getBufferedPosition().getX(), this.xPPI));
+		this.positionContainer.storeBufferedPositionY(MathTools.floorToMultiple(this.positionContainer.getBufferedPosition().getY(), this.yPPI));
 		
 		Matrix4f inverse = this.getCamera().getLookAtMatrix().getInverse();
+		
+		inverse.multiply(this.positionContainer.getBufferedPosition());
 
-		this.cam.getFocusPos().set(inverse.multiply(roundOffV));
+		this.cam.getFocusPos().set(this.positionContainer.getBufferedPosition());
 	}
 	
 	/**
