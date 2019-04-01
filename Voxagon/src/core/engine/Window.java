@@ -9,10 +9,10 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import core.graphics.misc.Color;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.ShadowMap;
+import core.utils.datatypes.GlueList;
 import core.utils.math.Vector4f;
 
 import java.nio.*;
-import java.util.ArrayList;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -28,10 +28,6 @@ public class Window {
 	private long window;
 	private int width;
 	private int height;
-	
-	//ArrayList<RenderObject> renderStack;
-	ArrayList<RenderObject> staticRenderStack;
-	ArrayList<RenderObject> dynamicRenderStack;
 	
 	private Color skyColor;
 	
@@ -58,8 +54,6 @@ public class Window {
 		this.width = w;
 		this.height = h;
 		this.init();
-		this.staticRenderStack = new ArrayList<>();
-		this.dynamicRenderStack = new ArrayList<>();
 		this.skyColor = new Color();
 	}
 	
@@ -152,50 +146,9 @@ public class Window {
 	void endRender() {
 		glfwSwapBuffers(this.getWindow()); // swap the color buffers
 	}
-	
-	@Deprecated
-	void renderStaticShadowMap(ShadowMap shadowmap) {
-		shadowmap.updateCameraUniform();
-		glCullFace(GL_FRONT);
-		glBindFramebuffer(GL_FRAMEBUFFER, shadowmap.getBuffer().getColorMapFBO());
-		glViewport(0, 0, shadowmap.getBuffer().getWidth(), shadowmap.getBuffer().getHeight());
-		glClear(GL_DEPTH_BUFFER_BIT);
-		int lastShader = 0;
-		for (int i = 0; i < staticRenderStack.size(); i++) {
-			if (lastShader != staticRenderStack.get(i).getDepthShader()) {
-				glUseProgram(staticRenderStack.get(i).getDepthShader());
-				//shadowmap.updateCameraUniform();
-			}
-			staticRenderStack.get(i).render();
-		}
-		glViewport(0, 0, this.getWidth(), this.getHeight());
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glUseProgram(0);
-		glCullFace(GL_BACK);
-	}
-	
-	@Deprecated
-	void renderDynamicShadowMap(ShadowMap shadowMap) {
-		shadowMap.updateCameraUniform();
-		glCullFace(GL_FRONT);
-		glBindFramebuffer(GL_FRAMEBUFFER, shadowMap.getBuffer().getColorMapFBO());
-		glViewport(0, 0, shadowMap.getBuffer().getWidth(), shadowMap.getBuffer().getHeight());
-		glClear(GL_DEPTH_BUFFER_BIT);
-		int lastShader = 0;
-		for (int i = 0; i < dynamicRenderStack.size(); i++) {
-			if (lastShader != dynamicRenderStack.get(i).getDepthShader()) {
-				glUseProgram(dynamicRenderStack.get(i).getDepthShader());
-			}
-			dynamicRenderStack.get(i).render();
-		}
-		glViewport(0, 0, this.getWidth(), this.getHeight());
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glUseProgram(0);
-		glCullFace(GL_BACK);
-	}
-	
 
-	void renderShadowMap(ShadowMap map, ArrayList<RenderObject> objects) {
+
+	void renderShadowMap(ShadowMap map, GlueList<RenderObject> objects) {
 		map.updateCameraUniform();
 		glCullFace(GL_FRONT);
 		glBindFramebuffer(GL_FRAMEBUFFER, map.getBuffer().getColorMapFBO());
@@ -221,10 +174,10 @@ public class Window {
 	 * @param arrayLists
 	 */
 	@SafeVarargs
-	final void renderTextured(ArrayList<? extends RenderObject>... arrayLists ) {
+	final void renderTextured(GlueList<? extends RenderObject>... arrayLists ) {
 
 		int lastShader = 0;
-		for (ArrayList<? extends RenderObject> renderlist : arrayLists) {
+		for (GlueList<? extends RenderObject> renderlist : arrayLists) {
 			for (RenderObject o : renderlist) {
 				if (lastShader != o.getShader()) {
 					lastShader = o.getShader();
@@ -232,31 +185,6 @@ public class Window {
 				}
 				o.renderTextured();
 			}
-		}
-		glUseProgram(0);
-	}
-	
-	
-	@Deprecated
-	void renderTextured(ShadowMap dynamicShadowMap) {
-		dynamicShadowMap.updateCameraUniform();
-		
-		int lastShader = 0;		
-		for (int i = 0; i < staticRenderStack.size(); i++) {
-			if (lastShader != staticRenderStack.get(i).getShader()) {
-				lastShader = staticRenderStack.get(i).getShader();
-				glUseProgram(lastShader);
-			
-			}
-			staticRenderStack.get(i).renderTextured();
-		}
-		
-		for (int i = 0; i < dynamicRenderStack.size(); i++) {
-			if (lastShader != dynamicRenderStack.get(i).getShader()) {
-				lastShader = dynamicRenderStack.get(i).getShader();
-				glUseProgram(lastShader);
-			}
-			dynamicRenderStack.get(i).renderTextured();
 		}
 		glUseProgram(0);
 	}
@@ -281,33 +209,15 @@ public class Window {
 		return this.skyColor.getColor();
 	}
 	
-	@Deprecated
-	void addStaticRenderObject(RenderObject obj) {
-		this.staticRenderStack.add(obj);
-	}
+
 	
-	@Deprecated
-	void addDynamicRenderObject(RenderObject obj) {
-		this.dynamicRenderStack.add(obj);
-	}
-	
-	void deleteRenderObject(RenderObject obj) {
-		if(staticRenderStack.contains(obj)) {
-			staticRenderStack.remove(obj);
-		} else if(dynamicRenderStack.contains(obj)) {
-			dynamicRenderStack.remove(obj);
+	void deleteRenderObject(GlueList<RenderObject> renderStack, RenderObject obj) {
+		if(renderStack.contains(obj)) {
+			renderStack.remove(obj);
+		} else if(renderStack.contains(obj)) {
+			renderStack.remove(obj);
 		}
 		
-	}
-	
-	void deleteAllRenderObjects() {
-		for(int i = 0; i < staticRenderStack.size(); i++) {
-			staticRenderStack.get(i).discard();
-		}
-		
-		for(int i = 0; i < dynamicRenderStack.size(); i++) {
-			dynamicRenderStack.get(i).discard();
-		}
 	}
 	
 	public static void enableVertexArray() {
