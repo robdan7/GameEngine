@@ -32,6 +32,7 @@ package core.graphics.models;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL15;
 
+import core.utils.datatypes.GlueList;
 import core.utils.fileSystem.FileManager;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
@@ -40,7 +41,7 @@ import core.utils.other.BufferTools;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -320,7 +321,7 @@ public class OBJLoader {
         return m;
     }
 
-    public static int createTexturedDisplayList(Model m, int amount, ArrayList<Vector3f> vec) {
+    public static int createTexturedDisplayList(Model m, int amount, List<Vector3f> vec) {
         int displayList = glGenLists(amount);
         for (int i = 0; i < amount; i++) {
         	glNewList(displayList+i, GL_COMPILE);

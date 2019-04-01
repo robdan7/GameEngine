@@ -10,13 +10,13 @@ import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.lwjgl.BufferUtils;
 
 import core.graphics.models.OBJLoader;
 import core.graphics.renderUtils.Shaders;
+import core.utils.datatypes.GlueList;
 import core.utils.fileSystem.FileManager;
 import static core.utils.other.StringUtils.*;
 
@@ -56,7 +56,7 @@ public class UniformObject {
 	/**
 	 * List of all connected uniform sources.
 	 */
-	private ArrayList<UniformSource> uniformSources;
+	private GlueList<UniformSource> uniformSources;
 	
 	// remove this.
 	//private int[] buffersizes;
@@ -100,7 +100,7 @@ public class UniformObject {
 				
 		this.bindBuffer(buffer);
 		
-		uniformSources = new ArrayList<UniformSource>();
+		uniformSources = new GlueList<UniformSource>();
 	}
 	
 	/**

@@ -8,14 +8,13 @@ import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL15;
 
 import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
+import core.utils.datatypes.GlueList;
 import core.utils.other.BufferTools;
 
 /**
@@ -38,11 +37,11 @@ public class UniformBufferObject {
 	
 
 	private static HashMap<String, UniformBufferObject> uniformList;
-	private static ArrayList<Shaders> pendingShaders;
+	private static GlueList<Shaders> pendingShaders;
 	
 	static {
 		uniformList = new HashMap<String,UniformBufferObject>();
-		pendingShaders = new ArrayList<Shaders>();
+		pendingShaders = new GlueList<Shaders>();
 	}
 
 	private int drawType;

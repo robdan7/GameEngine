@@ -1,13 +1,12 @@
 package core.input.ui;
 
-import java.util.ArrayList;
-
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
 import core.input.InputInterface;
 import core.input.KeyboardListener;
 import core.input.MouseListener;
 import core.input.MouseObserver;
+import core.utils.datatypes.GlueList;
 import core.utils.datatypes.Stack;
 import core.utils.event.Observer;
 import core.utils.math.Vector2f;
@@ -15,7 +14,7 @@ import core.utils.math.Vector2f;
 public class UiPanel extends  InputInterface implements RenderObject {
 	private static Stack<UiPanel> uiStack;
 	private boolean visible = false;
-	private ArrayList<UiItem> items;
+	private GlueList<UiItem> items;
 	private String panelfile;
 	Runnable onHide, onShow;
 	
@@ -47,7 +46,7 @@ public class UiPanel extends  InputInterface implements RenderObject {
 	
 	public UiPanel(MouseListener listener, String panelFile) {
 		super(listener);
-		items = new ArrayList<UiItem>();
+		items = new GlueList<UiItem>();
 		this.panelfile = panelFile;
 		
 		this.onHide = new Runnable() {
@@ -89,7 +88,7 @@ public class UiPanel extends  InputInterface implements RenderObject {
 			}
 			
 		});
-		items = new ArrayList<UiItem>();
+		items = new GlueList<UiItem>();
 		this.panelfile = panelfile;
 		
 		this.onHide = new Runnable() {

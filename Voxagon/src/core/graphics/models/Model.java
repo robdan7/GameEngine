@@ -29,10 +29,10 @@
 
 package core.graphics.models;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import core.utils.datatypes.GlueList;
 import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
 
@@ -43,10 +43,10 @@ import static org.lwjgl.opengl.GL11.*;
  */
 public class Model {
 
-    private final List<Vector3f> vertices = new ArrayList<Vector3f>();
-    private final List<Vector2f> textureCoordinates = new ArrayList<Vector2f>();
-    private final List<Vector3f> normals = new ArrayList<Vector3f>();
-    private final List<Face> faces = new ArrayList<Face>();
+    private final List<Vector3f> vertices = new GlueList<Vector3f>();
+    private final List<Vector2f> textureCoordinates = new GlueList<Vector2f>();
+    private final List<Vector3f> normals = new GlueList<Vector3f>();
+    private final List<Face> faces = new GlueList<Face>();
     private final HashMap<String, Material> materials = new HashMap<String, Material>();
     private String texture = "";
     private int indices;

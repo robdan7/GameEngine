@@ -3,6 +3,7 @@ package core.graphics.renderUtils;
 import org.lwjgl.opengl.GL20;
 
 import core.graphics.renderUtils.uniforms.*;
+import core.utils.datatypes.GlueList;
 import core.utils.fileSystem.FileManager;
 import core.utils.other.StringUtils;
 
@@ -19,7 +20,7 @@ public class Shaders{
 	private static HashMap<String, StringBuilder> imports = new HashMap<String,StringBuilder>();
 	private String vertexFile, fragmentFile;
 	private ShaderStatus compileStatus;
-	private ArrayList<String> pendingUniforms;
+	private GlueList<String> pendingUniforms;
     
 	/**
 	 * 
@@ -27,7 +28,7 @@ public class Shaders{
 	 * @param frag - Fragment shader file name.
 	 */
     public Shaders(String vert, String frag) {
-    	this.pendingUniforms = new ArrayList<String>();
+    	this.pendingUniforms = new GlueList<String>();
     	this.init(vert, frag);
     }
     
@@ -55,7 +56,7 @@ public class Shaders{
     				fShader = splittedLine[1];
     			}
     		}
-    		this.pendingUniforms = new ArrayList<String>();
+    		this.pendingUniforms = new GlueList<String>();
     		this.init(vShader, fShader);
 		} catch (IOException e) {
 			this.compileStatus = ShaderStatus.FAILED;

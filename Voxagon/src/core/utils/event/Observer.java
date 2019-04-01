@@ -1,6 +1,6 @@
 package core.utils.event;
 
-import java.util.ArrayList;
+import core.utils.datatypes.GlueList;
 
 /**
  * This class represents an observer that can notify listeners when something happens.
@@ -11,12 +11,12 @@ import java.util.ArrayList;
  * @param <L>
  */
 public class Observer<T, O extends Observer<T,O,L>, L extends Listener<T,L,O>> {
-	protected ArrayList<L> listeners;
+	protected GlueList<L> listeners;
 	int i;
 	
 	
 	public Observer() {
-		this.listeners = new ArrayList<L>();
+		this.listeners = new GlueList<L>();
 	}
 	
 	/**
