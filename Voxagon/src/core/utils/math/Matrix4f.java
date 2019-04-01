@@ -126,7 +126,7 @@ public class Matrix4f{
 		
 		float lengthProduct = u.length()*v.length();
 		double sin = n.length()/lengthProduct;
-		double cos = u.dotProduct(v)/lengthProduct;
+		double cos = u.dot(v)/lengthProduct;
 		
 		n.normalize();
 		this.rotate(sin, cos, n.x, n.y, n.z);

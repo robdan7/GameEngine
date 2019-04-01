@@ -23,7 +23,7 @@ public class Plane {
 	}
 	
 	private void init(Vector3f start, Vector3f n) {
-		informationVector = new Vector4f(n.getX(), n.getY(), n.getZ(), start.dotProduct(n));
+		informationVector = new Vector4f(n.getX(), n.getY(), n.getZ(), start.dot(n));
 		/*this.a = n.x;
 		this.b = n.y;
 		this.c = n.z;

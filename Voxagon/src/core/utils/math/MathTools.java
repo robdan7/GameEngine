@@ -32,7 +32,7 @@ public class MathTools {
 		Vector3f dist = p.getOgirin();
 		dist.subtract(point);
 		dist.flip();
-		return dist.dotProduct(p.getOgirin());
+		return dist.dot(p.getOgirin());
 	}
 	
 	
