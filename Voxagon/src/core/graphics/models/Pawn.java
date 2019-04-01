@@ -1,6 +1,8 @@
 package core.graphics.models;
 
 
+import java.io.IOException;
+
 import core.graphics.renderUtils.Camera;
 import core.graphics.renderUtils.Shaders;
 import core.input.MouseListener;
@@ -20,7 +22,7 @@ import core.utils.other.Timer;
  * @author Robin
  *
  */
-public class Pawn implements MouseListener {
+public class Pawn extends ModelBlueprint implements MouseListener {
 	private Vector3f[] moveDirection;
 	private float movementSmoothing = 0;
 	
@@ -34,7 +36,7 @@ public class Pawn implements MouseListener {
 	private Camera cam;
 	camFollow followmode;
 	
-	ModelBlueprint model;
+	//ModelBlueprint model;
 	
 	Gravity gravity = new Gravity(new Vector3f(0,1,0));
 	
@@ -50,7 +52,8 @@ public class Pawn implements MouseListener {
 	 * @param zNear - The new plane. Set to roughly 0.001f.
 	 * @param zFar - The far plane. Depth will be inaccurate if the far plane is to far away.
 	 */
-	public Pawn(Vector3f upVector, Vector3f right, float fovy, float aspect, float zNear, float zFar) {
+	public Pawn(String modelFile, Vector3f upVector, Vector3f right, float fovy, float aspect, float zNear, float zFar) {
+		super();
 		this.position = new BufferedMotionContainer();
 		//cam = new Camera(upVector, right, fovy, aspect, zNear, zFar, Camera.updateType.BOTH);
 		this.cam.bindFocusPos(this.getPosition());
@@ -65,7 +68,14 @@ public class Pawn implements MouseListener {
 		rotationMatrix = new Matrix4f();
 	}
 	
-	public Pawn() {
+	public Pawn(String modelFile) {
+		super();
+		try {
+			ModelCompiler.loadModelBlueprint(this, modelFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		//cam = new Camera(upVector, right, fovy, aspect, zNear, zFar, Camera.updateType.BOTH);
 		//this.cam.bindFocusPos(this.position);
 		this.position = new BufferedMotionContainer();
@@ -104,15 +114,17 @@ public class Pawn implements MouseListener {
 	/**
 	 * Add a .obj model to the pawn.
 	 */
+	@Deprecated
 	public void addModel(String file) {
-		this.model = new ModelBlueprint(file);
+		//this.model = new ModelBlueprint(file);
 	}
 	
 	/**
 	 * Add a .obj model to the pawn.
 	 */
+	@Deprecated
 	public void addModel(ModelBlueprint m) {
-		this.model = m;
+		//this.model = m;
 	}
 	
 	/**
@@ -120,10 +132,7 @@ public class Pawn implements MouseListener {
 	 * @param shader
 	 */
 	public void bindTexture(Shaders shader) {
-		if (this.model == null) {
-			throw new RuntimeException("No model exists");
-		}
-		this.model.bindTexture(shader);
+		super.bindTexture(shader);
 	}
 	
 	/**
@@ -179,7 +188,7 @@ public class Pawn implements MouseListener {
 		} else {
 			this.move();
 		}
-		this.model.translate(this.getPosition());
+		super.translate(this.position.getTargetPosition());
 		this.updateCamera();
 	}
 	
@@ -201,7 +210,9 @@ public class Pawn implements MouseListener {
 		this.rotationMatrix.rotate(this.cam.gethAngle(), 0, 1, 0);
 		this.rotationMatrix.multiply(this.position.getBufferedPosition());
 		
+		/* Multiply the normalized velocity by the time and length*/
 		this.position.getBufferedPosition().multiply((float)clock.getDelta()*this.moveVelocity);
+		/* Add the current position to get a new absolute position */
 		this.position.getBufferedPosition().add(this.position.getTargetPosition());
 		
 		this.position.unloadBufferedPosition();
@@ -274,10 +285,6 @@ public class Pawn implements MouseListener {
 	 */
 	public enum camFollow {
 		STATIC, FPV, THIRDVIEW
-	}
-
-	public ModelBlueprint getModel() {
-		return this.model;
 	}
 	
 	public void setGravity(float g) {
