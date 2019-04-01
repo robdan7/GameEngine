@@ -11,7 +11,6 @@ import core.utils.other.BufferTools;
 import static org.lwjgl.opengl.GL30.*;
 
 public class UniformTools {
-	//static ArrayList<Integer> usedUniforms = new ArrayList<>();
 
 	public static void createMatrixBlock(Shaders shader, String name) {
 		throw new RuntimeException("This function is not supported");
