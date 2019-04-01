@@ -6,13 +6,24 @@ import core.utils.math.Vector3f;
 public class Sphere {
 	private float radius;
 	Vector3f position;
+
 	
-	public Sphere(float radius) {
+	public Sphere(Vector3f position, float radius) {
+		this.position = position;
 		this.radius = radius;
 	}
 	
+	public Sphere(float radius) {
+		this(new Vector3f(), radius);
+	}
+
+	
 	public void setRadius(float r) {
 		this.radius = r;
+	}
+	
+	public float getRadius() {
+		return this.radius;
 	}
 	
 	/**
@@ -27,8 +38,8 @@ public class Sphere {
 	 * Get the position.
 	 * @return
 	 */
-	public Vector3f getPositionCopy() {
-		return this.position.copy();
+	public Vector3f getPosition() {
+		return this.position;
 	}
 
 }
