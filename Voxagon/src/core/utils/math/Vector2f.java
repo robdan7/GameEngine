@@ -62,7 +62,7 @@ public class Vector2f extends Vector<Vector2f>{
 	
 	@Override
 	public String toString() {
-		return this.x + " : " + this.y;
+		return this.x + " , " + this.y;
 	}
 
 	@Override
