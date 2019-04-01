@@ -5,8 +5,10 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import core.graphics.lights.DirectionalLight;
 import core.graphics.misc.Color;
+import core.graphics.models.Model;
 import core.graphics.models.ModelBlueprint;
 import core.graphics.models.ModelCompiler;
+import core.graphics.models.OBJLoader;
 import core.graphics.models.Pawn;
 import core.graphics.renderUtils.Camera;
 import core.graphics.renderUtils.Quad;
@@ -24,8 +26,12 @@ import core.input.MouseObserver;
 import core.input.ui.KeyLpointer;
 import core.input.ui.MouseLpointer;
 import core.input.ui.UiPanel;
+import core.physics.collision.BoundingSphere;
+import core.physics.collision.CollisionMesh;
+import core.physics.collision.CollisionObject;
+import core.physics.collision.GJK;
+import core.utils.datatypes.GlueList;
 import core.utils.event.Observer;
-import core.utils.math.Vector2f;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
 
@@ -34,7 +40,6 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 
 
@@ -53,16 +58,17 @@ public class Engine {
 	
 	Quad screenQuad;
 	
+	ModelBlueprint test;
 	
 	/**
 	 * List with static render models.
 	 */
-	ArrayList<RenderObject> staticRenderStack;
+	GlueList<RenderObject> staticRenderStack;
 	
 	/**
 	 * List with dynamic render models.
 	 */
-	ArrayList<RenderObject> dynamicRenderStack;
+	GlueList<RenderObject> dynamicRenderStack;
 	
 	boolean shouldClose = false;
 	
@@ -71,7 +77,7 @@ public class Engine {
 		run();
 		dynamicShadows.dispose();
 		staticShadows.dispose();
-		window.deleteAllRenderObjects();
+		//window.deleteAllRenderObjects();
 		window.deleteWindow();
 		
 	}
@@ -88,8 +94,8 @@ public class Engine {
 		keyboard = new Keyboard(window);
 		mouse = new Mouse(window, 0.5f);
 		
-		this.staticRenderStack = new ArrayList<RenderObject>();
-		this.dynamicRenderStack = new ArrayList<RenderObject>();
+		this.staticRenderStack = new GlueList<RenderObject>();
+		this.dynamicRenderStack = new GlueList<RenderObject>();
 
 		// Enable attribute arrays.
 		glEnableVertexAttribArray(0);
@@ -149,9 +155,10 @@ public class Engine {
 		//this.keyboard.addListener(l);
 		
 		//this.mouse.addListener(this.player);
-		player.getModel().setDepthShader(this.dynamicShadows);
+		player.setDepthShader(this.dynamicShadows);
 
 		// Create scene.
+		/*
 		ModelBlueprint m = null;
 		try {
 			m = ModelCompiler.loadModelBlueprint("/Assets/Models/Env/Maps/map.ini");
@@ -160,9 +167,10 @@ public class Engine {
 			e.printStackTrace();
 		}		
 		m.setDepthShader(this.staticShadows);
+		*/
 		this.dynamicShadowMap.bindPositionTo(player.getPosition());
 		
-		ModelBlueprint test = null;
+		test = null;
 		try {
 			test = ModelCompiler.loadModelBlueprint("/Assets/Models/temp.ini");
 		} catch (IOException | ShaderCompileException e) {
@@ -171,16 +179,16 @@ public class Engine {
 		test.setDepthShader(this.dynamicShadows);
 		
 		// add models to renderStack.
-		this.dynamicRenderStack.add(player.getModel());
+		this.dynamicRenderStack.add(player);
 		this.dynamicRenderStack.add(test);
-		this.staticRenderStack.add(m);
+		//this.staticRenderStack.add(m);
 		
 
 		// bind models to global transform matrix.
-		this.player.getModel().bindTransformMatrix(translateMatrix);
-		m.bindTransformMatrix(translateMatrix);
+		this.player.bindTransformMatrix(translateMatrix);
+		//m.bindTransformMatrix(translateMatrix);
 		test.bindTransformMatrix(translateMatrix);
-		test.translate(new Vector3f(10,10,0));
+		//test.translate(new Vector3f(10,10,0));
 		
 		// Create deffered shader and quad.
 		Shaders deffered = new Shaders("/Assets/Shaders/deffered/deffered.vert","/Assets/Shaders/deffered/deffered.frag");
@@ -192,7 +200,8 @@ public class Engine {
 
 
 		this.renderloop();
-		m.discard();
+		//test.discard();
+		//m.discard();
 	}
 	
 	@Deprecated
@@ -220,6 +229,10 @@ public class Engine {
 	}
 	
 	public void renderloop() {
+		
+		CollisionMesh pl = new CollisionMesh(player);
+		
+		CollisionMesh cube = new CollisionMesh(test);
 
 		//window.renderStaticShadowMap(this.staticShadowMap);
 		// Render static shadows.
@@ -239,7 +252,22 @@ public class Engine {
 */
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
 			// Get all window events. This is where key callback is activated.
+			
+			//player.updateMovement();
 			player.updateMovement();
+			
+			if (GJK.GJKcollision(pl, cube)) {
+				//System.out.println("Collision!");
+				//System.out.println(player.getPosition() + "    " + pl.getFurthestPoint(new Vector3f(0,0,1)).asSubtracted(cube.getFurthestPoint(new Vector3f(0,0,-1))).getZ());
+				/*
+				System.out.println("Furthest z player point: " + pl.getFurthestPoint(new Vector3f(1,0,0)));
+				System.out.println("Furthest cube position: " + cube.getFurthestPoint(new Vector3f(-1,0,0)));
+				System.out.println("player position: " + player.getPosition());
+				System.out.println(GJK.calcDifference(pl, cube, new Vector3f(0,1,0)) + "\n");
+				*/
+			}
+			
+			
 			window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack);
 			glBindFramebuffer(GL_FRAMEBUFFER, screenQuad.getFBO());
 			glClearColor(0, 0, 0, 0); // Set the background to transparent.
@@ -259,21 +287,21 @@ public class Engine {
 	}
 	
 	private void addPlayer(UniformBufferSource camUniform) {
-		player = new Pawn();
-		
+		player = new Pawn("/Assets/Models/temp.ini");
+		/*
 		try {
 			player.addModel(ModelCompiler.loadModelBlueprint("/Assets/Models/temp.ini"));
 		} catch (IOException | ShaderCompileException e) {
 			e.printStackTrace();
 		}
-		
+		*/
 		Camera cam = new Camera(new Vector3f(0, 1, 0), new Vector3f(-1,0,0), 45, (float)window.getWidth()/window.getHeight(), 0.1f, 200f, Camera.updateType.BOTH, camUniform);
 		player.bindCamera(cam);
 		
-		player.thirdPersonPreset(0.35f, new Vector3f(0,2,0), 10,5);
+		player.thirdPersonPreset(0.35f, new Vector3f(0,2,0), 0.6f,5);
 		cam.bindFocusPos(player.getPosition());
 		
-		player.setPosition(new Vector3f(10,10,0));
+		player.setPosition(new Vector3f(1.2f,0.7f,0));
 	}
 	
 	private void addMenuSystem() {
