@@ -195,18 +195,24 @@ public abstract  class Vector<T extends Vector<T>> {
 	
 	
 	/**
-	 * Calculate the cross product of this vector and v in right handed euclidean space.
+	 * Calculate the cross product of this vector and v in right handed euclidean space. 
+	 * No error is thrown if the resulting vector is the zero vector.
 	 * @param v
 	 * @return
 	 */
 	public T crossProduct(T v) {
-		if (this.length() == 0) {
-			throw new RuntimeException("Length of this vector is 0.");
-		}
 		T v2 = this.copy();
 		v2.x = this.y * v.z - v.y * this.z;
 		v2.y = this.z * v.x - v.z * this.x;
 		v2.z = this.x * v.y - v.x * this.y;
+		/*
+		if (v2.length() == 0) {
+			v2.set(new Vector3f((float)Math.random(), (float)Math.random(),(float)Math.random()));
+			v2.add(v);
+			return crossProduct(v2);
+		}
+		*/
+		
 		return v2;
 	}
 	
@@ -215,7 +221,7 @@ public abstract  class Vector<T extends Vector<T>> {
 	 * @param v
 	 * @return
 	 */
-	public float dotProduct(T v) {
+	public float dot(T v) {
 		return this.x*v.x + this.y*v.y+ this.z*v.z;
 	}
 	
@@ -283,7 +289,7 @@ public abstract  class Vector<T extends Vector<T>> {
 	 * @return This as a string.
 	 */
 	public String toString() {
-		return this.x + " : " + this.y + " : " + this.z + " : " + this.w;
+		return this.x + " , " + this.y + " , " + this.z + " , " + this.w;
 	}
 	
 	
