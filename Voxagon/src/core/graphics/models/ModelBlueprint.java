@@ -1,6 +1,7 @@
 package core.graphics.models;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.lwjgl.opengl.GL20;
 
@@ -15,7 +16,8 @@ import static org.lwjgl.opengl.GL15.*;
 
 public  class ModelBlueprint implements RenderObject{
 
-	private int modelVBO, modelIndices;
+	private int modelVBO;
+	private Model m;
 	private Vector3f position;
 	private Texture texture;
 	private UniformBufferSource transformUniform;
@@ -25,35 +27,40 @@ public  class ModelBlueprint implements RenderObject{
 	private Shaders shader;
 	private int depthshader;
 	
+	public List<Vector3f> getVertices() {
+		return this.m.getVertices();
+	}
+	
 	public ModelBlueprint(String modelFile) {
-		this.position = new Vector3f();
+		this();
 		try {
-			Model m = OBJLoader.loadTexturedModel(modelFile, 1);
+			m = OBJLoader.loadTexturedModel(modelFile, 1);
 			modelVBO = OBJLoader.createVBO(m);
-			this.modelIndices = m.getIndicesCount();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		this.transformMatrix = new Matrix4f();
 		//this.transformBuffer = BufferUtils.createFloatBuffer(Matrix4f.SIZE);
 		//this.transformMatrix.put(this.transformBuffer); // Initiate the buffer with the identity matrix.
 		//this.transformBuffer.flip();
 	}
 	
 	public ModelBlueprint(String modelFile, String textureUniformName) {
-		this.position = new Vector3f();
+		this();
 		try {
-			Model m = OBJLoader.loadTexturedModel(modelFile, 1);
+			m = OBJLoader.loadTexturedModel(modelFile, 1);
 			modelVBO = OBJLoader.createVBO(m);
-			this.modelIndices = m.getIndicesCount();
 			this.texture = new Texture(m.getTexture(), textureUniformName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		this.transformMatrix = new Matrix4f();
 		//this.transformBuffer = BufferUtils.createFloatBuffer(Matrix4f.SIZE);
 		//this.transformMatrix.put(this.transformBuffer); // Initiate the buffer with the identity matrix.
 		//this.transformBuffer.flip();
+	}
+	
+	public ModelBlueprint() {
+		this.position = new Vector3f();
+		this.transformMatrix = new Matrix4f();
 	}
 	
 	/**
@@ -66,6 +73,19 @@ public  class ModelBlueprint implements RenderObject{
 		} else {
 			this.texture.bindAsUniform(shader);
 		}
+	}
+	
+	void setTexture(String textureFile) throws IOException {
+		if (this.texture != null) {
+			this.texture.cleanup();
+		}
+		
+		this.texture = new Texture(this.m.getTexture(), textureFile);
+	}
+	
+	void setModel(String modelFile) throws IOException {
+		this.m = OBJLoader.loadTexturedModel(modelFile, 1);
+		this.modelVBO = OBJLoader.createVBO(m);
 	}
 	
 	/**
@@ -112,7 +132,7 @@ public  class ModelBlueprint implements RenderObject{
 		GL20.glVertexAttribPointer(0, 3, GL_FLOAT, false, Float.BYTES*8, 0);
 		GL20.glVertexAttribPointer(1, 3, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*3);
 		GL20.glVertexAttribPointer(2, 2, GL_FLOAT, false, Float.BYTES*8, Float.BYTES*6);
-		glDrawArrays(GL_TRIANGLES, 0, this.modelIndices);
+		glDrawArrays(GL_TRIANGLES, 0, this.m.getIndicesCount());
 		this.unbind();
 	}
 	
