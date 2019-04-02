@@ -1,0 +1,4 @@
+<scene><head><model name="Sphere" mesh="Sphere"><position>-0.511417 1.986469 -0.274636</position>
+</model><model name="Plane" mesh="Mesh_plane"><position>-0.010768 -0.141864 2.515840</position>
+</model><model name="Object_cube.001" mesh="Mesh_cube"><position>0.000000 0.000000 0.000000</position>
+</model></head><objects><instance name="Sphere"/><group name="Object_group_insance_2" position="-5.870568 5.443606 0.000000"><instance name="Plane"/><instance name="Object_cube.001"/></group><group name="Object_group_instance" position="4.457727 0.000000 0.000000"><instance name="Plane"/><instance name="Object_cube.001"/></group></objects></scene>
