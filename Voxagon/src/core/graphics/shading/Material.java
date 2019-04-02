@@ -11,7 +11,7 @@ public class Material {
 	/**
 	 * Set this material to be the active shader in the pipeline.
 	 */
-	public void setToActiveShader() {
+	public void setToActiveMaterial() {
 		
 	}
 	
