@@ -41,12 +41,43 @@ import java.nio.FloatBuffer;
 public class BufferTools {
 	
 	/**
+	 * Create an openGL vertex buffer.
+	 * @param target - GL_ARRAY_BUFFER if you are not sure what to put here.
+	 * @param data - the actual float buffer to store.
+	 * @param usage - GL_STATIC_DRAW if you are not sure what to put here.
+	 * @return The generated buffer index. Keep this!
+	 */
+	public static int createVertexBuffer(int target, FloatBuffer data, int usage) {
+		data.flip();
+		int glBuffer = GL15.glGenBuffers();
+		
+		GL15.glBindBuffer(target, glBuffer);
+		GL15.glBufferData(target, data, usage);
+		GL15.glBindBuffer(target, 0);
+		return glBuffer;
+	}
+	
+	/**
+	 * Store a new float buffer in the same vertex buffer object.
+	 * @param target - GL_ARRAY_BUFFER if you are not sure what to put here.
+	 * @param buffer - The vertex buffer object.
+	 * @param data - the actual float buffer to store.
+	 * @param usage - GL_STATIC_DRAW if you are not sure what to put here.
+	 */
+	public static void revalidateVertexBuffer(int target, int buffer, FloatBuffer data, int usage) {
+		data.flip();
+		GL15.glBindBuffer(target, buffer);
+		GL15.glBufferData(target, data, usage);
+		GL15.glBindBuffer(target, 0);
+	}
+	
+	/**
 	 * Update a buffer object that is already in the OpenGL pipeline.
 	 * @param buffer - the OpenGL target type.
 	 * @param offset - offset in machine units, not bytes.
 	 * @param data - the float buffer to write from. Flipping it is not required.
 	 */
-	public static void updateBuffer(int target, int buffer, int offset, FloatBuffer data) {
+	public static void updateVertexBuffer(int target, int buffer, int offset, FloatBuffer data) {
 		data.flip();
 		GL15.glBindBuffer(target, buffer);
 		GL15.glBufferSubData(target, offset<<2, data);
@@ -59,7 +90,7 @@ public class BufferTools {
 	 * @param offset - offset in machine units, not bytes.
 	 * @param data - the array to write from.
 	 */
-	public static void updateBuffer(int target, int buffer, int offset, float[] data) {
+	public static void updateVertexBuffer(int target, int buffer, int offset, float[] data) {
     	GL15.glBindBuffer(target, buffer);
 		GL15.glBufferSubData(target, offset<<2, data);
 		GL15.glBindBuffer(target, 0);
@@ -71,7 +102,7 @@ public class BufferTools {
 	 * @param offset - offset in machine units, not bytes.
 	 * @param data - the byte buffer to write from. Flipping it is not required.
 	 */
-	public static void updateBuffer(int target, int buffer, int offset, ByteBuffer data) {
+	public static void updateVertexBuffer(int target, int buffer, int offset, ByteBuffer data) {
 		data.flip();
 		GL15.glBindBuffer(target, buffer);
 		GL15.glBufferSubData(target, offset<<2, data);
