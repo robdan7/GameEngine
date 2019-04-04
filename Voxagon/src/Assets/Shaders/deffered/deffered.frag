@@ -5,7 +5,7 @@
 
 in vec2 texCoord;
 in vec2 frag;
-uniform sampler2D colorBuffer, normalBuffer, positionBuffer;
+uniform sampler2D normalBuffer, colorBuffer, positionBuffer;
 uniform sampler2D inDepth;
 uniform sampler2D staticShadowmap, dynamicShadowmap;
 

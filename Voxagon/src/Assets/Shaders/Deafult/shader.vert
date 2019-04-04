@@ -1,42 +1,35 @@
 #version 450 core
 
-#uniform Light lightSource;
+//#uniform Light lightSource;
 #uniform Matrices;
 
-uniform sampler2D modelTexture;
-
-layout(location = 0) in vec4 vertex;
+layout(location = 0) in vec4 vertexIn;
 layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 texCoord;
+layout(location = 2) in vec2 uvIn;
 
-out vec4 staticDepthPos, dynamicDepthPos;
-out vec4 n, lNormal, vertexPosition;
-out vec2 textureCoord;
-out vec4 diffuseLight;
+//out vec4 staticDepthPos, dynamicDepthPos;
+layout(location = 0) out Data {
+	layout(location = 0) vec4 vertexPosition;
+	layout(location = 1) vec4 n;
+	layout(location = 2) vec2 uv;
+} outData;
 
-out vec4 staticDepthNormal;
+//out vec4 staticDepthNormal;
 
 // include methods for calculating light.
-#include lightUtils;
+//#include lightUtils;
 
 void main() {
-	n = calcNormal(translateMatrix, normal);
-	lNormal = calcLightNormal(translateMatrix, lightSource.position, vertex);
+	//outData.n = calcNormal(translateMatrix, normal);
+	outData.n = normalize(translateMatrix * vec4(normal,0));
+	//outData.lNormal = calcLightNormal(translateMatrix, lightSource.position, vertexIn);
 	
 	
 	
-	diffuseLight = light(lNormal, n);
-	textureCoord = texCoord.xy;
-	vertexPosition = translateMatrix* vertex;
-	staticDepthPos = staticOrthoMatrix*vertexPosition*0.5+0.5;
-	dynamicDepthPos = dynamicOrthoMatrix*vertexPosition*0.5+0.5;
+	//diffuseLight = light(outData.lNormal, outData.n);
+	outData.uv = uvIn.xy;
+	outData.vertexPosition = translateMatrix* vertexIn;
+
 	
-	
-	//eyeNormal = normalize(viewMatrix*vertexPosition);
-	//vec4 mirrorLight = lNormal- 2*dot(lNormal, n)*n;
-	//eye = normalize(camera*mirrorLight);
-	//mirrorLight = vec4(dot(eye,vec3(0,0,1)),0,0,0);
-	
-	gl_Position  = camera* vertexPosition;
-	//gl_Position = vertexPosition;
+	gl_Position  = camera* outData.vertexPosition;
 }

@@ -9,6 +9,7 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import core.graphics.misc.Color;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.ShadowMap;
+import core.graphics.shading.Material;
 import core.utils.datatypes.GlueList;
 import core.utils.math.Vector4f;
 
@@ -175,14 +176,16 @@ public class Window {
 	 */
 	@SafeVarargs
 	final void renderTextured(GlueList<? extends RenderObject>... arrayLists ) {
-
+		
 		int lastShader = 0;
+		
 		for (GlueList<? extends RenderObject> renderlist : arrayLists) {
 			for (RenderObject o : renderlist) {
 				if (lastShader != o.getShader()) {
 					lastShader = o.getShader();
 					glUseProgram(lastShader);
 				}
+
 				o.renderTextured();
 			}
 		}
