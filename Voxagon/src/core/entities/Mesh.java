@@ -1,9 +1,11 @@
 package core.entities;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -22,6 +24,7 @@ public class Mesh {
 	private GlueList<Vector3f> vertices, normals, faces;
 	private GlueList<Vector2f> uv;
 	private String name;
+	private FloatBuffer meshBuffer;
 
 	public Mesh(String name, GlueList<Vector3f> vertices, GlueList<Vector3f> normals, GlueList<Vector3f> faces, GlueList<Vector2f> uv) {
 		this.vertices = vertices;
@@ -37,6 +40,7 @@ public class Mesh {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.meshBuffer = this.toFloatBuffer();
 	}
 	
 	/**
@@ -47,7 +51,7 @@ public class Mesh {
 	private void loadMesh(String file) throws IOException {
 		Document doc = null;
 		try {
-			doc = XMLparser.createParser(file);
+			doc = XMLparser.createDocument(file);
 			//System.out.println(vert.getTextContent());
 			//parseVertices(vert);
 		} catch (SAXException | IOException | ParserConfigurationException e) {
@@ -58,24 +62,25 @@ public class Mesh {
 		Element root = doc.getDocumentElement();
 		this.name = root.getAttribute("name");
 		NodeList nodes = root.getChildNodes();
+		
 		for (int i = 0; i<nodes.getLength(); i++) {
-			Element n = (Element)nodes.item(i);
-			
-			switch(n.getNodeName()) {
-			case "vertex":
-				this.vertices = this.parseVertices(n);
-				break;
-			case "normal":
-				this.normals = this.parseNormals(n);
-				break;
-			case "face":
-				this.faces = this.parseFaces(n);
-				break;
-			case "uv":
-				this.uv = this.parseUV(n);
-				break;
+			if (nodes.item(i).getNodeName() != "#text") {
+				Element n = (Element) nodes.item(i);
+				switch (n.getNodeName()) {
+				case "vertex":
+					this.vertices = this.parseVertices(n);
+					break;
+				case "normal":
+					this.normals = this.parseNormals(n);
+					break;
+				case "face":
+					this.faces = this.parseFaces(n);
+					break;
+				case "uv":
+					this.uv = this.parseUV(n);
+					break;
+				}
 			}
-			
 		}
 		if (!this.hasFaces()) {
 			throw new IOException("Mesh (" + this.name + ") does not have any faces!");
@@ -108,15 +113,24 @@ public class Mesh {
 	private GlueList<Vector3f> parseFaces(Element faces) {
 		String[] face = faces.getTextContent().split(" ");
 		int vertPerFace = Integer.parseInt(faces.getAttribute("indices"));
+
 		
-		switch(vertPerFace) {
-		case 3:
+		if (vertPerFace != 3) {
+			GlueList<Vector3f> result = new GlueList<Vector3f>();
+			float[] faceInstance = new float[vertPerFace];
+			for (int i = 0; i < face.length; i += vertPerFace) {
+				for (int k = 0; k < vertPerFace; k++) {
+					faceInstance[k] = Float.parseFloat(face[k + i]);
+					
+				}
+				result.addAll(this.triangulateFace(faceInstance));
+			}
+			return result;
+		} else {
 			return parseVec3ToVec3(face);
-		case 4:
-			return parseVec4ToVec3(face);
 		}
-		
-		return null;
+
+
 	}
 
 	private GlueList<Vector3f> parseNormals(Element normals) {
@@ -126,15 +140,21 @@ public class Mesh {
 
 	private GlueList<Vector2f> parseUV(Element uv) {
 		String[] uvStrings = uv.getTextContent().split(" ");
-		return this.parseVec2ToVec2(uvStrings);
-	}
-
-	private GlueList<Vector2f> parseVec2ToVec2(String[] vectors) {
+		int vecPerUV = Integer.parseInt(uv.getAttribute("indices"));
+		
+		//GlueList<Vector2f> result = this.parseVec2ToVec2(uvStrings);
 		GlueList<Vector2f> result = new GlueList<Vector2f>();
 		
-		for (int i= 0; i < vectors.length-1; i+=2) {
-			result.add(new Vector2f(Float.parseFloat(vectors[i]),Float.parseFloat(vectors[i+1])));
+		GlueList<Vector2f> temp = new GlueList<Vector2f>();
+		for (int i = 0; i < uvStrings.length; i+=(2*vecPerUV)) {
+			temp.clear();
+			for (int k = 0; k < vecPerUV*2; k+=2) {
+				temp.add(new Vector2f(Float.parseFloat(uvStrings[i+k]),Float.parseFloat(uvStrings[i+k+1])));
+			}
+			this.triangulateUV(temp);
+			result.addAll(temp);
 		}
+
 		return result;
 	}
 
@@ -152,19 +172,66 @@ public class Mesh {
 		return result;
 	}
 
+
+	
 	/**
-	 * Parse a string array with four vectors per index. This should be used for 
-	 * faces with 4 indices per face.
-	 * @param vectors
+	 * Split up a set of floats into groups of three. This is used to e.g. 
+	 * trangulate faces.
+	 * @param vectors - A list of vertices equal to one mesh face (three or more vertices).
 	 * @return
 	 */
-	private GlueList<Vector3f> parseVec4ToVec3(String[] vectors) {
+	private GlueList<Vector3f> triangulateFace(float[] vectors) {
 		GlueList<Vector3f> result = new GlueList<Vector3f>();
-		for (int i = 0; i < vectors.length - 3; i += 4) {
-			result.add(new Vector3f(Float.parseFloat(vectors[i]), Float.parseFloat(vectors[i+1]), Float.parseFloat(vectors[i+3])));
-			result.add(new Vector3f(Float.parseFloat(vectors[i+1]), Float.parseFloat(vectors[i+2]), Float.parseFloat(vectors[i+1])));
+
+		for (int i = 1; i < vectors.length-1; i++) {
+			result.add(new Vector3f(vectors[0],vectors[i],vectors[i+1]));
 		}
 		return result;
+	}
+	
+	/**
+	 * Triangulate UV coords to fit triangulated faces. The effect is immediate.
+	 * @param normals
+	 */
+	private void triangulateUV(GlueList<Vector2f> UV) {
+		
+		for (int i = 2; i < UV.size()-1; i+=3) {
+			UV.add(i+1,UV.get(i).copy());
+			UV.add(i+1,UV.get(0).copy());
+		}
+		
+	}
+	
+	
+	/**
+	 * Return this mesh as a float buffer.
+	 * @return A float buffer with the format {vertex,normal,uv}
+	 */
+	private FloatBuffer toFloatBuffer() {
+		int floatPerFace = 18; // 3 vertices * 3 floats + the same for normals.
+		int capacity = this.uv.size()*2 + this.faces.size()*floatPerFace;
+		
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(capacity);
+		
+		int x,y,z;
+		for (int i = 0; i < this.faces.size(); i++) {
+			x = (int)this.faces.get(i).getX();
+			y = (int)this.faces.get(i).getY();
+			z = (int)this.faces.get(i).getZ();
+			
+			buffer.put(this.vertices.get(x).asFloats());
+			buffer.put(this.normals.get(x).asFloats());
+			buffer.put(this.uv.get(3*i).asFloats());
+			
+			buffer.put(this.vertices.get(y).asFloats());
+			buffer.put(this.normals.get(y).asFloats());
+			buffer.put(this.uv.get(3*i+1).asFloats());
+			
+			buffer.put(this.vertices.get(z).asFloats());
+			buffer.put(this.normals.get(z).asFloats());
+			buffer.put(this.uv.get(3*i+2).asFloats());
+		}
+		return buffer;
 	}
 
 	/**
@@ -192,6 +259,19 @@ public class Mesh {
 	
 	String getName() {
 		return this.name;
+	}
+	
+	public int getTotalNumberOfVertices() {
+		return this.faces.size()*3;
+	}
+	
+	/**
+	 * Return the float buffer representation of this mesh. Please do not 
+	 * modify it.
+	 * @return
+	 */
+	FloatBuffer getMeshBuffer() {
+		return this.meshBuffer;
 	}
 	
 	public boolean hasVertices() {

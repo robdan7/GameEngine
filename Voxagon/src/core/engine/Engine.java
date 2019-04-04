@@ -2,7 +2,7 @@ package core.engine;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-
+import core.entities.ModelInstance;
 import core.graphics.lights.DirectionalLight;
 import core.graphics.misc.Color;
 import core.graphics.models.Model;
@@ -17,6 +17,7 @@ import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.graphics.renderUtils.ShadowMap;
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
+import core.graphics.shading.Material;
 import core.graphics.renderUtils.uniforms.UniformBufferObject;
 import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
 import core.input.Keyboard;
@@ -40,6 +41,10 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
 import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 
 
@@ -177,7 +182,7 @@ public class Engine {
 			e.printStackTrace();
 		}
 		test.setDepthShader(this.dynamicShadows);
-		
+		test.translate(new Vector3f(0,3,0));
 		// add models to renderStack.
 		this.dynamicRenderStack.add(player);
 		this.dynamicRenderStack.add(test);
@@ -250,6 +255,17 @@ public class Engine {
 		
 		UiPanel.switchPanel("world");
 */
+		
+		//Material m = new Material("/Assets/new/materials/m_test.mtl");
+		ModelInstance modelInstanceTemp = null;
+		try {
+			modelInstanceTemp = core.entities.Model.createModelInstance("/Assets/new/models/Object_sphere.001.XML");
+			
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
 			// Get all window events. This is where key callback is activated.
 			
@@ -275,6 +291,7 @@ public class Engine {
 			
 			
 			window.renderTextured(this.dynamicRenderStack, this.staticRenderStack);
+			modelInstanceTemp.getParent().renderModelInstances();
 			//glUseProgram(0);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			
@@ -298,7 +315,7 @@ public class Engine {
 		Camera cam = new Camera(new Vector3f(0, 1, 0), new Vector3f(-1,0,0), 45, (float)window.getWidth()/window.getHeight(), 0.1f, 200f, Camera.updateType.BOTH, camUniform);
 		player.bindCamera(cam);
 		
-		player.thirdPersonPreset(0.35f, new Vector3f(0,2,0), 0.6f,5);
+		player.thirdPersonPreset(0.35f, new Vector3f(0,2,0), 3f,5);
 		cam.bindFocusPos(player.getPosition());
 		
 		player.setPosition(new Vector3f(1.2f,0.7f,0));
