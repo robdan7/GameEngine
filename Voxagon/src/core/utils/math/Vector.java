@@ -292,13 +292,6 @@ public abstract  class Vector<T extends Vector<T>> {
 		return this.x + " , " + this.y + " , " + this.z + " , " + this.w;
 	}
 	
-	
-	/**
-	 * 
-	 * @return This vector as an array;
-	 */
-	public abstract float[] toFloatArray();
-	
 	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Vector)) {
