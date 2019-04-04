@@ -147,7 +147,7 @@ public class UniformBufferObject {
 			throw new UniformReadException("The uniform is not finalized!");
 		}
 		if (source.getOffset() < this.getSize()) {
-			BufferTools.updateBuffer(GL_UNIFORM_BUFFER, this.getUBO(), source.getOffset(), source.getBuffer());
+			BufferTools.updateVertexBuffer(GL_UNIFORM_BUFFER, this.getUBO(), source.getOffset(), source.getBuffer());
 		} else {
 			throw new IndexOutOfBoundsException("Source offset is larger than buffer.");
 		}

@@ -106,7 +106,7 @@ public class Matrix4f{
         this.m32 = (zFar + zNear) / (zNear - zFar);
 	}
 	
-	public void rotate(double angle, float x, float y, float z) {
+	public void rotateAbsolute(double angle, float x, float y, float z) {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
         this.rotate(sin, cos, x, y, z);
@@ -214,25 +214,91 @@ public class Matrix4f{
 	    this.m22 = -f.z;
 	    //this.m32 = -f.z;
 	    
-	    // TODO change this
-	    this.translate(e.asFlipped());
-	    //m30 = 0.0f;
-	    //m31 = 0.0f;
-	    //m32 = 0.0f;
-	    //m33 = 1.0f;
-
+	    e.flip();
+	    this.translateAbsolute(e);
 	}
 	
 	
 	/**
-	 * 
+	 * Translate without discarding previous translations.
 	 * @param v - The new position.
 	 */
 	public void translate(Vector<?> v) {
-        this.m30 = (float) (this.m00 * v.x + this.m10 * v.y + this.m20 * v.z);
-        this.m31 = (float) (this.m01 * v.x + this.m11 * v.y + this.m21 * v.z);
-        this.m32 = (float) (this.m02 * v.x + this.m12 * v.y + this.m22 * v.z);
+        this.translate(v.x, v.y, v.z);
     }
+	
+	public void translate(float x, float y, float z) {
+		this.m30 += (float) (this.m00 * x + this.m10 * y + this.m20 * z);
+        this.m31 += (float) (this.m01 * x + this.m11 * y + this.m21 * z);
+        this.m32 += (float) (this.m02 * x + this.m12 * y + this.m22 * z);
+	}
+	
+	/**
+	 * Discard all previous translations and set a new position along 
+	 * the rotation axis.
+	 * @param v
+	 */
+	public void translateAbsolute(Vector<?> v) {
+		this.translateAbsolute(v.x, v.y, v.z);
+	}
+	
+	/**
+	 * Discard all previous translations and set a new position along 
+	 * the rotation axis.
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	public void translateAbsolute(float x, float y, float z) {
+		this.m30 = 0;
+		this.m31 = 0;
+		this.m32 = 0;
+		this.translate(x,y,z);
+	}
+	
+	/**
+	 * Translate along the absolute x, y and z axis. Rotation does not 
+	 * affect this.
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	public void axisTranslation(float x, float y, float z) {
+		this.m30 += x;
+		this.m31 += y;
+		this.m32 += z;
+	}
+	
+	/**
+	 * Set absolute translation along the x, y and z axis. Rotation does 
+	 * not affect this.
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	public void absoluteAxisTranslation(float x, float y, float z) {
+		this.m30 = x;
+		this.m31 = y;
+		this.m32 = z;
+	}
+	
+	/**
+	 * Translate along the absolute x, y and z axis. Rotation does not 
+	 * affect this.
+	 * @param v
+	 */
+	public void axisTranslation(Vector<?> v) {
+		this.axisTranslation(v.x,v.y,v.z);
+	}
+	
+	/**
+	 * Set absolute translation along the x, y and z axis. Rotation does 
+	 * not affect this.
+	 * @param v
+	 */
+	public void absoluteAxisTranslation(Vector<?> v) {
+		this.absoluteAxisTranslation(v.x, v.y, v.z);
+	}
 	
 	/**
 	 * Multiply this matrix by a 4-point vector.

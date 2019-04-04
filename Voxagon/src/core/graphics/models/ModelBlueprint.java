@@ -94,7 +94,7 @@ public  class ModelBlueprint implements RenderObject{
 	 */
 	public void translate(Vector3f v) {
 		this.position.set(v);
-		this.transformMatrix.translate(this.position);
+		this.transformMatrix.translateAbsolute(this.position);
 		//this.transformMatrix.put(this.transformBuffer);
 	}
 	

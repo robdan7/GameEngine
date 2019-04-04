@@ -207,7 +207,7 @@ public class Pawn extends ModelBlueprint implements MouseListener {
 			this.clock.reset();
 		} 
 
-		this.rotationMatrix.rotate(this.cam.gethAngle(), 0, 1, 0);
+		this.rotationMatrix.rotateAbsolute(this.cam.gethAngle(), 0, 1, 0);
 		this.rotationMatrix.multiply(this.position.getBufferedPosition());
 		
 		/* Multiply the normalized velocity by the time and length*/
