@@ -21,7 +21,7 @@ public class XMLparser {
 	 * @throws IOException
 	 * @throws ParserConfigurationException
 	 */
-	public static Document createParser(String file) throws SAXException, IOException, ParserConfigurationException {
+	public static Document createDocument(String file) throws SAXException, IOException, ParserConfigurationException {
 		InputStream stream = FileManager.getStream(file);
 
 		DocumentBuilder builder = getBuilder();
