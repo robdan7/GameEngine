@@ -3,11 +3,11 @@
 		<code>
 		#version 450 core
 		layout (std140, binding = 1) uniform Matrices {
-			layout(offset = 0) uniform mat4 camera;
-			layout(offset = 64) uniform mat4 viewMatrix;
-			layout(offset = 128) uniform mat4 translateMatrix;
-			layout(offset = 192) uniform mat4 staticOrthoMatrix;
-			layout(offset = 256) uniform mat4 dynamicOrthoMatrix;
+			layout(offset = 0) mat4 camera;
+			layout(offset = 64) mat4 viewMatrix;
+			layout(offset = 128) mat4 translateMatrix;
+			layout(offset = 192) mat4 staticOrthoMatrix;
+			layout(offset = 256) mat4 dynamicOrthoMatrix;
 		};
 		
 		layout(location = 0) in vec4 vertexIn;

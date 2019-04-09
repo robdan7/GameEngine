@@ -1,0 +1,76 @@
+<template>
+	<shader type="vertex">
+		<attribute location="0" type="vec4" name="vertexIn"/> 
+		<attribute location="1" type="vec4" name="normal"/> 
+		<attribute location="2" type="vec2" name="uvIn"/> 
+		<attribute name="test" struct="STRUCT">
+			<attribute name="testInStruct" type="vec4"/>
+		</attribute>
+		<code>
+			#version 450 core
+			layout (std140, binding = 1) uniform Matrices {
+				layout(offset = 0) uniform mat4 camera;
+				layout(offset = 64) uniform mat4 viewMatrix;
+				layout(offset = 128) uniform mat4 translateMatrix;
+				layout(offset = 192) uniform mat4 staticOrthoMatrix;
+				layout(offset = 256) uniform mat4 dynamicOrthoMatrix;
+			};
+			
+			<placeholder type="attribute"/>
+			
+			//layout(location = 0) in vec4 vertexIn;
+			//layout(location = 1) in vec3 normal;
+			//layout(location = 2) in vec2 uvIn;
+			//layout(location = 3) in mat4 inTranslationMatrix;
+		
+	
+	
+			layout(location = 0) out PipelineData {
+				layout(location = 0) vec4 position;
+				layout(location = 1) vec4 normal;
+				layout(location = 2) vec2 UV;
+			} vertexOutput;
+	
+	
+			void main() {
+				vertexOutput.normal = normalize(vec4(normal,0));
+				vertexOutput.UV = uvIn.xy;
+				vertexOutput.position = vertexIn;
+	
+				gl_Position  = camera* vertexOutput.position;
+				
+				<placeholder type="code"/>
+			}
+		</code>
+	</shader>
+	<shader type="fragment">
+		<code>
+		#version 450 core
+		uniform sampler2D modelTexture;
+
+		//in vec4 staticDepthPos, dynamicDepthPos;
+
+		
+		layout(location = 0) in PipelineData {
+			layout(location = 0) vec4 position;
+			layout(location = 1) vec4 normal;
+			layout(location = 2) vec2 UV;
+		} fragmentData;
+
+		layout(location = 0) out vec4 outColor;	// locations are stored in Quad.java
+		layout(location = 1) out vec4 outNormal;
+		layout(location = 2) out vec4 worldPosition;
+
+		void main() {
+
+			outNormal = vec4(fragmentData.normal.xyz*0.5+0.5,1);
+			outColor = vec4(1,0,0,1);
+			worldPosition = fragmentData.position;
+	
+			gl_FragDepth = gl_FragCoord.z;
+			
+			<usercode/>
+		}
+		</code>
+	</shader>
+</template>
