@@ -3,8 +3,12 @@ package core.graphics.shading.uniforms;
 import java.util.HashMap;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import core.graphics.shading.InterfaceBlock;
+import core.graphics.shading.uniforms.references.UniformBlockReference;
+import core.graphics.shading.uniforms.references.UniformBlockReference.UniformTypeEception;
+import core.graphics.shading.uniforms.references.UniformReference.ReferenceCreationException;
 import core.utils.datatypes.GlueList;
 
 /**
@@ -19,67 +23,93 @@ import core.utils.datatypes.GlueList;
  * @author Robin
  *
  */
-public class UniformBlock extends InterfaceBlock implements Uniform {
+public class UniformBlock extends InterfaceBlock {
 	private String layout;
-	private static HashMap<String, UniformBlock> createdUniforms;
 	private UniformBlockReference applicationReference;	// A reference to the reference of this uniform.
+	GlueList<Uniform> siblingUniforms;
 	
-	static {
-		createdUniforms = new HashMap<String, UniformBlock>();
-	}
+
 	
 	private UniformBlock(String blockName, String instanceName) {
 		//this.uniformData = new InterfaceBlock("", blockName, instanceName);
 		super("uniform", blockName, instanceName);
 	}
 	
-	private UniformBlock(Element node) {
+	/**
+	 * Create a uniform block based on the node containing the uniform data.
+	 * @param node
+	 */
+	public UniformBlock(Element node) {
+		this(node, null);
+	}
+	
+	private UniformBlock(Element node, GlueList<Uniform> siblingUniforms) {
 		super();
+		super.setBlockName(node.getAttribute(UniformBlockSyntaxName.NAME.toString()));
 		
-		super.setBlockName(node.getAttribute(UniformSyntaxNames.NAME.toString()));
+		this.applicationReference = UniformBlockReference.requestBlockReference(super.getBlockName());
 		
 
-		if (node.hasAttribute(UniformSyntaxNames.INSTANCE.toString())) {
-			super.setInstanceName(UniformSyntaxNames.INSTANCE.toString());
+		if (node.hasAttribute(UniformBlockSyntaxName.INSTANCE.toString())) {
+			super.setInstanceName(UniformBlockSyntaxName.INSTANCE.toString());
 		}
 		
 		if (!node.hasChildNodes()) {
-			
+			throw new NullPointerException("The uniform block is empty!");
 		}
-	}
-	
-	/**
-	 * 
-	 * @param node
-	 * @return
-	 */
-	@Deprecated
-	public static UniformBlock createBlock(Element node) {
-		String name = node.getAttribute(UniformSyntaxNames.NAME.toString());
-		if (createdUniforms.containsKey(name)) {
 		
+		this.siblingUniforms = siblingUniforms;
+		
+		try {
+			this.createChildren(node);
+		} catch (UniformTypeException e) {
+			e.printStackTrace();
 		}
-		return new UniformBlock(node);
+		
+		System.out.println(this.toString());
 	}
 	
 	/**
-	 * @return The next available (global) uniform block location.
+	 * Add a new child to this uniform block.
+	 * @param root
+	 * @throws UniformTypeException
 	 */
-	private final int getAvailableLocation() {
-		//return UniformBlock.availableLocation++;
-		return 0;
+	private void createChildren(Element root) throws UniformTypeException {
+		NodeList nodes = root.getChildNodes();
+		
+		Element el;
+		Uniform.UniformType type = null;
+		for (int i = 0; i < nodes.getLength(); i++) {
+			if (!nodes.item(i).getNodeName().equals("#text")) {
+				el = (Element)nodes.item(i);
+				
+
+				type = Uniform.getTypeFromString(el.getAttribute(Uniform.UniformSyntaxName.TYPE.toString()));
+				
+				try {
+					this.applicationReference.requestNewMember(i, type);
+					super.addMember(new Uniform(el));
+				} catch (NumberFormatException | UniformTypeEception | ReferenceCreationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
+	private boolean hasSiblingUniforms() {
+		return this.siblingUniforms != null && this.siblingUniforms.size() > 0;
+	}
 
 	/**
 	 * This holds all syntax names for different things used in a uniform block.
 	 * @author Robin
 	 *
 	 */
-	private static enum UniformSyntaxNames {
-		STORAGE_QUALIFIER("qualifier"), NAME("name"), INSTANCE("instance");
+	private static enum UniformBlockSyntaxName {
+		LAYOUT("layout"), NAME("name"), INSTANCE("instance");
 		private String s;
-		private UniformSyntaxNames(String s) {
+		private UniformBlockSyntaxName(String s) {
 			this.s = s;
 		}
 		
