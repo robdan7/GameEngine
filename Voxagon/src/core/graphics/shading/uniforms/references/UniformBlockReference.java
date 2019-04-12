@@ -1,7 +1,10 @@
-package core.graphics.shading.uniforms;
+package core.graphics.shading.uniforms.references;
 
 import java.util.HashMap;
 
+import core.graphics.shading.uniforms.Uniform;
+import core.graphics.shading.uniforms.Uniform.UniformType;
+import core.graphics.shading.uniforms.references.UniformReference.ReferenceCreationException;
 import core.utils.datatypes.GlueList;
 
 /**
@@ -20,14 +23,14 @@ public class UniformBlockReference {
 	private int binding;
 	private String name;
 	private static HashMap<String, UniformBlockReference> createdReferences;
-	private GlueList<UniformBlockMember> members;
+	private GlueList<UniformReference> members;
 	
 	static {
 		createdReferences = new HashMap<String,UniformBlockReference>();
 	}
 
 	private UniformBlockReference(int binding, String name) {
-		this.members = new GlueList<UniformBlockMember>();
+		this.members = new GlueList<UniformReference>();
 		this.binding = binding;
 		this.name = name;
 	}
@@ -36,10 +39,11 @@ public class UniformBlockReference {
 		if (!createdReferences.containsKey(name)) {
 			// create a new reference. The binding is equal to the current size (0,1,2,3...)
 			UniformBlockReference r = new UniformBlockReference(createdReferences.size(), name);
+			createdReferences.put(name, r);
+			return r;
 		} else {
 			return createdReferences.get(name);
 		}
-		return null;
 	}
 	
 	public int getbinding() {
@@ -54,13 +58,14 @@ public class UniformBlockReference {
 	 * Request a new member to be added to this uniform reference. 
 	 * The member is only added if no other member currently exist at the 
 	 * same index.
-	 * @param index - The index in the uniform to use. 1, 2, 3...
+	 * @param index - The index in the uniform to use. 0, 1, 2...
 	 * @param stride - The data size in bytes.
 	 * @throws UniformTypeEception If a member exists with the same index but a different type
 	 * this exception is thrown as an indication of user error. It is not allowed to interpret 
 	 * a member as different variable types.
+	 * @throws ReferenceCreationException 
 	 */
-	public void requestNewMember(int index, UniformMemberType type) throws UniformTypeEception {
+	public void requestNewMember(int index, Uniform.UniformType type) throws UniformTypeEception, ReferenceCreationException {
 		// TODO find out what to do if memory is allocated to slot 1 and 3, but not 2.
 		// We cant calculate the offset in a struct if one index is missing!
 		/* Solution? Don't allow index in appendMember, or don't allow appending at all 
@@ -76,7 +81,7 @@ public class UniformBlockReference {
 		 * Solution 4 is the simplest. Do that.
 		 */
 		if (this.members.size() == 0) {
-			this.members.add(new UniformBlockMember(index, type));
+			this.members.add(new UniformReference(index, type, this.members));
 			return;
 		}
 		
@@ -85,82 +90,19 @@ public class UniformBlockReference {
 		 */
 		int i = 0;
 		for (; i < this.members.size() && i < index; i++) {
-			UniformBlockMember m = this.members.get(i);
+			UniformReference m = this.members.get(i);
 			if (m.getIndex() == index && type != m.getType()) {
 				throw new UniformTypeEception("In "+ this.name + "At index " + i + ": A member already exist different type!");
+				// TODO remove this and let the reference check for errors.
 			}
 			if (m.getIndex() > index) {
 				break;
 			}
 		}
-		this.members.add(i,new UniformBlockMember(index, type));
+		this.members.add(i,new UniformReference(index, type, this.members));
 	}
 	
-	public static enum UniformMemberType {
-		VEC4("vec4", 16), VEC3("vec3", 16), VEC2("vec2", 8), MAT4("mat4", 64);
-		private String type;
-		private int stride;
-		UniformMemberType(String type, int stride) {
-			this.type = type;
-			this.stride = stride;
-		}
-		
-		int getStride() {
-			return this.stride;
-		}
-	}
 	
-	/**
-	 * representation of a block member
-	 * @author Robin
-	 *
-	 */
-	private static class UniformBlockMember {
-		private int index, stride;
-		UniformMemberType type;
-		/**
-		 * Create a member with a stride and and index.
-		 * @param index
-		 * @param stride
-		 */
-		private UniformBlockMember(int index, UniformMemberType type) {
-			this.index = index;
-			this.type = type;
-		}
-		
-		/**
-		 * Get the size of this member. Measured in bytes.
-		 * @return
-		 */
-		private int getStride() {
-			return this.type.getStride();
-		}
-		
-		private int getIndex() {
-			return this.index;
-		}
-		
-		private UniformMemberType getType() {
-			return this.type;
-		}
-		
-		@Override
-		public boolean equals(Object o) {
-			if (!(o instanceof UniformBlockMember)) {
-				return false;
-			}
-			
-			if (((UniformBlockMember)o).type != this.type) {
-				return false;
-			}
-			
-			if (this.index != ((UniformBlockMember)o).index) {
-				return false;
-			}
-			
-			return true;
-		}
-	}
 
 	public static class UniformTypeEception extends Exception {
 		private static final long serialVersionUID = 1L;
