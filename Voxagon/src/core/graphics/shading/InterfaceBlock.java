@@ -16,24 +16,25 @@ interface ShaderDataStorage {
  */
 public class InterfaceBlock implements ShaderDataStorage {
 	private String storageQualifier = "", blockName = "", instanceName = "";
-	GlueList<ShaderVariable> members;
+	GlueList<InterfaceVariable> members;
 	
 	/**
 	 * @param qualifier - The storage qualifier. uniform, in or out etc.
 	 * @param blockName - The type of all instances of this block.
 	 * @param instanceName - An optional instance name.
 	 */
-	public InterfaceBlock(String qualifier, String blockName, String instanceName) {
+	protected InterfaceBlock(String qualifier, String blockName, String instanceName) {
 		this.setQualifier(qualifier);
 		this.setBlockName(blockName);
 		this.setInstanceName(instanceName);
+		this.members = new GlueList<InterfaceVariable>();
 	}
 	
 	/**
 	 * @param qualifier - The storage qualifier. uniform, in or out etc.
 	 * @param blockName - The type of all instances of this block.
 	 */
-	public InterfaceBlock(String qualifier, String blockName) {
+	protected InterfaceBlock(String qualifier, String blockName) {
 		this(qualifier, blockName, "");
 	}
 	
@@ -45,7 +46,7 @@ public class InterfaceBlock implements ShaderDataStorage {
 	 * Add variable to this block. 
 	 * @param member
 	 */
-	void addMember(ShaderVariable member) {
+	protected void addMember(InterfaceVariable member) {
 		this.members.add(member);
 	}
 	
@@ -69,6 +70,10 @@ public class InterfaceBlock implements ShaderDataStorage {
 		return this.instanceName;
 	}
 	
+	/**
+	 * The block name is the name used for identifying the block itself.
+	 * @return The the unique name of this block.
+	 */
 	protected String getBlockName() {
 		return this.blockName;
 	}
@@ -76,7 +81,7 @@ public class InterfaceBlock implements ShaderDataStorage {
 	@Override
 	public String toString() {
 		String result = this.getQualifier() + " " + this.getBlockName() + "{ ";
-		for(ShaderVariable v : this.members) {
+		for(InterfaceVariable v : this.members) {
 			result += v.toString();
 		}
 		result += "}" + this.getInstanceName() + ";";
@@ -95,40 +100,4 @@ public class InterfaceBlock implements ShaderDataStorage {
 		
 		return false;
 	}
-}
-
-class ShaderVariable implements ShaderDataStorage {
-	private String qualifier, name;
-
-	public ShaderVariable() {
-		// TODO Auto-generated constructor stub
-	}
-	
-	protected String getName() {
-		return this.name;
-	}
-	
-	protected String getQualifier() {
-		return this.qualifier;
-	}
-	
-	@Override
-	public String toString() {
-		String result = this.qualifier + " " + this.name + ";";
-		return result;
-	}
-	
-	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof ShaderVariable)) {
-			return false;
-		}
-		
-		if (this.getName().equals(((ShaderVariable)o).getName()) && this.getQualifier().equals(((ShaderVariable)o).getName())) {
-			return true;
-		}
-		
-		return false;
-	}
-
 }

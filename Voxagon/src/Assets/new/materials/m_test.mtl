@@ -1,5 +1,10 @@
 <material name="m_test">
 	<shader type="vertex" name="m_test_vertex">
+		<uniform name="test" instance="testInstance">
+			<uniform name="camera" type="mat4"/>
+		</uniform>
+		<uniform name="temp" type="vec4" />
+		<uniform name="temp3" type="vec4" />
 		<code>
 		#version 450 core
 		layout (std140, binding = 1) uniform Matrices {
@@ -8,7 +13,7 @@
 			layout(offset = 128) mat4 translateMatrix;
 			layout(offset = 192) mat4 staticOrthoMatrix;
 			layout(offset = 256) mat4 dynamicOrthoMatrix;
-		};
+		} mat;
 		
 		layout(location = 0) in vec4 vertexIn;
 		layout(location = 1) in vec3 normal;
@@ -34,7 +39,7 @@
 			vertexOutput.position = vertexIn;
 
 	
-			gl_Position  = camera* vertexOutput.position;
+			gl_Position  = mat.camera* vertexOutput.position;
 		}
 		</code>
 	</shader>

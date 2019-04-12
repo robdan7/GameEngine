@@ -9,7 +9,7 @@
 		<code>
 			#version 450 core
 			layout (std140, binding = 1) uniform Matrices {
-				layout(offset = 0) uniform mat4 camera;
+				layout(offset = 0) mat4 camera;
 				layout(offset = 64) uniform mat4 viewMatrix;
 				layout(offset = 128) uniform mat4 translateMatrix;
 				layout(offset = 192) uniform mat4 staticOrthoMatrix;

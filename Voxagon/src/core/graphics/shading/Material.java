@@ -11,7 +11,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import core.graphics.renderUtils.Shaders;
-import core.graphics.shading.uniforms.UniformBlockReference;
+import core.graphics.shading.uniforms.references.UniformBlockReference;
 import core.utils.datatypes.GlueList;
 import core.utils.fileSystem.XMLparser;
 
