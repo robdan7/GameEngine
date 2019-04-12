@@ -9,26 +9,28 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.lwjgl.opengl.GL20;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import core.utils.datatypes.GlueList;
 import core.utils.fileSystem.XMLparser;
-
+import core.graphics.shading.uniforms.*;
 
 public class Shader {
 	private int shaderIndex = -1;
 	private String name = "NULL";
 	private GlueList<Attribute> attributes;
+	private GlueList<UniformBlock> uniformBlocks;
+	private GlueList<Uniform> localUniforms;
 	private Element code;
 	private Shader parent;
 
 	
 	private Shader(Element shaderElement) {
 		this.attributes = new GlueList<Attribute>();
-		
+		this.uniformBlocks = new GlueList<UniformBlock>();
+		this.localUniforms = new GlueList<Uniform>();
 		if (shaderElement.hasAttribute("name")) {
 			this.name = shaderElement.getAttribute("name");
 		}
@@ -38,6 +40,7 @@ public class Shader {
 	
 	public Shader(Element shaderElement, int shaderType) {
 		this(shaderElement);
+		
 		this.iterateChildren(shaderElement);
 		NodeList codeNodes = this.code.getChildNodes();
 		Element el;
@@ -132,10 +135,29 @@ public class Shader {
 					this.attributes.add(new Attribute(el,attributeLength));
 					
 					continue;
+				case "uniform":
+					this.parseUniform(el);
+					break;
 				case "code":
 					this.code = el;
 					break;
 				}
+			}
+		}
+	}
+	
+	//private void parse
+	
+	private void parseUniform(Element uniformNode) {
+		if (uniformNode.hasChildNodes()) {
+			this.uniformBlocks.add(new UniformBlock(uniformNode));
+		} else {
+			try {
+				this.localUniforms.add(new Uniform(uniformNode, this.localUniforms));
+			} catch (UniformCreationException e) {
+				// TODO Auto-generated catch block
+				System.err.println("Error in shader " + this.getName());
+				e.printStackTrace();
 			}
 		}
 	}
@@ -163,6 +185,11 @@ public class Shader {
 		return this.parent != null;
 	}
 	
+	public String getName() {
+		return this.name;
+	}
+	
+	@Deprecated
 	private static class Throughput {
 		private GlueList<Attribute> attributes;
 		private GlueList<Uniform> uniforms;
@@ -189,19 +216,17 @@ public class Shader {
 		}
 	}
 	
+	@Deprecated
 	private static abstract class ShaderVariable {
 		private String name="", type="", data="", structName="";
 		int location = -1;
 		NodeList children;
 	}
 	
-	private static class Uniform extends ShaderVariable {
-		
-		
-	}
 	
 	// TODO make a clear structure for the attributes and how input/output works. Maybe one super class 
 	//with two classes that inherits from it and adds in/out to the attributes.
+	@Deprecated
 	public static class Attribute extends ShaderVariable {
 
 		
