@@ -1,7 +1,7 @@
 package core.graphics.shading.uniforms.references;
 
+import core.graphics.shading.GLSLvariableType;
 import core.graphics.shading.uniforms.Uniform;
-import core.graphics.shading.uniforms.Uniform.UniformType;
 import core.utils.datatypes.GlueList;
 
 /**
@@ -11,7 +11,7 @@ import core.utils.datatypes.GlueList;
  */
 public class UniformReference {
 		private int index;
-		Uniform.UniformType type;
+		GLSLvariableType type;
 		GlueList<UniformReference> siblings;
 		/**
 		 * Create a member with a stride and and index.
@@ -19,7 +19,7 @@ public class UniformReference {
 		 * @param stride
 		 * @throws ReferenceCreationException 
 		 */
-		UniformReference(int index, Uniform.UniformType type, GlueList<UniformReference> siblings) throws ReferenceCreationException {
+		UniformReference(int index, GLSLvariableType type, GlueList<UniformReference> siblings) throws ReferenceCreationException {
 			this.index = index;
 			this.type = type;
 			this.siblings = siblings;
@@ -31,7 +31,7 @@ public class UniformReference {
 			}
 		}
 		
-		public UniformReference(Uniform.UniformType type) {
+		public UniformReference(GLSLvariableType type) {
 			
 		}
 		
@@ -51,7 +51,7 @@ public class UniformReference {
 			return this.siblings != null && this.siblings.size() > 0;
 		}
 		
-		Uniform.UniformType getType() {
+		GLSLvariableType getType() {
 			return this.type;
 		}
 		

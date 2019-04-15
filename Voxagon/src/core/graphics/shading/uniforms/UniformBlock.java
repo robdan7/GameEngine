@@ -5,7 +5,9 @@ import java.util.HashMap;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import core.graphics.shading.GLSLvariableType;
 import core.graphics.shading.InterfaceBlock;
+import core.graphics.shading.InterfaceVariable;
 import core.graphics.shading.uniforms.references.UniformBlockReference;
 import core.graphics.shading.uniforms.references.UniformBlockReference.UniformTypeEception;
 import core.graphics.shading.uniforms.references.UniformReference.ReferenceCreationException;
@@ -46,12 +48,13 @@ public class UniformBlock extends InterfaceBlock {
 	private UniformBlock(Element node, GlueList<Uniform> siblingUniforms) {
 		super();
 		super.setBlockName(node.getAttribute(UniformBlockSyntaxName.NAME.toString()));
+		super.setQualifier("uniform");
 		
 		this.applicationReference = UniformBlockReference.requestBlockReference(super.getBlockName());
 		
 
 		if (node.hasAttribute(UniformBlockSyntaxName.INSTANCE.toString())) {
-			super.setInstanceName(UniformBlockSyntaxName.INSTANCE.toString());
+			super.setInstanceName(node.getAttribute(UniformBlockSyntaxName.INSTANCE.toString()));
 		}
 		
 		if (!node.hasChildNodes()) {
@@ -65,8 +68,6 @@ public class UniformBlock extends InterfaceBlock {
 		} catch (UniformTypeException e) {
 			e.printStackTrace();
 		}
-		
-		System.out.println(this.toString());
 	}
 	
 	/**
@@ -78,16 +79,16 @@ public class UniformBlock extends InterfaceBlock {
 		NodeList nodes = root.getChildNodes();
 		
 		Element el;
-		Uniform.UniformType type = null;
+		GLSLvariableType type = null;
 		for (int i = 0; i < nodes.getLength(); i++) {
 			if (!nodes.item(i).getNodeName().equals("#text")) {
 				el = (Element)nodes.item(i);
 				
-
-				type = Uniform.getTypeFromString(el.getAttribute(Uniform.UniformSyntaxName.TYPE.toString()));
+				Uniform u = new Uniform(el);
+				//type = Uniform.getTypeFromString(el.getAttribute(Uniform.UniformSyntaxName.TYPE.toString()));
 				
 				try {
-					this.applicationReference.requestNewMember(i, type);
+					this.applicationReference.requestNewMember(i, u.getType());
 					super.addMember(new Uniform(el));
 				} catch (NumberFormatException | UniformTypeEception | ReferenceCreationException e) {
 					// TODO Auto-generated catch block
@@ -99,6 +100,20 @@ public class UniformBlock extends InterfaceBlock {
 	
 	private boolean hasSiblingUniforms() {
 		return this.siblingUniforms != null && this.siblingUniforms.size() > 0;
+	}
+	
+
+	@Override
+	public String toString() {
+		String result = "layout (std140, binding = " + this.applicationReference.getbinding() + ") ";
+		result += this.getQualifier() + " " + this.getBlockName() + " {\n";
+		int offset = 0;
+		for(InterfaceVariable v : super.getMembers()) {
+			result += "layout(offset = " +offset+") " + v.toString();
+			offset += v.getStride();
+		}
+		result += "}" + this.getInstanceName() + ";\n";
+		return result;
 	}
 
 	/**

@@ -2,8 +2,11 @@ package core.graphics.shading.uniforms;
 
 import org.w3c.dom.Element;
 
+import core.graphics.shading.GLSLvariableType;
 import core.graphics.shading.InterfaceVariable;
 import core.utils.datatypes.GlueList;
+
+import static core.graphics.shading.GLSLvariableType.*;
 
 
 /**
@@ -12,7 +15,7 @@ import core.utils.datatypes.GlueList;
  *
  */
 public class Uniform extends InterfaceVariable {
-	UniformType type;
+	GLSLvariableType type;
 	private GlueList<Uniform> siblings;
 
 	
@@ -26,6 +29,13 @@ public class Uniform extends InterfaceVariable {
 		
 		
 		super.setType(root.getAttribute(Uniform.UniformSyntaxName.TYPE.toString()));
+		try {
+			this.type = getTypeFromString(root.getAttribute(Uniform.UniformSyntaxName.TYPE.toString()));
+		} catch (Exception e) {
+			// TODO Fix a proper exception.
+			e.printStackTrace();
+		}
+		super.setStride(this.type.getStride());
 	}
 	
 	/**
@@ -46,23 +56,11 @@ public class Uniform extends InterfaceVariable {
 		}		
 	}
 
-	
-	/**
-	 * Convert a string representing of any uniform into the internal representation.
-	 * @param type
-	 * @return
-	 * @throws UniformTypeException
-	 */
-	static UniformType getTypeFromString(String type) throws UniformTypeException {
-		
-		for (UniformType t: UniformType.values()) {
-			if (t.toString().equals(type)) {
-				return t;
-			}
-		}
-		throw new UniformTypeException("Invalid uniform type");
-	}
 
+	public GLSLvariableType getType() {
+		return this.type;
+	}
+	
 
 	/**
 	 * Check if this uniform has siblings or not.
@@ -84,30 +82,6 @@ public class Uniform extends InterfaceVariable {
 		}
 		
 		return true;
-	}
-	
-	/**
-	 * 
-	 * @author Robin
-	 *
-	 */
-	public static enum UniformType {
-		VEC4("vec4", 16), VEC3("vec3", 16), VEC2("vec2", 8), MAT4("mat4", 64);
-		private String type;
-		private int stride;
-		UniformType(String type, int stride) {
-			this.type = type;
-			this.stride = stride;
-		}
-		
-		public int getStride() {
-			return this.stride;
-		}
-		
-		@Override
-		public String toString() {
-			return this.type;
-		}
 	}
 	
 	public static enum UniformSyntaxName {

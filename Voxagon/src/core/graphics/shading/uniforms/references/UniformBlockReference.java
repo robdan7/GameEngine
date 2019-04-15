@@ -2,8 +2,7 @@ package core.graphics.shading.uniforms.references;
 
 import java.util.HashMap;
 
-import core.graphics.shading.uniforms.Uniform;
-import core.graphics.shading.uniforms.Uniform.UniformType;
+import core.graphics.shading.GLSLvariableType;
 import core.graphics.shading.uniforms.references.UniformReference.ReferenceCreationException;
 import core.utils.datatypes.GlueList;
 
@@ -65,7 +64,7 @@ public class UniformBlockReference {
 	 * a member as different variable types.
 	 * @throws ReferenceCreationException 
 	 */
-	public void requestNewMember(int index, Uniform.UniformType type) throws UniformTypeEception, ReferenceCreationException {
+	public void requestNewMember(int index, GLSLvariableType type) throws UniformTypeEception, ReferenceCreationException {
 		// TODO find out what to do if memory is allocated to slot 1 and 3, but not 2.
 		// We cant calculate the offset in a struct if one index is missing!
 		/* Solution? Don't allow index in appendMember, or don't allow appending at all 
