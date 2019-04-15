@@ -15,14 +15,18 @@ import org.xml.sax.SAXException;
 
 import core.utils.datatypes.GlueList;
 import core.utils.fileSystem.XMLparser;
+import core.graphics.shading.attributes.Attribute;
+import core.graphics.shading.attributes.Attribute.AttributeCreationException;
+import core.graphics.shading.attributes.AttributeBlock;
 import core.graphics.shading.uniforms.*;
 
 public class Shader {
 	private int shaderIndex = -1;
 	private String name = "NULL";
-	private GlueList<Attribute> attributes;
 	private GlueList<UniformBlock> uniformBlocks;
 	private GlueList<Uniform> localUniforms;
+	private GlueList<Attribute> attributes;
+	private GlueList<AttributeBlock> attributeBlocks;
 	private Element code;
 	private Shader parent;
 
@@ -31,6 +35,8 @@ public class Shader {
 		this.attributes = new GlueList<Attribute>();
 		this.uniformBlocks = new GlueList<UniformBlock>();
 		this.localUniforms = new GlueList<Uniform>();
+		this.attributes = new GlueList<Attribute>();
+		this.attributeBlocks = new GlueList<AttributeBlock>();
 		if (shaderElement.hasAttribute("name")) {
 			this.name = shaderElement.getAttribute("name");
 		}
@@ -39,8 +45,9 @@ public class Shader {
 	}
 	
 	public Shader(Element shaderElement, int shaderType) {
-		this(shaderElement);
+		this(shaderElement, null, shaderType);
 		
+		/*
 		this.iterateChildren(shaderElement);
 		NodeList codeNodes = this.code.getChildNodes();
 		Element el;
@@ -52,7 +59,7 @@ public class Shader {
 				}
 			}
 		}
-		
+		*/
 		/*
 		for (int i = 0; i < nodes.getLength(); i++) {
 			if (nodes.item(i).getNodeName() != "#text") {
@@ -69,43 +76,121 @@ public class Shader {
 				}
 			}
 		}*/
-
-		this.shaderIndex = this.compileshader(this.code.getTextContent(), shaderType);
+		System.out.println(this.code.getTextContent());
 	}
 	
 	
-	public Shader(Element shader, Shader parent, int shaderType) {
-		this(shader);
-		this.parent = parent;
-		this.iterateChildren(shader);
-		Element parentCode = (Element)this.parent.code.cloneNode(true);
-		NodeList parentNode = parentCode.getChildNodes();
+	public Shader(Element shaderRoot, Shader parent, int shaderType) {
+		this(shaderRoot);
 		
+		this.parent = parent;
+		//this.iterateChildren(shaderRoot);
+		if (this.hasParent()) {
+			this.uniformBlocks = (GlueList<UniformBlock>) this.parent.uniformBlocks.clone();
+			this.localUniforms = (GlueList<Uniform>) this.parent.localUniforms.clone();
+			Element parentCode = (Element)this.parent.code.cloneNode(true);
+			NodeList parentNode = parentCode.getChildNodes();
+			//System.out.println(this.code.getTextContent());
+		}
+		
+		this.iterateChildren(shaderRoot);		
+		this.insertToParentCode();
+		this.insertPlaceHolders();
+		
+		/*
 		Element el;
 		for (int i = 0; i < parentNode.getLength(); i++) {
 			if (!parentNode.item(i).getNodeName().equals("#text")) {
 				el = (Element)parentNode.item(i);
 				
 				if (el.getNodeName().equals("placeholder")) {
-					
-					if (el.getAttribute("type").equals("attribute")) {
+					String attribute = el.getAttribute("type");
+					if (attribute.equals("attribute")) {
 						
 						el.setTextContent(el.getTextContent() + this.getAttributeStrings());
-					} else if (el.getAttribute("type").equals("code")) {
+					} else if (attribute.equals("code")) {
 						el.setTextContent(el.getTextContent() + this.code.getTextContent());
+					} else if (attribute.equals("uniform")) {
+						System.out.println("hello world");
 					}
 				}
 			}
 		}
 		this.code = parentCode;
-		System.out.println(this.code.getTextContent());
+		*/
+		this.shaderIndex = this.compileshader(this.code.getTextContent(), shaderType);
 	}
 	
+	/**
+	 * Merge the code of this shader with the parent code. The code will be inserted at 
+	 * the specified user-code pointer.
+	 */
+	private void insertToParentCode() {
+		if (!this.hasParent()) {
+			return;
+		}
+		Element parentCode = (Element)this.parent.code.cloneNode(true);
+		NodeList nodes = parentCode.getChildNodes();
+		
+		Element el;
+		for (int i = 0; i < nodes.getLength(); i++) {
+
+			if (nodes.item(i).getNodeName().equals("usercode")) {
+				parentCode.replaceChild(this.code, nodes.item(i));
+			}
+		}
+		this.code = parentCode;
+	}
+	
+	/**
+	 * Add all uniforms and attributes to the placeholders in the code. 
+	 * The placeholders can only exist in one place, so no duplicates will be created if 
+	 * the shader has a parent and both have the same placeholders.
+	 */
+	private void insertPlaceHolders() {
+		NodeList codeNodes = this.code.getChildNodes();
+		Element el;
+		for (int i = 0; i < codeNodes.getLength(); i++) {
+			if (!codeNodes.item(i).getNodeName().equals("#text")) {
+				el = (Element) codeNodes.item(i);
+				if (el.getNodeName().equals("placeholder")) {
+					String type = el.getAttribute("type");
+					if (el.getAttribute("type").equals("attribute")) {;
+						el.setTextContent(this.getAttributeStrings());
+					} else if (type.equals("uniform")) {
+						el.setTextContent(this.getUniformStrings());
+					}
+					
+				}
+			}
+		}
+	}
+	
+
+	
+	private String getUniformStrings() {
+		String result = "";
+		
+		for (UniformBlock b : this.uniformBlocks) {
+			result += b.toString();
+		}
+		
+		for (Uniform u : this.localUniforms) {
+			result += u.toString();
+		}
+		
+		return result;
+	}
 	
 	private String getAttributeStrings() {
 		String result = "";
-		for (int i = 0; i < this.attributes.size(); i++) {
-			result += this.attributes.get(i).toString();
+		
+		for (Attribute b : this.attributes) {
+			result += b.toString();
+		}
+		
+		for (AttributeBlock b: this.attributeBlocks) {
+			result += b.toString();
 		}
 		return result;
 	}
@@ -117,23 +202,9 @@ public class Shader {
 		for (int i = 0; i < nodes.getLength(); i++) {
 			if (nodes.item(i).getNodeName() != "#text") {
 				el = (Element) nodes.item(i);
-				
 				switch(el.getNodeName()) {
 				case "attribute":
-					// TODO fix this code, please.
-					int lastIndex = 0;
-					if (this.attributes.size() > 0) {
-						lastIndex = this.attributes.get(this.attributes.size()-1).getLocation()+1;
-					}
-					int attributeLength = this.attributes.size() < lastIndex? lastIndex : this.attributes.size();				
-					if (this.hasParent()) {	/* The parent could already have attributes with higher index. */
-						int parentIndex = this.parent.attributes.get(parent.attributes.size()-1).location+1;
-						if (parentIndex > lastIndex) {
-							attributeLength += this.parent.attributes.get(parent.attributes.size()-1).location+1;
-						}
-					}
-					this.attributes.add(new Attribute(el,attributeLength));
-					
+					this.parseAttribute(el);
 					continue;
 				case "uniform":
 					this.parseUniform(el);
@@ -146,7 +217,31 @@ public class Shader {
 		}
 	}
 	
-	//private void parse
+	private void parseAttribute(Element attrib) {
+		if (attrib.hasChildNodes()) {
+			try {
+				this.attributeBlocks.add(new AttributeBlock(attrib));
+			} catch (AttributeCreationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			int location = 0;
+			if (this.attributes.size() > 0) {
+				location = this.attributes.get(this.attributes.size()-1).getLocation()+1;
+			}
+
+			if (!attrib.hasAttribute(Attribute.AttributeSyntax.LOCATION.toString())) {
+				attrib.setAttribute(Attribute.AttributeSyntax.LOCATION.toString(), Integer.toString(location));
+			}
+			try {
+				this.attributes.add(new Attribute(attrib));
+			} catch (AttributeCreationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 	
 	private void parseUniform(Element uniformNode) {
 		if (uniformNode.hasChildNodes()) {
@@ -160,6 +255,7 @@ public class Shader {
 				e.printStackTrace();
 			}
 		}
+		
 	}
 	
 	private int compileshader(String code, int shaderType) {
@@ -190,99 +286,9 @@ public class Shader {
 	}
 	
 	@Deprecated
-	private static class Throughput {
-		private GlueList<Attribute> attributes;
-		private GlueList<Uniform> uniforms;
-		
-		private Throughput() {
-			
-		}
-		
-		private int getNexAttributeIndex() {
-			if (this.attributes.size() > 0) {
-				return this.attributes.get(this.attributes.size()-1).location+1;
-			} else {
-				return 0;
-			}
-		}
-		
-		private int getNextUniformIndex() {
-			if (this.uniforms.size() > 0) {
-				//return this.uniforms.get(this.uniforms.size()-1)
-				return 0;
-			} else {
-				return 0;
-			}
-		}
-	}
-	
-	@Deprecated
 	private static abstract class ShaderVariable {
 		private String name="", type="", data="", structName="";
 		int location = -1;
 		NodeList children;
-	}
-	
-	
-	// TODO make a clear structure for the attributes and how input/output works. Maybe one super class 
-	//with two classes that inherits from it and adds in/out to the attributes.
-	@Deprecated
-	public static class Attribute extends ShaderVariable {
-
-		
-		public Attribute(Element attribute, int location) {
-			if (attribute.hasChildNodes()) {
-				this.children = attribute.getChildNodes();
-			} else if (!attribute.hasAttribute("type")) {
-				throw new RuntimeException("Attribute is missing a type");
-			} else if(!attribute.hasAttribute("name")) {
-				throw new RuntimeException("Attribute is missing a name");
-			}
-			super.name = attribute.getAttribute("name");
-			super.type = attribute.getAttribute("type");
-			
-			if (attribute.hasAttribute("location")) {
-				super.location = Integer.parseInt(attribute.getAttribute("location"));
-				if (super.location < location) {
-					throw new RuntimeException("Attribute " + super.name + " has illegal location: " + (super.location-location));
-				}
-			} else {
-				super.location = location;
-			}
-			
-			super.data = attribute.getTextContent();
-			
-			if (attribute.hasAttribute("struct")) {
-				super.structName = attribute.getAttribute("struct");
-			}
-		}
-		
-		private int getLocation() {
-			return super.location;
-		}
-		
-		@Override
-		public String toString() {
-			String result = "";
-			if (super.location != -1) {
-				result = "layout(location = " + super.location + ") in " ;
-			} else {
-				result = "in ";
-			}
-			 
-			if (this.children != null) {
-				result += super.structName + "{\n";
-				for (int i = 0, k = 0; i < this.children.getLength(); i++) {
-					if (this.children.item(i).getNodeName() != "#text") {
-						result += new Attribute((Element)super.children.item(i), k).toString() + "\n";
-						k++;
-					}
- 					//
-				}
-				return result + "}" + super.name + ";";
-			} else {
-				return result + super.type + " " + super.name + ";";
-			}
-		}
 	}
 }

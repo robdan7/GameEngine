@@ -50,6 +50,10 @@ public class InterfaceBlock implements ShaderDataStorage {
 		this.members.add(member);
 	}
 	
+	protected GlueList<InterfaceVariable> getMembers() {
+		return this.members;
+	}
+	
 	protected void setQualifier(String qualifier) {
 		this.storageQualifier = qualifier;
 	}
@@ -76,16 +80,6 @@ public class InterfaceBlock implements ShaderDataStorage {
 	 */
 	protected String getBlockName() {
 		return this.blockName;
-	}
-	
-	@Override
-	public String toString() {
-		String result = this.getQualifier() + " " + this.getBlockName() + "{ ";
-		for(InterfaceVariable v : this.members) {
-			result += v.toString();
-		}
-		result += "}" + this.getInstanceName() + ";";
-		return result;
 	}
 	
 	@Override

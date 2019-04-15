@@ -8,6 +8,7 @@ package core.graphics.shading;
  */
 public class InterfaceVariable {
 	private String storageQualifier = "", type = "", name = "";
+	private int stride = 0;
 
 	/**
 	 * 
@@ -31,6 +32,7 @@ public class InterfaceVariable {
 		this.setType(type);
 	}
 	
+	
 	/**
 	 * Protected constructor.
 	 */
@@ -50,6 +52,14 @@ public class InterfaceVariable {
 		this.type = type;
 	}
 	
+	protected void setStride(int stride) {
+		this.stride = stride;
+	}
+	
+	public int getStride() {
+		return this.stride;
+	}
+	
 	protected String getQualifier() {
 		return this.storageQualifier;
 	}
@@ -58,13 +68,11 @@ public class InterfaceVariable {
 		return this.name;
 	}
 	
-	protected String getType() {
-		return this.type;
-	}
+
 	
 	@Override
 	public String toString() {
-		return this.getQualifier() + " " + this.getType() + " "+ this.getName() + ";";
+		return this.getQualifier() + " " + this.type + " "+ this.getName() + ";\n";
 	}
 	
 	@Override
@@ -74,7 +82,7 @@ public class InterfaceVariable {
 		}
 		
 		if (this.getName().equals(((InterfaceVariable)o).getName()) && this.getQualifier().equals(((InterfaceVariable)o).getQualifier())
-				&& this.getType().equals(((InterfaceVariable)o).getType())) {
+				&& this.type.equals(((InterfaceVariable)o).type)) {
 			return true;
 		}
 		
