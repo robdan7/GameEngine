@@ -7,6 +7,7 @@ layout(location = 0) in vec4 vertexIn;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in vec2 uvIn;
 
+
 //out vec4 staticDepthPos, dynamicDepthPos;
 layout(location = 0) out Data {
 	layout(location = 0) vec4 vertexPosition;

@@ -41,6 +41,23 @@ public class ShaderDemo {
 			}
 		}
 		
+		Element shader = shaders.get(0);
+		
+		Shader sh = new Shader(shader, 0);
+		
+		// child
+		try {
+			doc = XMLparser.createDocument("/Assets/new/shaders/child_test.shd");
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		root = doc.getDocumentElement();
+
+		
+		Shader child = new Shader(root, sh, 0);
+		
+		/*
 		try {
 			doc = XMLparser.createDocument("/Assets/new/shaders/child_test.shd");
 		} catch (SAXException | IOException | ParserConfigurationException e1) {
@@ -58,40 +75,14 @@ public class ShaderDemo {
 			}
 			
 		}
-		
+		*/
 		//iterateChildren(root);
 		
 		//Element copy = (Element)root.cloneNode(true);
 		//System.out.println(copy.getTextContent());
 	}
 	
-	private void iterateChildren(Element root) {
-		String attributes = "";
-		NodeList nodes = root.getChildNodes();
-		Element el = null;
-		for (int i = 0; i < nodes.getLength(); i++) {
-			if (nodes.item(i).getNodeName() != "#text") {
-				el = (Element) nodes.item(i);
-				if (el.hasChildNodes()) {
-					if (el.getNodeName() != "attribute") iterateChildren(el);
-					else {
-						//System.out.println(new Shader.Attribute(el));
-					}
-					if (el.getNodeName() == "code") {
-						//System.out.println("nodeName: " + el.getNodeName());
-						//System.out.println(el.getTextContent());
-					}
-				}
-				
-				if (el.getNodeName() == "placeholder") {
-					el.setTextContent("HELLO WORLD");
-				}
-				
-				
-				
-			}
-		}
-	}
+
 	
 	public static void main(String[] args) {
 		new ShaderDemo();

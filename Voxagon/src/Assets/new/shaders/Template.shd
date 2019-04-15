@@ -6,6 +6,11 @@
 		<attribute name="test" struct="STRUCT">
 			<attribute name="testInStruct" type="vec4"/>
 		</attribute>
+		<uniform name="test" instance="testInstance">
+			<uniform name="camera" type="mat4"/>
+		</uniform>
+		<uniform name="temp" type="vec4" />
+		<uniform name="temp3" type="vec4" />
 		<code>
 			#version 450 core
 			layout (std140, binding = 1) uniform Matrices {
@@ -17,6 +22,7 @@
 			};
 			
 			<placeholder type="attribute"/>
+			<placeholder type="uniform"/>
 			
 			//layout(location = 0) in vec4 vertexIn;
 			//layout(location = 1) in vec3 normal;

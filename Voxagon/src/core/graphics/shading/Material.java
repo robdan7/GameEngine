@@ -94,4 +94,11 @@ public class Material {
 	}
 	
 
+	// TODO make this work somehow. I want that.
+	public static enum ValidShaderType {
+		VERTEX(1), FRAGMENT(2);
+		private ValidShaderType(int s) {
+			
+		}
+	}
 }

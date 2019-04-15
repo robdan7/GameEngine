@@ -2,6 +2,7 @@
 	<attribute  type="mat4" name="matrix" />
 	<attribute location="10" type="vec2" name="vector" />
 	<attribute  type="vec2" name="vector2" />
+	<uniform name="temp4" type="vec4" />
 	<code>
 	gl_Position = vec4(0,1,0,1);
 	</code>

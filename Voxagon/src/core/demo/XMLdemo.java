@@ -26,7 +26,7 @@ public class XMLdemo {
 		Element root = doc.getDocumentElement();
 		//System.out.println(root.getAttribute("mesh"));
 		
-		ModelInstance model = Model.createModelInstance(root);
+		//ModelInstance model = Model.createModelInstance(root);
 		
 		//file = "/Assets/new/mesh/imports.shd";
 		//Mesh mesh = new Mesh(file);

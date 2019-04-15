@@ -1,33 +1,44 @@
 <material name="m_test">
 	<shader type="vertex" name="m_test_vertex">
-		<uniform name="test" instance="testInstance">
-			<uniform name="camera" type="mat4"/>
+		<uniform name="Light" instance="lightSource">
+			<uniform type="vec4" name="test"/>
 		</uniform>
-		<uniform name="temp" type="vec4" />
-		<uniform name="temp3" type="vec4" />
+		<uniform name="Matrices" instance="mat">
+			<uniform type="mat4" name="camera"/>
+			<uniform type="mat4" name="viewMatrix"/>
+			<uniform type="mat4" name="translateMatrix"/>
+			<uniform type="mat4" name="staticOrthoMatrix"/>
+			<uniform type="mat4" name="dynamicOrthoMatrix"/>
+		</uniform>
+		<attribute location="3" qualifier="in" type="vec2" name="uvIn"/>
+		<attribute location="0" qualifier="in" type="vec4" name="vertexIn"/> 
+		<attribute location="1" qualifier="in" type="vec3" name="normal"/> 
+		<attribute location="0" qualifier="out" name="PipelineData" instance="vertexOutput">
+			<attribute location="0" type="vec4" name="position"/>
+			<attribute location="2" type="vec4" name="normal"/>
+			<attribute location="3" type="vec2" name="UV"/>
+			<attribute type="vec2" name="test"/>
+		</attribute>
 		<code>
 		#version 450 core
-		layout (std140, binding = 1) uniform Matrices {
-			layout(offset = 0) mat4 camera;
-			layout(offset = 64) mat4 viewMatrix;
-			layout(offset = 128) mat4 translateMatrix;
-			layout(offset = 192) mat4 staticOrthoMatrix;
-			layout(offset = 256) mat4 dynamicOrthoMatrix;
-		} mat;
 		
-		layout(location = 0) in vec4 vertexIn;
-		layout(location = 1) in vec3 normal;
-		layout(location = 2) in vec2 uvIn;
+		
+		<placeholder type="uniform"/>
+		<placeholder type="attribute"/>
+		
+		//layout(location = 0) in vec4 vertexIn;
+		//layout(location = 1) in vec3 normal;
+		//layout(location = 2) in vec2 uvIn;
 		layout(location = 3) in mat4 inTranslationMatrix;
 	
 
 
-		layout(location = 0) out PipelineData {
-			layout(location = 0) vec4 position;
-			layout(location = 1) vec4 normal;
-			layout(location = 2) vec2 UV;
+		//layout(location = 0) out PipelineData {
+		//	layout(location = 0) vec4 position;
+		//	layout(location = 2) vec4 normal;
+		//	layout(location = 3) vec2 UV;
 
-		} vertexOutput;
+		//} vertexOutput;
 
 
 		void main() {
@@ -53,8 +64,9 @@
 		
 		layout(location = 0) in PipelineData {
 			layout(location = 0) vec4 position;
-			layout(location = 1) vec4 normal;
-			layout(location = 2) vec2 UV;
+			layout(location = 2) vec4 normal;
+			layout(location = 3) vec2 UV;
+			layout(location = 4) vec2 test;
 		} fragmentData;
 
 		layout(location = 0) out vec4 outColor;	// locations are stored in Quad.java
