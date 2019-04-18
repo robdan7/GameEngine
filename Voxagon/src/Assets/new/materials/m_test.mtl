@@ -10,9 +10,9 @@
 			<uniform type="mat4" name="staticOrthoMatrix"/>
 			<uniform type="mat4" name="dynamicOrthoMatrix"/>
 		</uniform>
-		<attribute location="3" qualifier="in" type="vec2" name="uvIn"/>
-		<attribute location="0" qualifier="in" type="vec4" name="vertexIn"/> 
-		<attribute location="1" qualifier="in" type="vec3" name="normal"/> 
+		<attribute qualifier="in" type="vec4" name="vertexIn"/> 
+		<attribute qualifier="in" type="vec3" name="normal"/> 
+		<attribute qualifier="in" type="vec2" name="uvIn"/>
 		<attribute location="0" qualifier="out" name="PipelineData" instance="vertexOutput">
 			<attribute location="0" type="vec4" name="position"/>
 			<attribute location="2" type="vec4" name="normal"/>
@@ -39,7 +39,6 @@
 		//	layout(location = 3) vec2 UV;
 
 		//} vertexOutput;
-
 
 		void main() {
 
@@ -72,11 +71,13 @@
 		layout(location = 0) out vec4 outColor;	// locations are stored in Quad.java
 		layout(location = 1) out vec4 outNormal;
 		layout(location = 2) out vec4 worldPosition;
+		
+		<import>/Assets/new/shaders/diffuse.shd</import>
 
 		void main() {
 
 			outNormal = vec4(fragmentData.normal.xyz*0.5+0.5,1);
-			outColor = vec4(1,0,0,1);
+			outColor = diffuse(vec4(1,0,0,1));
 			worldPosition = fragmentData.position;
 	
 			gl_FragDepth = gl_FragCoord.z;

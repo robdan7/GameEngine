@@ -162,7 +162,8 @@ void main() {
 	sun.specular = lightSource.specular;
 	
 
-	gl_FragColor = fragment.color*composeLight(fragment.sShadowPos, fragment.dShadowPos, fragment.wPosition, fragment.normal, sun.normal,sun.diffuse, sun.ambient, sun.specular, 50);
+	//gl_FragColor = fragment.color*composeLight(fragment.sShadowPos, fragment.dShadowPos, fragment.wPosition, fragment.normal, sun.normal,sun.diffuse, sun.ambient, sun.specular, 50);
+	gl_FragColor = fragment.color;
 	//gl_FragColor = dummy;
 	gl_FragDepth = texture(inDepth, texCoord).r;
 	

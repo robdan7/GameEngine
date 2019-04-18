@@ -5,10 +5,12 @@ import static org.lwjgl.opengl.GL20.GL_COMPILE_STATUS;
 import static org.lwjgl.opengl.GL20.glGetShaderi;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.lwjgl.opengl.GL20;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -29,7 +31,31 @@ public class Shader {
 	private GlueList<AttributeBlock> attributeBlocks;
 	private Element code;
 	private Shader parent;
+	
+	private static HashMap<String, Shader> shaderImports;
+	
+	static {
+		shaderImports = new HashMap<String, Shader>();
+	}
 
+	/**
+	 * Create a shaders that is just an empty shell with code in it. Used for internal imports.
+	 * @param file
+	 * @throws SAXException
+	 * @throws IOException
+	 * @throws ParserConfigurationException
+	 */
+	private Shader(String file) throws SAXException, IOException, ParserConfigurationException {
+		Document doc = XMLparser.createDocument(file);
+		Element root = doc.getDocumentElement();
+		NodeList nodes = root.getChildNodes();
+		for (int i = 0; i < nodes.getLength(); i++) {
+			if (!nodes.item(i).getNodeName().equals("#text") && nodes.item(i).getNodeName().equals("code")) {
+				this.code = (Element) nodes.item(i);
+			}
+		}
+		this.insertPlaceHolders();
+	}
 	
 	private Shader(Element shaderElement) {
 		this.attributes = new GlueList<Attribute>();
@@ -40,8 +66,6 @@ public class Shader {
 		if (shaderElement.hasAttribute("name")) {
 			this.name = shaderElement.getAttribute("name");
 		}
-		
-		
 	}
 	
 	public Shader(Element shaderElement, int shaderType) {
@@ -76,7 +100,7 @@ public class Shader {
 				}
 			}
 		}*/
-		System.out.println(this.code.getTextContent());
+		//System.out.println(this.code.getTextContent());
 	}
 	
 	
@@ -155,12 +179,16 @@ public class Shader {
 				el = (Element) codeNodes.item(i);
 				if (el.getNodeName().equals("placeholder")) {
 					String type = el.getAttribute("type");
-					if (el.getAttribute("type").equals("attribute")) {;
+					if (type.equals("attribute")) {;
 						el.setTextContent(this.getAttributeStrings());
 					} else if (type.equals("uniform")) {
 						el.setTextContent(this.getUniformStrings());
 					}
 					
+				} else {
+					if (el.getNodeName().equals("import")) {
+						this.importShader(el, el.getTextContent());
+					}
 				}
 			}
 		}
@@ -213,6 +241,28 @@ public class Shader {
 					this.code = el;
 					break;
 				}
+			}
+		}
+	}
+	
+	private void importShader(Element el, String file) {
+		String[] files = file.split("\\s+");
+		
+		for (String f : files) {
+			//System.out.println(f);
+			if (shaderImports.containsKey(f)) {
+				el.setTextContent(shaderImports.get(f).code.getTextContent());
+			} else {
+				Shader sh = null;
+				try {
+					sh = new Shader(f);
+				} catch (SAXException | IOException | ParserConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				shaderImports.put(f, sh);
+				el.setTextContent(sh.code.getTextContent());
+				//el.setTextContent("");
 			}
 		}
 	}

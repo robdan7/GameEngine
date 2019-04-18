@@ -1,0 +1,11 @@
+<shader>
+	<code>
+	vec4 ambient(vec4 color) {
+		return color*0.1;
+	}
+	
+	float ambient() {
+		return 0.1;
+	}
+	</code>
+</shader>

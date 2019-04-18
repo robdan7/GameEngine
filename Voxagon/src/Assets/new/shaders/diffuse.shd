@@ -1,0 +1,9 @@
+<shader>
+	<code>
+	<import>/Assets/new/shaders/ambient.shd</import>
+	
+	vec4 diffuse(vec4 color) {
+		return vec4(color.rgb,1);
+	}
+	</code>
+</shader>
