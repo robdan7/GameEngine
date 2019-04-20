@@ -1,0 +1,32 @@
+<material>
+	<shader type="vertex" name="G_buffer_vertex">
+	<attribute qualifier="in" type="vec4" name="vertex"/>
+	<attribute location="0" qualifier="out" name="VertexOutput" instance="vertexOut">
+		<attribute location="0" type="vec2" name="texCoord"/>
+		<attribute location="1" type="vec2" name="fragCoord"/>
+	</attribute>
+	<code>
+		#version 450 core
+		<placeholder type="attribute"/>
+		void main() {
+			vertexOut.texCoord = (vertex.xy*0.5+0.5);
+			//vertexOut.fragCoord = vertex.xy;
+			gl_Position = vec4(1,0,0,0);
+		}
+	</code>
+	</shader>
+	<shader type="fragment" name="G_buffer_fragment">
+	<attribute location="0" qualifier="out" name="VertexOutput" instance="vertexOut">
+		<attribute location="0" type="vec2" name="texCoord"/>
+		<attribute location="1" type="vec2" name="fragCoord"/>
+	</attribute>
+		
+	<code>
+		<placeholder type="attribute"/>
+		#version 450 core
+		void main() {
+			
+		}	
+	</code>
+	</shader>
+</material>

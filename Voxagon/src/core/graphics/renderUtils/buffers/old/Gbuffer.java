@@ -1,4 +1,4 @@
-package core.graphics.renderUtils.buffers;
+package core.graphics.renderUtils.buffers.old;
 
 import static org.lwjgl.opengl.GL11.GL_DEPTH_COMPONENT;
 import static org.lwjgl.opengl.GL11.glReadBuffer;

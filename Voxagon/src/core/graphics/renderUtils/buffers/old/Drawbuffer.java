@@ -1,4 +1,4 @@
-package core.graphics.renderUtils.buffers;
+package core.graphics.renderUtils.buffers.old;
 
 
 import static org.lwjgl.opengl.GL11.*;
@@ -100,13 +100,15 @@ public class Drawbuffer {
         
     }
 
+    /*
     public Texture getPrimaryTexture() {
 		return primaryTexture;
-    }
+    }*/
 
+    /*
     public Texture getColorMapTexture() {
         return textures[0];
-    }
+    }*/
     
     public Texture getDepthMapTexture() {
         return depthtexture;

@@ -1,9 +1,12 @@
 package core.graphics.renderUtils;
 
+import org.lwjgl.opengl.GL11;
+
 import core.graphics.lights.DirectionalLight;
 import core.graphics.lights.Light;
 import core.graphics.misc.Texture;
-import core.graphics.renderUtils.buffers.Drawbuffer;
+import core.graphics.renderUtils.buffers.Framebuffer;
+import core.graphics.renderUtils.buffers.old.Drawbuffer;
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
 import core.physics.mechanics.BufferedMotionContainer;
 import core.utils.math.MathTools;
@@ -21,8 +24,9 @@ public class ShadowMap {
 	/**
 	 * This stores the finished rendering of the scene.
 	 */
-	private Drawbuffer textureBuffer;
-	
+	//private Drawbuffer textureBuffer;
+	private Framebuffer framebuffer;
+
 	/**
 	 * Every shadow map need a light source. It can only be directional atm.
 	 */
@@ -46,20 +50,19 @@ public class ShadowMap {
 	 * @throws Exception
 	 */
 	public ShadowMap(Vector3f up, Vector3f right, String textureName, int width, int height, int imageFilter, Vector4f matrixDimensions, UniformBufferSource unf) throws Exception {
-		textureBuffer = new Drawbuffer(textureName, width, height);
-		//buffer.getColorMapTexture().bindAsUniform(shader.getShaderProgram());
+
+		this.framebuffer = new Framebuffer(width, height);
+		this.framebuffer.addDepthAttachment(textureName, imageFilter, GL11.GL_DEPTH_COMPONENT);
+
 		cam = new Camera(
 				up, right, -matrixDimensions.getX(), matrixDimensions.getX(), -matrixDimensions.getY(), matrixDimensions.getY(), matrixDimensions.getZ(), matrixDimensions.getW(), 
 				Camera.updateType.CAMERA, unf);
-		//cam.rotate(0, -(float)Math.PI/2);
-		//cam.lookAt(new Vector3f(0.1f,-1f,0).normalize());
+
 		Vector3f v = new Vector3f(0.1f,-1f,0);
 		v.normalize();
 		this.lookAt(v);
-		//System.out.println(cam.getForward().toString() + " : " + cam.getPosition().toString());
 		cam.lookAt();
-		
-		//this.position = new Vector3f();
+
 		this.positionContainer = new BufferedMotionContainer();
 		
 		this.xPPI = matrixDimensions.getX()*2.0f/(float)width;
@@ -149,8 +152,17 @@ public class ShadowMap {
 	 * 
 	 * @return - The draw buffer used for rendering to the texture.
 	 */
-	public Drawbuffer getBuffer() {
-		return this.textureBuffer;
+	public int getBufferIndex() {
+		//return this.textureBuffer;
+		return this.framebuffer.getFramebuffer();
+	}
+	
+	public int getHeight() {
+		return this.framebuffer.getHeight();
+	}
+	
+	public int getWidth() {
+		return this.framebuffer.getWidth();
 	}
 	
 	/**
@@ -158,7 +170,8 @@ public class ShadowMap {
 	 * @return - The generated shadow map depth texture.
 	 */
 	public Texture getTexture() {
-		return this.textureBuffer.getDepthMapTexture();
+		//return this.textureBuffer.getDepthMapTexture();
+		return this.framebuffer.getDepthAttachment();
 	}
 	
 	public Light getLightSource() {

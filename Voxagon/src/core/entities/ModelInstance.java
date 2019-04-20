@@ -17,13 +17,20 @@ public class ModelInstance {
 		this.position = position;
 		this.matrix = new Matrix4f();
 		this.parent = parent;
-		this.instanceBuffer = BufferUtils.createFloatBuffer(16); // one matrix.
-		this.instanceBuffer.clear();
-		this.matrix.put(this.instanceBuffer);
+		//this.instanceBuffer = BufferUtils.createFloatBuffer(16); // one matrix.
+		//this.instanceBuffer.clear();
+		//this.matrix.put(this.instanceBuffer);
+		this.instanceBuffer = BufferUtils.createFloatBuffer(4);
+		
+		this.instanceBuffer.put(this.position.asFloats());
 	}
 	
 	ModelInstance(Model parent) {
 		this(parent, new Vector3f());
+	}
+	
+	public Vector3f getPosition() {
+		return this.position;
 	}
 	
 	/**
