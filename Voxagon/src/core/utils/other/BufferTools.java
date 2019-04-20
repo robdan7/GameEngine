@@ -48,7 +48,6 @@ public class BufferTools {
 	 * @return The generated buffer index. Keep this!
 	 */
 	public static int createVertexBuffer(int target, FloatBuffer data, int usage) {
-		data.flip();
 		int glBuffer = GL15.glGenBuffers();
 		
 		GL15.glBindBuffer(target, glBuffer);
@@ -65,7 +64,6 @@ public class BufferTools {
 	 * @param usage - GL_STATIC_DRAW if you are not sure what to put here.
 	 */
 	public static void revalidateVertexBuffer(int target, int buffer, FloatBuffer data, int usage) {
-		data.flip();
 		GL15.glBindBuffer(target, buffer);
 		GL15.glBufferData(target, data, usage);
 		GL15.glBindBuffer(target, 0);
@@ -73,12 +71,12 @@ public class BufferTools {
 	
 	/**
 	 * Update a buffer object that is already in the OpenGL pipeline.
+	 * The buffer is not fliped or cleared before updating.
 	 * @param buffer - the OpenGL target type.
 	 * @param offset - offset in machine units, not bytes.
-	 * @param data - the float buffer to write from. Flipping it is not required.
+	 * @param data - the float buffer to write from. Fliping it is not required.
 	 */
 	public static void updateVertexBuffer(int target, int buffer, int offset, FloatBuffer data) {
-		data.flip();
 		GL15.glBindBuffer(target, buffer);
 		GL15.glBufferSubData(target, offset<<2, data);
 		GL15.glBindBuffer(target, 0);
@@ -283,7 +281,6 @@ public class BufferTools {
     public static FloatBuffer asFlippedFloatBuffer(float... values) {
         FloatBuffer buffer = BufferUtils.createFloatBuffer(values.length);
         buffer.put(values);
-        buffer.flip();
         return buffer;
     }
     
@@ -295,7 +292,6 @@ public class BufferTools {
     public static FloatBuffer asFlippedFloatBuffer(Matrix4f matrix4f) {
         FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
         matrix4f.put(buffer);
-        buffer.flip();
         return buffer;
     }
 
@@ -332,9 +328,9 @@ public class BufferTools {
     	}
     	FloatBuffer dest = BufferUtils.createFloatBuffer(size);
     	for (FloatBuffer b: buffers) {
+    		b.clear();
     		dest.put(b);
     	}
-    	dest.flip();
     	return dest;
     }
 

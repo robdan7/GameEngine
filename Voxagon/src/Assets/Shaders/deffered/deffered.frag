@@ -142,8 +142,19 @@ vec4 composeLight(vec4 sPos, vec4 dPos, vec4 vPos, vec4 vNormal, vec4 lNormal, v
 	float absoluteShadow = getLargest(dynamicShadow, staticShadow);
 	float spec = calcSpecularLight(lNormal, vNormal ,eye, shine);
 	//float test = remove(lNormal, vNormal ,eye, 100);
-	return max(min(ambient + diffuse, 1) + vec4(spec,spec,spec,1)*specular*(1-absoluteShadow)-absoluteShadow,ambient);
+	return max(min(ambient + diffuse, 1) -absoluteShadow,ambient)+vec4(spec,spec,spec,1)*specular*(1-absoluteShadow);
 	//return vec4(calcSpecularLight(lNormal, vNormal ,eye, shine),0,0,1);
+}
+
+vec4 testisen(vec4 sPos, vec4 dPos, vec4 ambient, vec4 diffuse) {
+	float staticShadow = calcShadow(sPos, staticShadowmap, diffuse);
+	float dynamicShadow = calcShadow(dPos, dynamicShadowmap, diffuse);
+	//vec4 eye = normalize(viewMatrix*vPos);
+	
+	float absoluteShadow = 1-getLargest(dynamicShadow, staticShadow);
+
+	return vec4(absoluteShadow,absoluteShadow,absoluteShadow,1);
+	//return 1;
 }
 
 
@@ -162,9 +173,10 @@ void main() {
 	sun.specular = lightSource.specular;
 	
 
-	//gl_FragColor = fragment.color*composeLight(fragment.sShadowPos, fragment.dShadowPos, fragment.wPosition, fragment.normal, sun.normal,sun.diffuse, sun.ambient, sun.specular, 50);
-	gl_FragColor = fragment.color;
-	//gl_FragColor = dummy;
+	gl_FragColor = fragment.color*composeLight(fragment.sShadowPos, fragment.dShadowPos, fragment.wPosition, fragment.normal, sun.normal,sun.diffuse, sun.ambient, sun.specular, 100);
+	//gl_FragColor = fragment.color*testisen(fragment.sShadowPos, fragment.dShadowPos, sun.ambient, sun.diffuse);
+	//gl_FragColor = fragment.color*testisen(fragment.sShadowPos, fragment.dShadowPos, sun.ambient, sun.diffuse);
+	//gl_FragColor = vec4(fragment.normal.xyz,1);
 	gl_FragDepth = texture(inDepth, texCoord).r;
 	
 }

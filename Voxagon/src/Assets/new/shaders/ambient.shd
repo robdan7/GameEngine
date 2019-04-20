@@ -1,11 +1,27 @@
 <shader>
+	<uniform name="Light" instance="lightSource">
+		<uniform type="vec4" name="lightPosition"/>
+		<uniform type="vec4" name="diffuse"/>
+		<uniform type="vec4" name="ambient"/>
+		<uniform type="vec4" name="specular"/>
+	</uniform>
 	<code>
-	vec4 ambient(vec4 color) {
-		return color*0.1;
+	
+	layout (std140, binding = 0) uniform Light {
+		layout(offset = 0) uniform vec4 position;
+		layout(offset = 16) uniform vec4 diffuse;
+		layout(offset = 32) uniform vec4 ambient;
+		layout(offset = 48) uniform vec4 specular;
+	} lightSource;
+
+	
+	vec4 ambient() {
+		return lightSource.ambient;
 	}
 	
-	float ambient() {
-		return 0.1;
+	vec4 ambient(vec4 color) {
+		return color*ambient();
 	}
+	
 	</code>
 </shader>

@@ -26,7 +26,7 @@ public class UniformReference {
 			
 			if (this.hasSiblings()) {
 				if (this.siblings.contains(this)) {
-					throw new ReferenceCreationException("A sibling with the same name exist already!");
+					throw new ReferenceCreationException(this.index + ", "+ this.type +" A sibling with the same name exist already!");
 				}
 			}
 		}

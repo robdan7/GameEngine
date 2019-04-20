@@ -2,6 +2,12 @@ package core.utils.datatypes;
 
 import java.util.Iterator;
 
+/**
+ * Normal stack class. Nothing special here.
+ * @author Robin
+ *
+ * @param <E>
+ */
 public class Stack <E> implements Iterable<E>{
 	private Node first, last;
 	private int size;

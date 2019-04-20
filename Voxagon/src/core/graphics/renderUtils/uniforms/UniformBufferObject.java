@@ -105,6 +105,7 @@ public class UniformBufferObject {
 	 * @param data
 	 */
 	private void genBuffer(FloatBuffer data) {
+		
 		glBindBuffer(GL_UNIFORM_BUFFER, this.getUBO());
 		glBufferData(GL_UNIFORM_BUFFER, data, this.getDrawType());
 		glBindBufferBase(GL_UNIFORM_BUFFER, this.getIndex(), this.getUBO());
@@ -133,6 +134,7 @@ public class UniformBufferObject {
 			
 			// The buffer size has changed. Expand it and generate the buffer again.
 			this.uniformBuffer = BufferTools.combineBuffers(this.uniformBuffer, BufferUtils.createFloatBuffer(source.getStride()));
+			this.uniformBuffer.flip();
 			this.genBuffer(this.uniformBuffer);
 		}
 	}

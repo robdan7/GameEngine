@@ -44,6 +44,7 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.lwjgl.opengl.GL33;
 import org.xml.sax.SAXException;
 
 
@@ -106,6 +107,16 @@ public class Engine {
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
+		
+		// enable matrix attribute for instances.
+		glEnableVertexAttribArray(3);
+		GL33.glVertexAttribDivisor(3, 1);
+		glEnableVertexAttribArray(4);
+		GL33.glVertexAttribDivisor(4, 1);
+		glEnableVertexAttribArray(5);
+		GL33.glVertexAttribDivisor(5, 1);
+		glEnableVertexAttribArray(6);
+		GL33.glVertexAttribDivisor(6, 1);
 
 		try {
 			Shaders.addImport("/Assets/Shaders/Imports/imports.shd");
@@ -257,41 +268,42 @@ public class Engine {
 */
 		
 		//Material m = new Material("/Assets/new/materials/m_test.mtl");
+		/*
 		ModelInstance modelInstanceTemp = null;
 		try {
-			modelInstanceTemp = core.entities.Model.createModelInstance("/Assets/new/models/Object_sphere.001.XML");
-			
+			modelInstanceTemp = core.entities.Model.createModelInstance("/Assets/new/models/Object_sphere.001.XML");	
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+		
+		Material mat = new Material("/Assets/new/shaders/deffered/Gbuffer.mtl");
+		ModelInstance[] instances = null;
+		try {
+			instances = core.entities.Model.createModelInstances("/Assets/new/models/O_sphere_instance.mod");
 		} catch (SAXException | IOException | ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
-			// Get all window events. This is where key callback is activated.
-			
-			//player.updateMovement();
+
 			player.updateMovement();
 			
-			if (GJK.GJKcollision(pl, cube)) {
-				//System.out.println("Collision!");
-				//System.out.println(player.getPosition() + "    " + pl.getFurthestPoint(new Vector3f(0,0,1)).asSubtracted(cube.getFurthestPoint(new Vector3f(0,0,-1))).getZ());
-				/*
-				System.out.println("Furthest z player point: " + pl.getFurthestPoint(new Vector3f(1,0,0)));
-				System.out.println("Furthest cube position: " + cube.getFurthestPoint(new Vector3f(-1,0,0)));
-				System.out.println("player position: " + player.getPosition());
-				System.out.println(GJK.calcDifference(pl, cube, new Vector3f(0,1,0)) + "\n");
-				*/
-			}
+
 			
 			
 			window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack);
-			glBindFramebuffer(GL_FRAMEBUFFER, screenQuad.getFBO());
+			glBindFramebuffer(GL_FRAMEBUFFER, screenQuad.getFBO().getFramebuffer());
 			glClearColor(0, 0, 0, 0); // Set the background to transparent.
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
 			
 			window.renderTextured(this.dynamicRenderStack, this.staticRenderStack);
-			modelInstanceTemp.getParent().renderModelInstances();
+			//modelInstanceTemp.getParent().renderModelInstances();
+			instances[0].getParent().renderModelInstances();
 			//glUseProgram(0);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			

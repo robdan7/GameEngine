@@ -1,6 +1,6 @@
 <material name="m_test">
 	<shader type="vertex" name="m_test_vertex">
-		<uniform name="Light" instance="lightSource">
+		<uniform name="Tested" instance="Teset">
 			<uniform type="vec4" name="test"/>
 		</uniform>
 		<uniform name="Matrices" instance="mat">
@@ -13,6 +13,7 @@
 		<attribute qualifier="in" type="vec4" name="vertexIn"/> 
 		<attribute qualifier="in" type="vec3" name="normal"/> 
 		<attribute qualifier="in" type="vec2" name="uvIn"/>
+		<attribute qualifier="in" type="vec4" name="locationMatrix"/>
 		<attribute location="0" qualifier="out" name="PipelineData" instance="vertexOutput">
 			<attribute location="0" type="vec4" name="position"/>
 			<attribute location="2" type="vec4" name="normal"/>
@@ -46,10 +47,10 @@
 			
 
 			vertexOutput.UV = uvIn.xy;
-			vertexOutput.position = vertexIn;
+			vertexOutput.position = locationMatrix+vertexIn;
 
 	
-			gl_Position  = mat.camera* vertexOutput.position;
+			gl_Position  = mat.camera*vertexOutput.position;
 		}
 		</code>
 	</shader>
@@ -77,7 +78,8 @@
 		void main() {
 
 			outNormal = vec4(fragmentData.normal.xyz*0.5+0.5,1);
-			outColor = diffuse(vec4(1,0,0,1));
+			//outColor = diffuse(vec4(1,1,1,1),fragmentData.normal);
+			outColor = vec4(1,1,0,1);
 			worldPosition = fragmentData.position;
 	
 			gl_FragDepth = gl_FragCoord.z;

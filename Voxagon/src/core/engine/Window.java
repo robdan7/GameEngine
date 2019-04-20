@@ -78,11 +78,7 @@ public class Window {
 		if ( window == NULL )
 			throw new RuntimeException("Failed to create the GLFW window");
 
-		// Setup a key callback. It will be called every time a key is pressed, repeated or released.
-		glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-			if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
-				glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
-		});
+
 
 		// Get the thread stack and push a new frame
 		try ( MemoryStack stack = stackPush() ) {
@@ -152,8 +148,8 @@ public class Window {
 	void renderShadowMap(ShadowMap map, GlueList<RenderObject> objects) {
 		map.updateCameraUniform();
 		glCullFace(GL_FRONT);
-		glBindFramebuffer(GL_FRAMEBUFFER, map.getBuffer().getColorMapFBO());
-		glViewport(0, 0, map.getBuffer().getWidth(), map.getBuffer().getHeight());
+		glBindFramebuffer(GL_FRAMEBUFFER, map.getBufferIndex());
+		glViewport(0, 0, map.getWidth(), map.getHeight());
 		glClear(GL_DEPTH_BUFFER_BIT);
 		int lastShader = 0;
 		for (int i = 0; i < objects.size(); i++) {
@@ -223,27 +219,7 @@ public class Window {
 		
 	}
 	
-	public static void enableVertexArray() {
-		glEnableClientState(GL_VERTEX_ARRAY);
-	}
 	
-	public static void enableNormals() {
-		glEnableClientState(GL_NORMAL_ARRAY);
-	}
-	
-	public static void disableNormals() {
-		glDisableClientState(GL_NORMAL_ARRAY);
-	}
-	
-	public static void enableTexture() {
-		glEnable(GL_TEXTURE_2D);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	
-	public static void disableTexture() {
-		glDisable(GL_TEXTURE_2D);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
 	
 	public int getHeight() {
 		return this.height;

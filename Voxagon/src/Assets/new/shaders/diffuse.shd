@@ -2,8 +2,11 @@
 	<code>
 	<import>/Assets/new/shaders/ambient.shd</import>
 	
-	vec4 diffuse(vec4 color) {
-		return vec4(color.rgb,1);
+	
+	vec4 diffuse(vec4 color, vec4 normal) {
+		float nDotL = max(dot(normal.xyz, normalize(lightSource.position).xyz),0);
+		vec4 light = min(lightSource.diffuse*vec4(vec3(nDotL),1),1);
+		return min(ambient(color)+color*light,1);
 	}
 	</code>
 </shader>

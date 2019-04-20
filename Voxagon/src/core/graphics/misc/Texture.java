@@ -27,6 +27,15 @@ public class Texture {
 	private int width = 0;
 	String name;
 	
+	/**
+	 * 
+	 * @param width
+	 * @param height
+	 * @param textureName - The uniform texture name used in shaders.
+	 * @param filtering - Specifies the OpenGL filter function for the texture.
+	 * @param internalFormat - Specifies the number of color components in the texture. Must be one of the base internal formats in OpenGL.
+	 * @param format - Specifies the format of the pixel data.
+	 */
 	public Texture(int width, int height, String textureName, int filtering, int internalFormat, int format) {
 		this.name = textureName;
 	    this.id = glGenTextures();

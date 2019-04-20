@@ -33,11 +33,11 @@ public class UniformBufferSource implements Iterable<String> {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v);
-		this.object.updateSource(this);
+		this.updateSource();
 	}
 	
 	public void updateSource(Vector4f v) {
-		this.updateSource(v, 0);
+		this.updateSource();
 	}
 	
 	public void updateSource(Vector3f v, int offset) {		
@@ -45,7 +45,7 @@ public class UniformBufferSource implements Iterable<String> {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v.toVec4f());
-		this.object.updateSource(this);
+		this.updateSource();
 	}
 	
 	public void updateCource(Vector3f v) {
@@ -57,7 +57,7 @@ public class UniformBufferSource implements Iterable<String> {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v);
-		this.object.updateSource(this);
+		this.updateSource();
 	}
 	
 	public void updateSource(Vector2f v) {
@@ -70,7 +70,7 @@ public class UniformBufferSource implements Iterable<String> {
 		}
 		
 		BufferTools.putInBuffer(this.buffer, offset, mat);
-		this.object.updateSource(this);
+		this.updateSource();
 	}
 	
 	public void updateSource(Matrix4f mat) {
@@ -82,7 +82,7 @@ public class UniformBufferSource implements Iterable<String> {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, buf);
-		this.object.updateSource(this);
+		this.updateSource();
 	}
 	 
 	public void updateSource(FloatBuffer buf) {
@@ -94,7 +94,7 @@ public class UniformBufferSource implements Iterable<String> {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v);
-		this.object.updateSource(this);
+		this.updateSource();
 	}
 	
 	public void updateSource(int offset, float... data) {
@@ -106,6 +106,11 @@ public class UniformBufferSource implements Iterable<String> {
 	
 	public void updateSource(int offset, Matrix4f... matrices) {
 		BufferTools.putInBuffer(this.buffer, offset, matrices);
+		this.updateSource();
+	}
+	
+	private void updateSource() {
+		this.getBuffer().flip();
 		this.object.updateSource(this);
 	}
 	

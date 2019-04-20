@@ -54,6 +54,13 @@ public class Shader {
 				this.code = (Element) nodes.item(i);
 			}
 		}
+		
+		this.attributes = new GlueList<Attribute>();
+		this.uniformBlocks = new GlueList<UniformBlock>();
+		this.localUniforms = new GlueList<Uniform>();
+		this.attributes = new GlueList<Attribute>();
+		this.attributeBlocks = new GlueList<AttributeBlock>();
+		this.iterateChildren(root);
 		this.insertPlaceHolders();
 	}
 	
@@ -100,7 +107,6 @@ public class Shader {
 				}
 			}
 		}*/
-		//System.out.println(this.code.getTextContent());
 	}
 	
 	
