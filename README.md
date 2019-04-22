@@ -4,6 +4,7 @@ Voxagon is a simple, text based, game rendering engine for OpenGL based on LWJGL
 Current features:
 - Custom model loader (requires special Python code and Blender. Will be added later)
 - Shaders, textures and materials.
+- A simple rendering engine with support for deffered shading in several stages.
 - Basic lighting with global illumination.
 - Basic shadow mapping functionalities.
 - The ability to create uniform blocks from java code.
@@ -19,7 +20,6 @@ Current features:
 Upcoming features:
 - GUI system.
 - Collision detection and a physics engine.
-- Custom rendering stages for deffered rendering etc.
 
 My wish list:
 - Particles.
