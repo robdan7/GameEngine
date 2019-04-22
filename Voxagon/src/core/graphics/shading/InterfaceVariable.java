@@ -56,6 +56,10 @@ public class InterfaceVariable {
 		this.stride = stride;
 	}
 	
+	/**
+	 * Set the size in bytes.
+	 * @return
+	 */
 	public int getStride() {
 		return this.stride;
 	}

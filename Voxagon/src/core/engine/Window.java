@@ -177,11 +177,12 @@ public class Window {
 		
 		for (GlueList<? extends RenderObject> renderlist : arrayLists) {
 			for (RenderObject o : renderlist) {
+				/*
 				if (lastShader != o.getShader()) {
 					lastShader = o.getShader();
 					glUseProgram(lastShader);
 				}
-
+*/
 				o.renderTextured();
 			}
 		}

@@ -91,6 +91,11 @@ public class Framebuffer {
 		return this.BUFFER_WIDTH;
 	}
 	
+	/**
+	 * Set the background color for this buffer. The background will be transparent if 
+	 * no color is set.
+	 * @param color
+	 */
 	public void setClearColor(Vector4f color) {
 		this.backgroundColor.set(color);
 	}
@@ -105,6 +110,10 @@ public class Framebuffer {
 	public void clearBuffer() {
 		glClearColor(this.backgroundColor.getX(), this.backgroundColor.getY(), this.backgroundColor.getZ(), this.backgroundColor.getW()); // Set the background to transparent.
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+	
+	public void bindBuffer() {
+		glBindFramebuffer(GL_FRAMEBUFFER, this.getFramebuffer());
 	}
 	
 	public void completeFramebuffer() {

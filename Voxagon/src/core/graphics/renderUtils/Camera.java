@@ -1,7 +1,7 @@
 package core.graphics.renderUtils;
 
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
-import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
+import core.graphics.shading.GLSLvariableType;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
@@ -53,14 +53,15 @@ public class Camera {
 		perspectiveMatrix.setOrtho(left, right, bottom, top, zNear, zFar);
 	}
 	
+	/*
 	@Deprecated
 	public Camera(Vector3f up, Vector3f rightV, float left, float right, float bottom, float top, float zNear, float zFar, updateType update, String name1) {
 		//super(update.getSize());
-		this.uniformSource = new UniformBufferSource(glVariableType.MATRIX4F, name1);
+		this.uniformSource = new UniformBufferSource(GLSLvariableType.MAT4, name1);
 		cameraPosition = new Vector3f();
 		init(up, rightV, update);
 		perspectiveMatrix.setOrtho(left, right, bottom, top, zNear, zFar);
-	}
+	}*/
 	
 	/**
 	 * Init matrices for camera.

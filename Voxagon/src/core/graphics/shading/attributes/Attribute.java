@@ -27,7 +27,7 @@ public class Attribute extends InterfaceVariable {
 			throw new AttributeCreationException(this.getName() + ": Unauthorized qualifier \"" + qualifier + "\"");
 		}
 		this.type = GLSLvariableType.getTypeFromString(root.getAttribute(AttributeSyntax.TYPE.toString()));
-		super.setStride(this.type.getStride());
+		super.setStride(this.type.getbytes());
 		super.setType(this.type.toString());
 		super.setQualifier(qualifier);
 		this.location = Integer.parseInt(root.getAttribute(AttributeSyntax.LOCATION.toString()));
