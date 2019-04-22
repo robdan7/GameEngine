@@ -43,10 +43,11 @@ public class RenderEngine {
 		}
 		
 		private void render() {
-			//glBindFramebuffer(GL_FRAMEBUFFER, this.framebuffer.getFramebuffer());
-			//this.framebuffer.clearBuffer();
+			this.framebuffer.bindBuffer();
+			this.framebuffer.clearBuffer();
 			for (RenderObject obj : this.rendercontent) {
-				obj.render();
+				//obj.render();
+				obj.renderTextured();
 			}
 			//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}

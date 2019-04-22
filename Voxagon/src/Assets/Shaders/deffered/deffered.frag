@@ -1,7 +1,22 @@
 #version 450 core
 
-#uniform Light lightSource;
-#uniform Matrices;
+//#uniform Light lightSource;
+//#uniform Matrices;
+
+layout (std140, binding = 0) uniform Light {
+		layout(offset = 0) uniform vec4 position;
+		layout(offset = 16) uniform vec4 diffuse;
+		layout(offset = 32) uniform vec4 ambient;
+		layout(offset = 48) uniform vec4 specular;
+} lightSource;
+
+layout(std140, binding = 1) uniform Matrices {
+	layout(offset = 0) uniform mat4 camera;
+	layout(offset = 64) uniform mat4 viewMatrix;
+	layout(offset = 128) uniform mat4 translateMatrix;
+	layout(offset = 192) uniform mat4 staticOrthoMatrix;
+	layout(offset = 256) uniform mat4 dynamicOrthoMatrix;
+};
 
 in vec2 texCoord;
 in vec2 frag;
@@ -177,6 +192,7 @@ void main() {
 	//gl_FragColor = fragment.color*testisen(fragment.sShadowPos, fragment.dShadowPos, sun.ambient, sun.diffuse);
 	//gl_FragColor = fragment.color*testisen(fragment.sShadowPos, fragment.dShadowPos, sun.ambient, sun.diffuse);
 	//gl_FragColor = vec4(fragment.normal.xyz,1);
+	//gl_FragColor = fragment.color;
 	gl_FragDepth = texture(inDepth, texCoord).r;
 	
 }

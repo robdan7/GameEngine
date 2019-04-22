@@ -125,6 +125,7 @@ public  class ModelBlueprint implements RenderObject{
 		this.transformMatrix.put(b);*/
 		
 		//this.transformUniform.updateUniform(this.transformBuffer);
+		
 		this.transformUniform.updateSource(this.transformMatrix);
 		
 		this.bind();
@@ -143,6 +144,7 @@ public  class ModelBlueprint implements RenderObject{
 	 * The total length is 3 + 3 + 2 = 8 floats between two vertices. The normal starts at 3 floats and the texture starts at 6 floats.
 	 */
 	public void renderTextured() {
+		GL20.glUseProgram(this.getShader());
 		if(this.texture == null) {
 			throw new RuntimeException("Model does not have a texture");
 		} else {

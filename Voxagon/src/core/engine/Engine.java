@@ -17,9 +17,9 @@ import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.graphics.renderUtils.ShadowMap;
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
+import core.graphics.shading.GLSLvariableType;
 import core.graphics.shading.Material;
 import core.graphics.renderUtils.uniforms.UniformBufferObject;
-import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
 import core.input.Keyboard;
 import core.input.Mouse;
 import core.input.MouseListener;
@@ -127,18 +127,18 @@ public class Engine {
 		sun = new DirectionalLight(new Vector4f(0.2f,1,0.5f,0), new Vector4f(1f,1f,1f,1), window.getSkyColor().asMultiplied(0.4f), new Vector4f(2,2,2,0), "Light", sunNames);
 		
 		// Init uniforms
-		UniformBufferObject uniform = new UniformBufferObject("Matrices", GL_DYNAMIC_DRAW);
+		UniformBufferObject uniform = new UniformBufferObject("Matrices");
 
-		UniformBufferSource camUniform = new UniformBufferSource(uniform, glVariableType.MATRIX4F, "camera", "viewMatrix");
+		UniformBufferSource camUniform = new UniformBufferSource(uniform, 0, GLSLvariableType.MAT4, "camera", "viewMatrix");
 		
-		UniformBufferSource translateMatrix = new UniformBufferSource(uniform, glVariableType.MATRIX4F, "translateMatrix");
+		UniformBufferSource translateMatrix = new UniformBufferSource(uniform, 1, GLSLvariableType.MAT4, "translateMatrix");
 		
-		UniformBufferSource staticUniform = new UniformBufferSource(uniform, glVariableType.MATRIX4F, "staticOrthoMatrix");
+		UniformBufferSource staticUniform = new UniformBufferSource(uniform, 2, GLSLvariableType.MAT4, "staticOrthoMatrix");
 		
-		UniformBufferSource dynamicUniform = new UniformBufferSource(uniform, glVariableType.MATRIX4F, "dynamicOrthoMatrix");
+		UniformBufferSource dynamicUniform = new UniformBufferSource(uniform, 3, GLSLvariableType.MAT4, "dynamicOrthoMatrix");
 		
 		try {
-			uniform.finalizeBuffer();
+			//uniform.finalizeBuffer();
 			
 		} catch (ShaderCompileException e) {
 			e.printStackTrace();
@@ -287,6 +287,8 @@ public class Engine {
 			e.printStackTrace();
 		}
 
+		RenderEngine engine = new RenderEngine();
+		engine.addRenderStage(screenQuad.getFBO(), this.dynamicRenderStack);
 		
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
 
@@ -296,15 +298,16 @@ public class Engine {
 			
 			
 			window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack);
-			glBindFramebuffer(GL_FRAMEBUFFER, screenQuad.getFBO().getFramebuffer());
-			glClearColor(0, 0, 0, 0); // Set the background to transparent.
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			
+			//glBindFramebuffer(GL_FRAMEBUFFER, screenQuad.getFBO().getFramebuffer());
+			//glClearColor(0, 0, 0, 0); // Set the background to transparent.
+			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			
 			
-			window.renderTextured(this.dynamicRenderStack, this.staticRenderStack);
-			//modelInstanceTemp.getParent().renderModelInstances();
+			//window.renderTextured(this.dynamicRenderStack, this.staticRenderStack);
+			//instances[0].getParent().renderModelInstances();
+			engine.renderAll();
 			instances[0].getParent().renderModelInstances();
-			//glUseProgram(0);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			
 			window.prepareToRender();
