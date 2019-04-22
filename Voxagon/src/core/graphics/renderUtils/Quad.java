@@ -16,7 +16,7 @@ import org.lwjgl.opengl.GL30;
 import core.graphics.renderUtils.buffers.Framebuffer;
 import core.graphics.renderUtils.buffers.old.Gbuffer;
 
-public class Quad {
+public class Quad implements RenderObject{
 	private Framebuffer framebuffer;
 	Shaders defferedShader;
 	int vbo;
@@ -61,5 +61,46 @@ public class Quad {
 		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, data, GL15.GL_STATIC_DRAW);
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);		
 		return vbo;
+	}
+
+	@Override
+	public void render() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void renderTextured() {
+		this.drawQuad();
+	}
+
+	@Override
+	public void discard() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setShader(Shaders shader) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setDepthShader(Shaders shader) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getShader() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getDepthShader() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
