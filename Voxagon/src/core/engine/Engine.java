@@ -16,6 +16,7 @@ import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.graphics.renderUtils.ShadowMap;
+import core.graphics.renderUtils.buffers.Framebuffer;
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
 import core.graphics.shading.GLSLvariableType;
 import core.graphics.shading.Material;
@@ -287,8 +288,16 @@ public class Engine {
 			e.printStackTrace();
 		}
 
-		RenderEngine engine = new RenderEngine();
-		engine.addRenderStage(screenQuad.getFBO(), this.dynamicRenderStack);
+		RenderEngine engine = new RenderEngine(this.window.getWindow());
+		engine.addRenderStage(screenQuad.getFBO(), this.dynamicRenderStack, true);
+		engine.addRenderStage(this.screenQuad.getFBO(), this.staticRenderStack, false);
+		this.staticRenderStack.add(instances[0].getParent());
+		
+		Framebuffer buffer = new Framebuffer(0, window.getWidth(), window.getHeight());
+		buffer.setClearColor(window.getSkyColor());
+		GlueList<RenderObject> list = new GlueList<RenderObject>();
+		list.add(screenQuad);
+		engine.addRenderStage(buffer, list);
 		
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
 
@@ -299,21 +308,10 @@ public class Engine {
 			
 			window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack);
 			
-			//glBindFramebuffer(GL_FRAMEBUFFER, screenQuad.getFBO().getFramebuffer());
-			//glClearColor(0, 0, 0, 0); // Set the background to transparent.
-			//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			
-			
-			//window.renderTextured(this.dynamicRenderStack, this.staticRenderStack);
-			//instances[0].getParent().renderModelInstances();
+
 			engine.renderAll();
-			instances[0].getParent().renderModelInstances();
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			
-			window.prepareToRender();
-			screenQuad.drawQuad();
-			
-			window.endRender();		
+			//window.endRender();		
 			glfwPollEvents();
 		}
 	}
