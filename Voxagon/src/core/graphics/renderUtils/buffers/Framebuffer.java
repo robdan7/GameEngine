@@ -15,7 +15,7 @@ import core.utils.math.Vector4f;
 
 /**
  * This class should represent one (1) frame buffer. A frame buffer contains a 
- * texture and color information used for rendering to the texture. Mimpapping is not enabled. I don't know how
+ * texture and color information used for rendering to the texture. Mipmpapping is not enabled. I don't know how
  * to do that, yet.
  * @author Robin
  *
@@ -29,10 +29,25 @@ public class Framebuffer {
 	
 	private boolean finalized = false;
 
+	/**
+	 * Create a new frame buffer.
+	 * @param width - The buffer width in pixels.
+	 * @param height - The buffer height in pixels.
+	 */
 	public Framebuffer(int width, int height) {
+		this(glGenFramebuffers(), width, height);
+	}
+	
+	/**
+	 * Create a frame buffer with a custom index. Set it to 0 (zero) for the default OpenGL frame buffer.
+	 * @param framebufferIndex - The buffer index.
+	 * @param width - The buffer width in pixels.
+	 * @param height - The buffer height in pixels;
+	 */
+	public Framebuffer(int framebufferIndex, int width, int height) {
 		this.backgroundColor = new Vector4f();
 		this.textures = new GlueList<Texture>();
-		this.framebuffer = glGenFramebuffers();
+		this.framebuffer = framebufferIndex;
 		this.BUFFER_WIDTH = width;
 		this.BUFFER_HEIGHT =  height;
 	}
