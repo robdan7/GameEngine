@@ -17,6 +17,10 @@ public class Stack <E> implements Iterable<E>{
 		this.last = new Node(null,this.first);
 	}
 	
+	/**
+	 * Add an element to the top of the stack.
+	 * @param object
+	 */
 	public void push (E object) {
 		this.size ++;
 		this.last.setObject(object);
@@ -24,6 +28,10 @@ public class Stack <E> implements Iterable<E>{
 		this.last = newLast;
 	}
 	
+	/**
+	 * Remove the element at the top of the stack.
+	 * @return
+	 */
 	public E pull() {
 		if (this.last.getPrevious().equals(this.first)) {
 			return null;
@@ -57,10 +65,19 @@ public class Stack <E> implements Iterable<E>{
 		return false;
 	}
 	
+	/**
+	 * Get the current element at the top. Null is returned if 
+	 * the stack is empty.
+	 * @return
+	 */
 	public E getTop() {
 		return this.last.getPrevious().getObject();
 	}
 	
+	/**
+	 * Get the size of this stack.
+	 * @return
+	 */
 	public int getSize() {
 		return this.size;
 	}
