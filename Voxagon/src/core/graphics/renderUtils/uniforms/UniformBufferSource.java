@@ -6,30 +6,32 @@ import java.util.NoSuchElementException;
 
 import org.lwjgl.BufferUtils;
 
-import core.graphics.renderUtils.uniforms.UniformBufferObject.glVariableType;
+import core.graphics.shading.GLSLvariableType;
 import core.utils.math.*;
 import core.utils.other.BufferTools;
 
 public class UniformBufferSource implements Iterable<String> {
 	private int offset; // offset in bytes.
+	private int index;
 	private final String[] names;
-	private glVariableType type;
+	private GLSLvariableType type;
 	private UniformBufferObject object;
 	private FloatBuffer buffer;
 
-	public UniformBufferSource(glVariableType type, String... names) {
+	public UniformBufferSource(int index, GLSLvariableType type, String... names) {
 		this.names = names;
 		this.type = type;
-		this.buffer = BufferUtils.createFloatBuffer(type.getStride()*names.length);
+		this.index = index;
+		this.buffer = BufferUtils.createFloatBuffer(type.getSize()*names.length);
 	}
 	
-	public UniformBufferSource(UniformBufferObject obj, glVariableType type, String... names) {
-		this(type, names);
-		this.bindToBufferObject(obj);
+	public UniformBufferSource(UniformBufferObject obj, int index, GLSLvariableType type, String... names) {
+		this(index, type, names);
+		this.bindToBufferObject(obj, index);
 	}
 	
 	public void updateSource(Vector4f v, int offset) {		
-		if (offset+glVariableType.VEC4.getStride() > this.getStride()) {
+		if ((offset+GLSLvariableType.VEC4.getSize()) > this.getStride()) {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v);
@@ -41,19 +43,19 @@ public class UniformBufferSource implements Iterable<String> {
 	}
 	
 	public void updateSource(Vector3f v, int offset) {		
-		if (offset+glVariableType.VEC3.getStride() > this.getStride()) {
+		if ((offset+GLSLvariableType.VEC4.getSize()) > this.getStride()) {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v.toVec4f());
 		this.updateSource();
 	}
 	
-	public void updateCource(Vector3f v) {
+	public void updateSource(Vector3f v) {
 		this.updateSource(v, 0);
 	}
 	
 	public void updateSource(Vector2f v, int offset) {	
-		if (offset+glVariableType.VEC2.getStride() > this.getStride()) {
+		if ((offset+GLSLvariableType.VEC4.getSize()) > this.getStride()) {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v);
@@ -65,7 +67,7 @@ public class UniformBufferSource implements Iterable<String> {
 	}
 	
 	public void updateSource(Matrix4f mat, int offset) {		
-		if (offset+glVariableType.MATRIX4F.getStride() > this.getStride()) {
+		if ((offset+GLSLvariableType.VEC4.getSize()) > this.getStride()) {
 			throw new IndexOutOfBoundsException();
 		}
 		
@@ -90,7 +92,7 @@ public class UniformBufferSource implements Iterable<String> {
 	}
 	
 	public void updateSource(int offset, Vector4f... v) {		
-		if (v.length*glVariableType.VEC4.getStride() > this.getStride()) {
+		if (v.length*GLSLvariableType.VEC4.getSize() > this.getStride()) {
 			throw new IndexOutOfBoundsException();
 		}
 		BufferTools.putInBuffer(this.buffer, offset, v);
@@ -114,17 +116,29 @@ public class UniformBufferSource implements Iterable<String> {
 		this.object.updateSource(this);
 	}
 	
-	public void bindToBufferObject(UniformBufferObject o) {
+	public void bindToBufferObject(UniformBufferObject o, int index) {
 		this.object = o;
-		o.bindBufferSource(this);
+		o.bindBufferSource(this, index);
 	}
 	
 	FloatBuffer getBuffer() {
 		return this.buffer;
 	}
 	
+	/**
+	 * Get the buffer offset in machine units.
+	 * @return
+	 */
 	int  getOffset() {
 		return this.offset;
+	}
+	
+	int getIndex() {
+		return this.index;
+	}
+	
+	void setIndex(int index) {
+		this.index = index;
 	}
 	
 	void setOffset(int offset) {
@@ -135,7 +149,7 @@ public class UniformBufferSource implements Iterable<String> {
 		return this.names;
 	}
 	
-	glVariableType getType() {
+	GLSLvariableType getType() {
 		return this.type;
 	}
 	

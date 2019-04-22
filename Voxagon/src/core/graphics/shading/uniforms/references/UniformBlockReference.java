@@ -3,7 +3,6 @@ package core.graphics.shading.uniforms.references;
 import java.util.HashMap;
 
 import core.graphics.shading.GLSLvariableType;
-import core.graphics.shading.uniforms.references.UniformReference.ReferenceCreationException;
 import core.utils.datatypes.GlueList;
 
 /**
@@ -58,13 +57,11 @@ public class UniformBlockReference {
 	 * The member is only added if no other member currently exist at the 
 	 * same index.
 	 * @param index - The index in the uniform to use. 0, 1, 2...
-	 * @param stride - The data size in bytes.
 	 * @throws UniformTypeEception If a member exists with the same index but a different type
 	 * this exception is thrown as an indication of user error. It is not allowed to interpret 
 	 * a member as different variable types.
-	 * @throws ReferenceCreationException 
 	 */
-	public void requestNewMember(int index, GLSLvariableType type) throws UniformTypeEception, ReferenceCreationException {
+	public void requestNewMember(int index, GLSLvariableType type) throws UniformTypeException {
 		// TODO find out what to do if memory is allocated to slot 1 and 3, but not 2.
 		// We cant calculate the offset in a struct if one index is missing!
 		/* Solution? Don't allow index in appendMember, or don't allow appending at all 
@@ -80,6 +77,7 @@ public class UniformBlockReference {
 		 * Solution 4 is the simplest. Do that.
 		 */
 		if (this.members.size() == 0) {
+			// The list is empty, so no members exist.
 			this.members.add(new UniformReference(index, type, this.members));
 			return;
 		}
@@ -88,13 +86,17 @@ public class UniformBlockReference {
 		 * so the code must detect where a member should be even if the uniform is incomplete. 
 		 */
 		int i = 0;
-		for (; i < this.members.size() && i < index; i++) {
+		for (; i < this.members.size(); i++) {
 			UniformReference m = this.members.get(i);
-			if (m.getIndex() == index && type != m.getType()) {
-				throw new UniformTypeEception("In "+ this.name + "At index " + i + ": A member already exist different type!");
-				// TODO remove this and let the reference check for errors.
-			}
-			if (m.getIndex() > index) {
+			if (m.getIndex() == index) {
+				if (!type.equals(m.getType())) {
+					throw new UniformTypeException("In "+ this.name + "At index " + i + ": A member already exist with different type!");
+				} else {
+					// A reference exist for this index and type already. We don't have to add it again.
+					return;
+				}
+			} else if (m.getIndex() > index) {
+				// We have found the spot in the list for the new member.
 				break;
 			}
 		}
@@ -103,14 +105,14 @@ public class UniformBlockReference {
 	
 	
 
-	public static class UniformTypeEception extends Exception {
+	public static class UniformTypeException extends Exception {
 		private static final long serialVersionUID = 1L;
 		
-		public UniformTypeEception() {
+		public UniformTypeException() {
 			this("");
 		}
 		
-		public UniformTypeEception(String s) {
+		public UniformTypeException(String s) {
 			super(s);
 		}
 	}

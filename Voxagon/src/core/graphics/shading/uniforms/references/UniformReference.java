@@ -13,26 +13,22 @@ public class UniformReference {
 		private int index;
 		GLSLvariableType type;
 		GlueList<UniformReference> siblings;
+		
 		/**
-		 * Create a member with a stride and and index.
+		 * Create a member with a stride and and index. It is assumed that
+		 * every sibling is unique and not equal to this object.
 		 * @param index
 		 * @param stride
 		 * @throws ReferenceCreationException 
 		 */
-		UniformReference(int index, GLSLvariableType type, GlueList<UniformReference> siblings) throws ReferenceCreationException {
-			this.index = index;
-			this.type = type;
+		UniformReference(int index, GLSLvariableType type, GlueList<UniformReference> siblings) {
+			this(index, type);
 			this.siblings = siblings;
-			
-			if (this.hasSiblings()) {
-				if (this.siblings.contains(this)) {
-					throw new ReferenceCreationException(this.index + ", "+ this.type +" A sibling with the same name exist already!");
-				}
-			}
 		}
 		
-		public UniformReference(GLSLvariableType type) {
-			
+		public UniformReference(int index, GLSLvariableType type) {
+			this.index = index;
+			this.type = type;
 		}
 		
 		/**
@@ -40,7 +36,7 @@ public class UniformReference {
 		 * @return
 		 */
 		int getStride() {
-			return this.type.getStride();
+			return this.type.getbytes();
 		}
 		
 		int getIndex() {
@@ -70,15 +66,5 @@ public class UniformReference {
 			}
 			
 			return true;
-		}
-		
-		public static class ReferenceCreationException extends Exception {
-			public ReferenceCreationException() {
-				super();
-			}
-			
-			public ReferenceCreationException(String s) {
-				super(s);
-			}
 		}
 	}

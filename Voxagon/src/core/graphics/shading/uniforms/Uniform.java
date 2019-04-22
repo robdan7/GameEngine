@@ -35,7 +35,7 @@ public class Uniform extends InterfaceVariable {
 			// TODO Fix a proper exception.
 			e.printStackTrace();
 		}
-		super.setStride(this.type.getStride());
+		super.setStride(this.type.getbytes());
 	}
 	
 	/**

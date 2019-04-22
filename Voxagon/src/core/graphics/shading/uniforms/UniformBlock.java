@@ -9,8 +9,7 @@ import core.graphics.shading.GLSLvariableType;
 import core.graphics.shading.InterfaceBlock;
 import core.graphics.shading.InterfaceVariable;
 import core.graphics.shading.uniforms.references.UniformBlockReference;
-import core.graphics.shading.uniforms.references.UniformBlockReference.UniformTypeEception;
-import core.graphics.shading.uniforms.references.UniformReference.ReferenceCreationException;
+import core.graphics.shading.uniforms.references.UniformBlockReference.UniformTypeException;
 import core.utils.datatypes.GlueList;
 
 /**
@@ -89,9 +88,9 @@ public class UniformBlock extends InterfaceBlock {
 				
 				try {
 					this.applicationReference.requestNewMember(i, u.getType());
-					super.addMember(new Uniform(el));
-				} catch (NumberFormatException | UniformTypeEception | ReferenceCreationException e) {
-					// TODO Auto-generated catch block
+					super.addMember(u);
+				} catch (NumberFormatException | UniformTypeException e) {
+					System.err.println("Error in " + this.getBlockName() + ":");
 					e.printStackTrace();
 				}
 			}
