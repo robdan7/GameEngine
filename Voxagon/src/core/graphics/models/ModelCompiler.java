@@ -7,6 +7,7 @@ import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.utils.fileSystem.FileManager;
 
+@Deprecated
 public class ModelCompiler {
 	
 	/**
@@ -57,7 +58,7 @@ public class ModelCompiler {
 		
 		// Create the model and return it.
 		model = new ModelBlueprint(modelFile, textureFile);
-		model.setShader(shaderProgram);
+		//model.setShader(shaderProgram);
 		return model;
 	}
 	
@@ -105,7 +106,7 @@ public class ModelCompiler {
 		
 		model.setModel(modelFile);
 		model.setTexture(textureFile);
-		model.setShader(shaderProgram);
+		//model.setShader(shaderProgram);
 	}
 	
 	/**

@@ -3,6 +3,7 @@ package core.engine;
 import static org.lwjgl.glfw.GLFW.*;
 
 import core.entities.ModelInstance;
+import core.entities.staticMesh.StaticModel;
 import core.graphics.lights.DirectionalLight;
 import core.graphics.misc.Color;
 import core.graphics.models.Model;
@@ -11,12 +12,12 @@ import core.graphics.models.ModelCompiler;
 import core.graphics.models.OBJLoader;
 import core.graphics.models.Pawn;
 import core.graphics.renderUtils.Camera;
+import core.graphics.renderUtils.Framebuffer;
 import core.graphics.renderUtils.Quad;
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
 import core.graphics.renderUtils.Shaders.ShaderCompileException;
 import core.graphics.renderUtils.ShadowMap;
-import core.graphics.renderUtils.buffers.Framebuffer;
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
 import core.graphics.shading.GLSLvariableType;
 import core.graphics.shading.Material;
@@ -38,6 +39,7 @@ import core.utils.math.Vector3f;
 import core.utils.math.Vector4f;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
@@ -45,12 +47,14 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL33;
 import org.xml.sax.SAXException;
 
 
 
 public class Engine {
+	// TODO add custom attributes to shaders that updates with each instance. The player and shadows are deactivated.
 	static Window window;
 	private Keyboard keyboard;
 	private Mouse mouse;
@@ -64,8 +68,7 @@ public class Engine {
 	ShadowMap dynamicShadowMap;
 	
 	Quad screenQuad;
-	
-	ModelBlueprint test;
+
 	
 	/**
 	 * List with static render models.
@@ -105,6 +108,7 @@ public class Engine {
 		this.dynamicRenderStack = new GlueList<RenderObject>();
 
 		// Enable attribute arrays.
+		
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 		glEnableVertexAttribArray(2);
@@ -118,7 +122,7 @@ public class Engine {
 		GL33.glVertexAttribDivisor(5, 1);
 		glEnableVertexAttribArray(6);
 		GL33.glVertexAttribDivisor(6, 1);
-
+		
 		try {
 			Shaders.addImport("/Assets/Shaders/Imports/imports.shd");
 		} catch (IOException e1) {
@@ -187,25 +191,17 @@ public class Engine {
 		*/
 		this.dynamicShadowMap.bindPositionTo(player.getPosition());
 		
-		test = null;
-		try {
-			test = ModelCompiler.loadModelBlueprint("/Assets/Models/temp.ini");
-		} catch (IOException | ShaderCompileException e) {
-			e.printStackTrace();
-		}
-		test.setDepthShader(this.dynamicShadows);
-		test.translate(new Vector3f(0,3,0));
+
 		// add models to renderStack.
-		this.dynamicRenderStack.add(player);
-		this.dynamicRenderStack.add(test);
+		//this.dynamicRenderStack.add(player);
+		//this.dynamicRenderStack.add(test);
 		//this.staticRenderStack.add(m);
 		
 
 		// bind models to global transform matrix.
 		this.player.bindTransformMatrix(translateMatrix);
 		//m.bindTransformMatrix(translateMatrix);
-		test.bindTransformMatrix(translateMatrix);
-		//test.translate(new Vector3f(10,10,0));
+		
 		
 		// Create deffered shader and quad.
 		Shaders deffered = new Shaders("/Assets/Shaders/deffered/deffered.vert","/Assets/Shaders/deffered/deffered.frag");
@@ -247,51 +243,21 @@ public class Engine {
 	
 	public void renderloop() {
 		
-		CollisionMesh pl = new CollisionMesh(player);
-		
-		CollisionMesh cube = new CollisionMesh(test);
 
-		//window.renderStaticShadowMap(this.staticShadowMap);
-		// Render static shadows.
-		window.renderShadowMap(this.staticShadowMap, this.staticRenderStack);
-		
-		//UiPanel.switchPanel("");
-		
-		/*
-		UiPanel.init("hello");
-		
 
-		InputPointer p = new InputPointer((Observer<Object, MouseObserver, MouseListener> t, Object u) -> UiPanel.getActive());
-		
-		this.mouse.addListener(p);
-		
-		UiPanel.switchPanel("world");
-*/
-		
-		//Material m = new Material("/Assets/new/materials/m_test.mtl");
-		/*
-		ModelInstance modelInstanceTemp = null;
-		try {
-			modelInstanceTemp = core.entities.Model.createModelInstance("/Assets/new/models/Object_sphere.001.XML");	
-		} catch (SAXException | IOException | ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
-		
 		Material mat = new Material("/Assets/new/shaders/deffered/Gbuffer.mtl");
-		ModelInstance[] instances = null;
-		try {
-			instances = core.entities.Model.createModelInstances("/Assets/new/models/O_sphere_instance.mod");
-		} catch (SAXException | IOException | ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		core.entities.Model instance1 = null;
+		//core.entities.Model instance2 = null;
 
+			//instance1 = core.entities.Model.createModelInstances("/Assets/new/models/O_cube_instance.mod");
+		instance1 = new StaticModel("/Assets/new/models/O_cube_instance.mod");
+		StaticModel instance2 = new StaticModel("/Assets/new/models/O_sphere_instance.mod");
+		
 		RenderEngine engine = new RenderEngine(this.window.getWindow());
 		engine.addRenderStage(screenQuad.getFBO(), this.dynamicRenderStack, true);
 		engine.addRenderStage(this.screenQuad.getFBO(), this.staticRenderStack, false);
-		this.staticRenderStack.add(instances[0].getParent());
+		this.staticRenderStack.add(instance1);
+		this.staticRenderStack.add(instance2);
 		
 		Framebuffer buffer = new Framebuffer(0, window.getWidth(), window.getHeight());
 		buffer.setClearColor(window.getSkyColor());
@@ -306,7 +272,7 @@ public class Engine {
 
 			
 			
-			window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack);
+			//window.renderShadowMap(this.dynamicShadowMap, this.dynamicRenderStack);
 			
 
 			engine.renderAll();
@@ -326,12 +292,13 @@ public class Engine {
 		}
 		*/
 		Camera cam = new Camera(new Vector3f(0, 1, 0), new Vector3f(-1,0,0), 45, (float)window.getWidth()/window.getHeight(), 0.1f, 200f, Camera.updateType.BOTH, camUniform);
+		
 		player.bindCamera(cam);
 		
-		player.thirdPersonPreset(0.35f, new Vector3f(0,2,0), 3f,5);
+		player.thirdPersonPreset(0.35f, new Vector3f(0,0,10), 3f,0);
 		cam.bindFocusPos(player.getPosition());
-		
-		player.setPosition(new Vector3f(1.2f,0.7f,0));
+		player.rotateCamera((float)Math.PI, 0);
+		//player.setPosition(new Vector3f(1.2f,0.7f,0));
 	}
 	
 	private void addMenuSystem() {

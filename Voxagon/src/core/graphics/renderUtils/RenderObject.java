@@ -22,28 +22,12 @@ public interface RenderObject {
 	 */
 	public void discard();
 	
-	/**
-	 * Set the shader to this object.
-	 * @param shader
-	 */
-	public void setShader(Shaders shader);
+
 	
 	/**
 	 * Set a depth shader.
 	 * @param shader
 	 */
 	public void setDepthShader(Shaders shader);
-	
-	/**
-	 * Get the shader.
-	 * @return
-	 */
-	public int getShader();
-	
-	/**
-	 * Get the depth shader.
-	 * @return
-	 */
-	public int getDepthShader();
 }
 

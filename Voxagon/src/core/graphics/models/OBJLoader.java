@@ -49,6 +49,7 @@ import static org.lwjgl.opengl.GL15.*;
 /**
  * @author Oskar Veerhoek
  */
+@Deprecated
 public class OBJLoader {
 
     public static int createDisplayList(Model m) {

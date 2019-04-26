@@ -144,7 +144,7 @@ public  class ModelBlueprint implements RenderObject{
 	 * The total length is 3 + 3 + 2 = 8 floats between two vertices. The normal starts at 3 floats and the texture starts at 6 floats.
 	 */
 	public void renderTextured() {
-		GL20.glUseProgram(this.getShader());
+		GL20.glUseProgram(this.shader.getShaderProgram());
 		if(this.texture == null) {
 			throw new RuntimeException("Model does not have a texture");
 		} else {
@@ -173,15 +173,6 @@ public  class ModelBlueprint implements RenderObject{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	@Override
-	public void setShader(Shaders shader) {
-		this.shader = shader;
-	}
-
-	@Override
-	public int getShader() {
-		return this.shader.getShaderProgram();
-	}
 	
 	public Vector3f getPosition() {
 		return this.position;
@@ -192,10 +183,6 @@ public  class ModelBlueprint implements RenderObject{
 		this.depthshader = shader.getShaderProgram();
 	}
 
-	@Override
-	public int getDepthShader() {
-		return this.depthshader;
-	}
 	
 	protected Matrix4f getTransformMatrix() {
 		return this.transformMatrix;

@@ -145,6 +145,7 @@ public class Window {
 	}
 
 
+	@Deprecated
 	void renderShadowMap(ShadowMap map, GlueList<RenderObject> objects) {
 		map.updateCameraUniform();
 		glCullFace(GL_FRONT);
@@ -153,9 +154,9 @@ public class Window {
 		glClear(GL_DEPTH_BUFFER_BIT);
 		int lastShader = 0;
 		for (int i = 0; i < objects.size(); i++) {
-			if (lastShader != objects.get(i).getDepthShader()) {
+			/*if (lastShader != objects.get(i).getDepthShader()) {
 				glUseProgram(objects.get(i).getDepthShader());
-			}
+			}*/
 			objects.get(i).render();
 		}
 		glViewport(0, 0, this.getWidth(), this.getHeight());

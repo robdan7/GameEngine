@@ -3,30 +3,54 @@ package core.entities;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
+import core.utils.datatypes.buffers.FloatBufferPartition;
 import core.utils.math.Matrix4f;
 import core.utils.math.Vector3f;
 
-public class ModelInstance {
+public abstract class ModelInstance {
 	private Vector3f position;
 	private Model parent;		/* Model parent */
 	private Matrix4f matrix;	/* Translation matrix for this instance */
-	private FloatBuffer instanceBuffer;
+	private FloatBufferPartition bufferpartition;
 	
-	ModelInstance(Model parent, Vector3f position) {
-		this.position = position;
+	
+	/**
+	 * Create a model instance object.
+	 * @param parent
+	 * @param root
+	 * @param instanceDataSize
+	 */
+	protected ModelInstance(Model parent, Element root, int bufferStart, int bufferStop, FloatBuffer instanceBuffer) {
+		this.position = this.createPosition(root);
 		this.matrix = new Matrix4f();
 		this.parent = parent;
-		//this.instanceBuffer = BufferUtils.createFloatBuffer(16); // one matrix.
-		//this.instanceBuffer.clear();
-		//this.matrix.put(this.instanceBuffer);
-		this.instanceBuffer = BufferUtils.createFloatBuffer(4);
 		
-		this.instanceBuffer.put(this.position.asFloats());
+		this.bufferpartition = new FloatBufferPartition(instanceBuffer, bufferStart, bufferStop);
 	}
 	
-	ModelInstance(Model parent) {
-		this(parent, new Vector3f());
+	/**
+	 * Create a model instance without specified root element.
+	 * The default values will be assigned instead.
+	 * @param parent
+	 * @param instanceDataSize
+	 */
+	protected ModelInstance(Model parent, int instanceDataSize, int bufferStart, int bufferStop, FloatBuffer instanceBuffer) {
+		this.position = new Vector3f();
+		this.matrix = new Matrix4f();
+		this.bufferpartition = new FloatBufferPartition(instanceBuffer, bufferStart, bufferStop);
+	}
+	
+	private Vector3f createPosition(Element root) {
+		NodeList nodes= root.getElementsByTagName("position");
+		String[] vectorString = nodes.item(0).getTextContent().split("\\s+");
+		int x = Integer.parseInt(vectorString[0]);
+		int y = Integer.parseInt(vectorString[1]);
+		int z = Integer.parseInt(vectorString[2]);
+		
+		return new Vector3f(x,y,z);
 	}
 	
 	public Vector3f getPosition() {
@@ -41,9 +65,10 @@ public class ModelInstance {
 		return this.matrix;
 	}
 	
-	FloatBuffer getInstanceData() {
-		return this.instanceBuffer;
+	protected FloatBufferPartition getInstanceData() {
+		return this.bufferpartition;
 	}
+	
 	
 	public Model getParent() {
 		return this.parent;

@@ -41,6 +41,7 @@ import static org.lwjgl.opengl.GL11.*;
 /**
  * @author Oskar Veerhoek
  */
+@Deprecated
 public class Model {
 
     private final List<Vector3f> vertices = new GlueList<Vector3f>();
