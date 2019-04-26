@@ -1,4 +1,4 @@
-package core.graphics.renderUtils.buffers;
+package core.graphics.renderUtils;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.*;
@@ -9,7 +9,6 @@ import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL33;
 
 import core.graphics.misc.Texture;
-import core.graphics.renderUtils.Shaders;
 import core.utils.datatypes.GlueList;
 import core.utils.math.Vector4f;
 
