@@ -2,8 +2,8 @@ package core.engine;
 
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
 
+import core.graphics.renderUtils.Framebuffer;
 import core.graphics.renderUtils.RenderObject;
-import core.graphics.renderUtils.buffers.Framebuffer;
 import core.utils.datatypes.GlueList;
 import core.utils.datatypes.Stack;
 
@@ -22,11 +22,7 @@ public class RenderEngine {
 	 * Render all stages in the current render context.
 	 */
 	public void renderAll() {
-		if (this.rendercontexts.getSize() > 0 ) {
-			this.rendercontexts.getTop().renderAll();
-		} else {
-			throw new RuntimeException("The current render context is empty!");
-		}
+		this.rendercontexts.getTop().renderAll();
 		glfwSwapBuffers(this.window);	// Swap the buffers so everything is shown in the window.
 	}
 	

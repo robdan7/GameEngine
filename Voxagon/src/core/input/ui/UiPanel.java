@@ -206,29 +206,12 @@ public class UiPanel extends  InputInterface implements RenderObject {
 	}
 
 	@Override
-	public void setShader(Shaders shader) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void setDepthShader(Shaders shader) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
-	public int getShader() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
-	@Override
-	public int getDepthShader() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	
 	@Override
 	public String toString() {
 		return this.panelfile;

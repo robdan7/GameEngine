@@ -1,5 +1,9 @@
 package core.utils.math;
 
+import java.nio.FloatBuffer;
+
+import org.lwjgl.BufferUtils;
+
 /**
  * 3-dimensional vector.
  * @author Robin
@@ -101,5 +105,10 @@ public class Vector3f extends Vector<Vector3f> {
 	@Override
 	public Vector3f create() {
 		return new Vector3f();
+	}
+
+	public FloatBuffer asFloatBuffer() {
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(3);
+		return buffer.put(this.asFloats());
 	}
 }

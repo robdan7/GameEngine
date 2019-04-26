@@ -5,8 +5,6 @@ import org.lwjgl.opengl.GL11;
 import core.graphics.lights.DirectionalLight;
 import core.graphics.lights.Light;
 import core.graphics.misc.Texture;
-import core.graphics.renderUtils.buffers.Framebuffer;
-import core.graphics.renderUtils.buffers.old.Drawbuffer;
 import core.graphics.renderUtils.uniforms.UniformBufferSource;
 import core.physics.mechanics.BufferedMotionContainer;
 import core.utils.math.MathTools;

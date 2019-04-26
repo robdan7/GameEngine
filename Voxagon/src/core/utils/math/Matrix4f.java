@@ -10,7 +10,7 @@ import org.lwjgl.opengl.GL20;
  * @author Robin
  * 
  */
-public class Matrix4f{
+public class Matrix4f {
 	public final static int SIZE = 16;
 	private float left, right, top, bottom, zFar, zNear, fovy;
 	private Matrix4f inverse = null;
@@ -541,7 +541,22 @@ public class Matrix4f{
         dest.put(this.m33);
     }
 	
-	public float[] toFloatArray() {
+	/*
+	public void updateUniformBlock() {
+		this.put();
+		UniformTools.updateUniformBlock(this.UBO, this.shaderBuffer, this.uniformOffset);
+	}*/
+	
+	@Override
+	public String toString() {
+		String s = m00 + " " + m10 + " " + m20 + " " + m30 + "\n";
+		s += m01 + " " + m11 + " " + m21 + " " + m31 + "\n";
+		s += m02 + " " + m12 + " " + m22 + " " + m32 + "\n";
+		s += m03 + " " + m13 + " " + m23 + " " + m33 + "\n";
+		return s;
+	}
+
+	public float[] asFloats() {
 		if (this.dest == null) {
 			this.dest = new float[SIZE];
 		}
@@ -565,20 +580,5 @@ public class Matrix4f{
 		dest[14] = this.m32;
 		dest[15] = this.m33;
 		return dest;
-	}
-	
-	/*
-	public void updateUniformBlock() {
-		this.put();
-		UniformTools.updateUniformBlock(this.UBO, this.shaderBuffer, this.uniformOffset);
-	}*/
-	
-	@Override
-	public String toString() {
-		String s = m00 + " " + m10 + " " + m20 + " " + m30 + "\n";
-		s += m01 + " " + m11 + " " + m21 + " " + m31 + "\n";
-		s += m02 + " " + m12 + " " + m22 + " " + m32 + "\n";
-		s += m03 + " " + m13 + " " + m23 + " " + m33 + "\n";
-		return s;
 	}
 }

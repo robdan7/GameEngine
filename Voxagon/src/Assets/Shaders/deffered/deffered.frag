@@ -188,11 +188,13 @@ void main() {
 	sun.specular = lightSource.specular;
 	
 
-	gl_FragColor = fragment.color*composeLight(fragment.sShadowPos, fragment.dShadowPos, fragment.wPosition, fragment.normal, sun.normal,sun.diffuse, sun.ambient, sun.specular, 100);
+	//gl_FragColor = fragment.color*composeLight(fragment.sShadowPos, fragment.dShadowPos, fragment.wPosition, fragment.normal, sun.normal,sun.diffuse, sun.ambient, sun.specular, 100);
 	//gl_FragColor = fragment.color*testisen(fragment.sShadowPos, fragment.dShadowPos, sun.ambient, sun.diffuse);
 	//gl_FragColor = fragment.color*testisen(fragment.sShadowPos, fragment.dShadowPos, sun.ambient, sun.diffuse);
 	//gl_FragColor = vec4(fragment.normal.xyz,1);
-	//gl_FragColor = fragment.color;
+	
+	//gl_FragColor = mix(fragment.color*sun.diffuse, sun.diffuse, length(sun.diffuse/10));
+	gl_FragColor = fragment.color*sun.diffuse;
 	gl_FragDepth = texture(inDepth, texCoord).r;
 	
 }

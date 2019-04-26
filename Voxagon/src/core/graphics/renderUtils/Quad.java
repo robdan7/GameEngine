@@ -13,9 +13,6 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import core.graphics.renderUtils.buffers.Framebuffer;
-import core.graphics.renderUtils.buffers.old.Gbuffer;
-
 public class Quad implements RenderObject{
 	private Framebuffer framebuffer;
 	Shaders defferedShader;
@@ -29,7 +26,6 @@ public class Quad implements RenderObject{
 		this.framebuffer.addTexture("colorBuffer", GL_LINEAR, GL_RGBA, GL_RGBA);
 		this.framebuffer.addTexture("normalBuffer", GL_LINEAR, GL30.GL_RGB16F, GL_RGB);
 		this.framebuffer.addTexture("positionBuffer", GL_LINEAR, GL_RGBA32F, GL_RGBA);
-		//this.framebuffer.addTexture("depthBuffer", GL_LINEAR, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT);
 		this.framebuffer.addDepthAttachment("inDepth", GL_LINEAR, GL_DEPTH_COMPONENT);
 		this.framebuffer.completeFramebuffer();
 		this.framebuffer.bindTextures(this.defferedShader);
@@ -81,26 +77,10 @@ public class Quad implements RenderObject{
 	}
 
 	@Override
-	public void setShader(Shaders shader) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void setDepthShader(Shaders shader) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
-	public int getShader() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
-	@Override
-	public int getDepthShader() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }

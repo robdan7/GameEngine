@@ -1,7 +1,7 @@
 package core.engine;
 
+import core.graphics.renderUtils.Framebuffer;
 import core.graphics.renderUtils.RenderObject;
-import core.graphics.renderUtils.buffers.Framebuffer;
 import core.utils.datatypes.GlueList;
 
 

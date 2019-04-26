@@ -6,6 +6,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import core.entities.Mesh;
@@ -24,6 +25,13 @@ public class XMLdemo {
 			e.printStackTrace();
 		}
 		Element root = doc.getDocumentElement();
+		
+		NodeList nodes = root.getElementsByTagName("position");
+		
+		for (int i = 0; i < nodes.getLength(); i++) {
+			System.out.println(nodes.item(i).getNodeName());
+		}
+		
 		//System.out.println(root.getAttribute("mesh"));
 		
 		//ModelInstance model = Model.createModelInstance(root);

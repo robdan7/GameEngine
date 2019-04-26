@@ -58,7 +58,6 @@ public class Shader {
 		this.attributes = new GlueList<Attribute>();
 		this.uniformBlocks = new GlueList<UniformBlock>();
 		this.localUniforms = new GlueList<Uniform>();
-		this.attributes = new GlueList<Attribute>();
 		this.attributeBlocks = new GlueList<AttributeBlock>();
 		this.iterateChildren(root);
 		this.insertPlaceHolders();
@@ -68,7 +67,6 @@ public class Shader {
 		this.attributes = new GlueList<Attribute>();
 		this.uniformBlocks = new GlueList<UniformBlock>();
 		this.localUniforms = new GlueList<Uniform>();
-		this.attributes = new GlueList<Attribute>();
 		this.attributeBlocks = new GlueList<AttributeBlock>();
 		if (shaderElement.hasAttribute("name")) {
 			this.name = shaderElement.getAttribute("name");

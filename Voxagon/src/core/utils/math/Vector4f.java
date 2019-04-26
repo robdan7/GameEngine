@@ -1,5 +1,9 @@
 package core.utils.math;
 
+import java.nio.FloatBuffer;
+
+import org.lwjgl.BufferUtils;
+
 /**
  * 4-dimensional vector.
  * @author Robin
@@ -100,6 +104,11 @@ public class Vector4f extends Vector<Vector4f> {
 	@Override
 	public float[] asFloats() {
 		return new float[] {this.x,this.y,this.z,this.w};
+	}
+
+	public FloatBuffer asFloatBuffer() {
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(4);
+		return buffer.put(this.asFloats());
 	}
 
 }

@@ -1,5 +1,9 @@
 package core.utils.math;
 
+import java.nio.FloatBuffer;
+
+import org.lwjgl.BufferUtils;
+
 /**
  * 2-dimensional vector.
  * @author Robin
@@ -74,5 +78,10 @@ public class Vector2f extends Vector<Vector2f>{
 	@Override
 	public Vector2f create() {
 		return new Vector2f();
+	}
+
+	public FloatBuffer asFloatBuffer() {
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(2);
+		return buffer.put(this.asFloats());
 	}
 }

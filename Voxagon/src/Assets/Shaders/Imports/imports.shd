@@ -13,7 +13,7 @@ vec4 light(vec4 lightNormal, vec4 vertexNormal) {
 
 vec4 calcDiffuseLight(vec4 lightN, vec4 vertexN) {
 	float nDotL = max(dot(vertexN.xyz, lightN.xyz),0);
-	vec4 light = min(lightSource.diffuse*vec4(vec3(nDotL),1),1);
+	vec4 light = lightSource.diffuse*vec4(vec3(nDotL),1);
 	return light;
 }
 
