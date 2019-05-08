@@ -12,11 +12,15 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL31;
+
+import core.utils.other.BufferTools;
 
 public class Quad implements RenderObject{
 	private Framebuffer framebuffer;
 	Shaders defferedShader;
 	int vbo;
+	int vao;
 	
 	public Quad(int width, int height, Shaders shader) {
 		this.defferedShader = shader;
@@ -32,6 +36,8 @@ public class Quad implements RenderObject{
 		this.vbo = genBuffer();
 		glUseProgram(0);
 		
+		VertexAttribute color = new VertexAttribute(0,3,GL_FLOAT,false,Float.BYTES*3,0);
+		this.vao = BufferTools.createVAO(this.vbo, color);
 	}
 	
 	public Framebuffer getFBO() {
@@ -40,11 +46,9 @@ public class Quad implements RenderObject{
 	
 	public void drawQuad() {
 		GL20.glUseProgram(defferedShader.getShaderProgram());
-		glBindBuffer(GL_ARRAY_BUFFER, this.vbo);
-		//GL20.glUseProgram(0);
-		GL20.glVertexAttribPointer(0, 3, GL_FLOAT, false, Float.BYTES*3, 0);
+		GL31.glBindVertexArray(this.vao);
 		GL11.glDrawArrays(GL11.GL_QUADS, 0, 4);
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		GL31.glBindVertexArray(0);
 	}
 	
 	private static int genBuffer() {

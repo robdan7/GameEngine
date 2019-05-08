@@ -31,8 +31,12 @@ package core.utils.other;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL33;
+
 import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
+import core.graphics.renderUtils.VertexAttribute;
 import core.utils.math.*;
 
 import java.nio.ByteBuffer;
@@ -41,19 +45,62 @@ import java.nio.FloatBuffer;
 public class BufferTools {
 	
 	/**
-	 * Create an openGL vertex buffer.
+	 * Create an openGL vertex buffer object.
 	 * @param target - GL_ARRAY_BUFFER if you are not sure what to put here.
 	 * @param data - the actual float buffer to store.
 	 * @param usage - GL_STATIC_DRAW if you are not sure what to put here.
 	 * @return The generated buffer index. Keep this!
 	 */
-	public static int createVertexBuffer(int target, FloatBuffer data, int usage) {
+	public static int createVBO(int target, FloatBuffer data, int usage) {
 		int glBuffer = GL15.glGenBuffers();
 		
 		GL15.glBindBuffer(target, glBuffer);
 		GL15.glBufferData(target, data, usage);
 		GL15.glBindBuffer(target, 0);
 		return glBuffer;
+	}
+	
+	
+	/**
+	 * Create an OpenGL vertex array object. The vertex array holds pointers between 
+	 * attributes and the actual buffer that stores the vertex data. This enables models to 
+	 * be rendered without specifying pointers before every draw call. Remember that the array 
+	 * itself does not store the actual data, only pointers to the currently bound buffer.
+	 * @param VBO
+	 * @param attributes
+	 */
+	public static int createVAO( int VBO, VertexAttribute... attributes) {
+		int VAO = GL30.glGenVertexArrays();
+		GL30.glBindVertexArray(VAO);
+		GL15.glBindBuffer(GL30.GL_ARRAY_BUFFER, VBO);
+		
+		for (VertexAttribute attrib : attributes ) {
+			GL30.glEnableVertexAttribArray(attrib.getIndex());
+			GL33.glVertexAttribDivisor(attrib.getIndex(), attrib.getDivisor());
+			attrib.bindAttribute();
+		}
+		GL30.glBindVertexArray(0);
+		//GL15.glBindBuffer(GL30.GL_ARRAY_BUFFER, VBO);
+		return VAO;
+	}
+	
+	/**
+	 * Add additional vertex attributes to an already created VAO. These attributes could hold 
+	 * data used when rendering instances, or additional data in a separate buffer.
+	 * @param VAO
+	 * @param VBO
+	 * @param attributes
+	 */
+	public static void addVAOattributes(int VAO, int VBO, VertexAttribute... attributes) {
+		GL30.glBindVertexArray(VAO);
+		GL15.glBindBuffer(GL30.GL_ARRAY_BUFFER, VBO);
+		
+		for (VertexAttribute attrib : attributes ) {
+			GL30.glEnableVertexAttribArray(attrib.getIndex());
+			GL33.glVertexAttribDivisor(attrib.getIndex(), attrib.getDivisor());
+			attrib.bindAttribute();
+		}
+		GL30.glBindVertexArray(0);
 	}
 	
 	/**

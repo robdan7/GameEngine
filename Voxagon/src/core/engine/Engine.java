@@ -2,8 +2,8 @@ package core.engine;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-import core.entities.ModelInstance;
-import core.entities.staticMesh.StaticModel;
+import core.graphics.entities.ModelInstance;
+import core.graphics.entities.staticMesh.StaticModel;
 import core.graphics.lights.DirectionalLight;
 import core.graphics.misc.Color;
 import core.graphics.models.Model;
@@ -107,22 +107,6 @@ public class Engine {
 		this.staticRenderStack = new GlueList<RenderObject>();
 		this.dynamicRenderStack = new GlueList<RenderObject>();
 
-		// Enable attribute arrays.
-		
-		glEnableVertexAttribArray(0);
-		glEnableVertexAttribArray(1);
-		glEnableVertexAttribArray(2);
-		
-		// enable matrix attribute for instances.
-		glEnableVertexAttribArray(3);
-		GL33.glVertexAttribDivisor(3, 1);
-		glEnableVertexAttribArray(4);
-		GL33.glVertexAttribDivisor(4, 1);
-		glEnableVertexAttribArray(5);
-		GL33.glVertexAttribDivisor(5, 1);
-		glEnableVertexAttribArray(6);
-		GL33.glVertexAttribDivisor(6, 1);
-		
 		try {
 			Shaders.addImport("/Assets/Shaders/Imports/imports.shd");
 		} catch (IOException e1) {
@@ -246,24 +230,30 @@ public class Engine {
 
 
 		Material mat = new Material("/Assets/new/shaders/deffered/Gbuffer.mtl");
-		core.entities.Model instance1 = null;
+
 		//core.entities.Model instance2 = null;
 
 			//instance1 = core.entities.Model.createModelInstances("/Assets/new/models/O_cube_instance.mod");
-		instance1 = new StaticModel("/Assets/new/models/O_cube_instance.mod");
-		StaticModel instance2 = new StaticModel("/Assets/new/models/O_sphere_instance.mod");
+		
+		
 		
 		RenderEngine engine = new RenderEngine(this.window.getWindow());
 		engine.addRenderStage(screenQuad.getFBO(), this.dynamicRenderStack, true);
 		engine.addRenderStage(this.screenQuad.getFBO(), this.staticRenderStack, false);
-		this.staticRenderStack.add(instance1);
-		this.staticRenderStack.add(instance2);
+		
+
+		//this.staticRenderStack.add(instance2);
 		
 		Framebuffer buffer = new Framebuffer(0, window.getWidth(), window.getHeight());
 		buffer.setClearColor(window.getSkyColor());
 		GlueList<RenderObject> list = new GlueList<RenderObject>();
 		list.add(screenQuad);
 		engine.addRenderStage(buffer, list);
+		
+		core.graphics.entities.Model instance1 = new StaticModel("/Assets/new/models/O_cube_instance.mod");
+		StaticModel instance2 = new StaticModel("/Assets/new/models/O_sphere_instance.mod");
+		this.staticRenderStack.add(instance1);
+		this.staticRenderStack.add(instance2);
 		
 		while (!this.shouldClose && !glfwWindowShouldClose(window.getWindow())) {
 

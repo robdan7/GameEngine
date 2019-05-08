@@ -1,4 +1,4 @@
-package core.entities;
+package core.graphics.entities;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;

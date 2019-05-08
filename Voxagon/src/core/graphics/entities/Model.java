@@ -1,4 +1,4 @@
-package core.entities;
+package core.graphics.entities;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
@@ -20,6 +20,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL31;
 import org.lwjgl.opengl.GL33;
+import org.lwjgl.opengl.GL40;
 import org.lwjgl.system.NativeType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -28,6 +29,7 @@ import org.xml.sax.SAXException;
 
 import core.graphics.renderUtils.RenderObject;
 import core.graphics.renderUtils.Shaders;
+import core.graphics.renderUtils.VertexAttribute;
 import core.graphics.shading.Material;
 import core.utils.datatypes.GlueList;
 import core.utils.fileSystem.XMLparser;
@@ -52,10 +54,12 @@ public abstract class Model implements RenderObject {
 	private String name;
 	private Material material;
 	FloatBuffer modelBuffer;
-	public int modelVBO;
+	private int modelVBO;
+	private int modelVAO;
+	
 	private boolean shouldUpdate = false;
 	
-	GlueList<VertexAttribute> attributes;
+	private VertexAttribute[] attributes;
 
 	private ModelInstance[] instances;
 	
@@ -77,26 +81,29 @@ public abstract class Model implements RenderObject {
 		String mesh = root.getAttribute("mesh");
 		this.modelMesh = new Mesh(mesh);
 		
-		this.attributes = new GlueList<VertexAttribute>();
+		this.attributes = new VertexAttribute[3];
 		
 		
 		/* Add vertex attributes for vertices etc. */
 		if (this.modelMesh.hasVertices()) {
-			this.attributes.add(new VertexAttribute(0,3,GL_FLOAT,false,Float.BYTES*8,0));
+			this.attributes[0] = new VertexAttribute(0,3,GL_FLOAT,false,Float.BYTES*8,0);
 		}
 		
 		if (this.modelMesh.hasNormals()) {
-			this.attributes.add(new VertexAttribute(1,3,GL_FLOAT,false,Float.BYTES*8,Float.BYTES*3));
+			this.attributes[1] = new VertexAttribute(1,3,GL_FLOAT,false,Float.BYTES*8,Float.BYTES*3);
 		}
 		
 		if (this.modelMesh.hasUVcoords()) {
-			this.attributes.add(new VertexAttribute(2,2,GL_FLOAT,false,Float.BYTES*8,Float.BYTES*6));
+			this.attributes[2] = new VertexAttribute(2,2,GL_FLOAT,false,Float.BYTES*8,Float.BYTES*6);
 		}
+		
 		
 		/* Create the VBO and all instances. The VBO must exist before the instances can be created. */
 		int instancecount = root.getElementsByTagName("instance").getLength();
 		this.modelVBO = this.createVBO(instancecount, instanceBufferSize);
 		this.instances = this.createInstances(root, instanceBufferSize);
+		
+		this.modelVAO = BufferTools.createVAO(this.modelVBO, this.attributes);
 		
 		/* All the instances are set up, but the VBO has not been updated yet. */
 		this.updateVBO();
@@ -129,27 +136,16 @@ public abstract class Model implements RenderObject {
 		int z = Integer.parseInt(vectorString[2]);
 		return new Vector3f(x,y,z);
 	}
-	
-	@Deprecated
-	private void setModelInstances(ModelInstance... instances) {
-		this.instances = instances;
-	}
+
 	
 	public void renderModelInstances() {
 		if (this.shouldUpdate) {
 			
 		}
 		this.material.setToActiveMaterial();
-		
-		GL20.glBindBuffer(GL_ARRAY_BUFFER, this.modelVBO);
-
-		for (VertexAttribute attrib : this.attributes) {
-			attrib.bindAttribute();
-		}
-
+		GL30.glBindVertexArray(this.modelVAO);
 		GL31.glDrawArraysInstanced(GL11.GL_TRIANGLES, 0, this.modelMesh.getTotalNumberOfVertices(), this.instances.length);
-		
-		GL20.glBindBuffer(GL_ARRAY_BUFFER, 0);
+		GL30.glBindVertexArray(0);
 	}
 
 	/**
@@ -167,7 +163,14 @@ public abstract class Model implements RenderObject {
 		this.modelBuffer.put(this.modelMesh.getMeshBuffer());
 
 		this.modelBuffer.clear();
-		return BufferTools.createVertexBuffer(GL_ARRAY_BUFFER, this.modelBuffer, GL_STATIC_DRAW);
+		return BufferTools.createVBO(GL_ARRAY_BUFFER, this.modelBuffer, GL_STATIC_DRAW);
+	}
+	
+	/**
+	 * Create and bind the VAO used in this model.
+	 */
+	protected void addVAOattributes(int VBO, VertexAttribute...attributes) {
+		BufferTools.addVAOattributes(this.modelVAO, this.modelVBO, attributes);
 	}
 	
 	protected void updateVBO() {
@@ -175,48 +178,15 @@ public abstract class Model implements RenderObject {
 		BufferTools.updateVertexBuffer(GL_ARRAY_BUFFER, modelVBO, 0, this.modelBuffer);
 	}
 	
-	protected void addAttribute(VertexAttribute attrib) {
-		this.attributes.add(attrib);
-	}
-	
 	protected int getMeshVerticesCount() {
 		return this.modelMesh.getTotalNumberOfVertices();
 	}
 	
-	/**
-	 * Add a newly created model instance to the vertex buffer object.
-	 */
-	@Deprecated
-	void updateVBO(ModelInstance... instances) {
-		/*
-		FloatBuffer[] instanceBuffers = new FloatBuffer[instances.length];
-		int i= 0;
-		for (ModelInstance instance : instances) {
-			instanceBuffers[i] = instance.getInstanceData();
-			i++;
-		}
-		
-		FloatBuffer buffers = BufferTools.combineBuffers(instanceBuffers);
-		
-		
-		this.modelBuffer = BufferTools.combineBuffers(this.modelBuffer,buffers);
-		this.modelBuffer.flip();
-
-		BufferTools.revalidateVertexBuffer(GL_ARRAY_BUFFER, this.modelVBO, this.modelBuffer, GL_STATIC_DRAW);
-		*/
-		throw new UnsupportedOperationException();
-	}
 
 	void signalUpdate() {
 		this.shouldUpdate = true;
 	}
-	
-	@Deprecated
-	private Vector3f parsePosition(Element position) {
-		String[] vectorString = position.getTextContent().split(" ");
-		
-		return new Vector3f(Float.parseFloat(vectorString[0]), Float.parseFloat(vectorString[1]), Float.parseFloat(vectorString[2]));
-	}
+
 	
 	/**
 	 * Set the position of this model and all its instances.
@@ -226,105 +196,16 @@ public abstract class Model implements RenderObject {
 		this.position.set(position);
 	}
 	
-	
-	/**
-	 * Create a singular model instance.
-	 * @param m
-	 */
-	@Deprecated
-	public static ModelInstance createModelInstance(Element m) {
-		throw new UnsupportedOperationException("This method is deprecated.");
-		/*Model model = new Model(m);
 
-		ModelInstance instance = new ModelInstance(model);
-		model.setModelInstances(instance);
-		
-		//model.updateVBO(instance);
-		model.updateVBO(instance);
-		return instance;
-		*/
-	}
-	
-	@Deprecated
-	public static Model createInstancedModel(Element m) {
-		throw new UnsupportedOperationException("This method is deprecated.");
-		/*
-		Model model = new Model(m);
-		
-		NodeList nodes = m.getChildNodes();
-		
-		ModelInstance[] instances = new ModelInstance[Integer.parseInt(m.getAttribute("instances"))];
-		if (instances.length == 0) {
-			throw new RuntimeException("zero instances");
-		}
-		Element el;
-		for (int i = 0, k = 0; i < nodes.getLength() && k < instances.length; i++) {
-			if (!nodes.item(i).getNodeName().equals("#text")) {
-				el = (Element) nodes.item(i);
-
-				switch (el.getNodeName()) {
-				case "instance":
-					instances[k] = createPlainInstance(model, el);
-					k++;
-					break;
-				}
-			}
-		}
-		model.setModelInstances(instances);
-		model.updateVBO(instances);
-		//return instances;
-		return model;
-		*/
-	}
-	
-	@Deprecated
-	private static ModelInstance createPlainInstance(Model m, Element instance) {
-		/*
-		NodeList nodes = instance.getChildNodes();
-		Vector3f position = new Vector3f();
-		Element el;
-		for (int i = 0; i < nodes.getLength(); i++) {
-			if (!nodes.item(i).getNodeName().equals("#text")) {
-				el = (Element) nodes.item(i);
-				
-				switch (el.getNodeName()) {
-				case "position":
-					String[] pos = el.getTextContent().split("\\s+");
-					position.set(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]), Integer.parseInt(pos[2]));
-					break;
-				}
-			}
-		}
-		return new ModelInstance(m,position);
-		*/
-		return null;
-	}
-	
-	@Deprecated
-	public static ModelInstance createModelInstance(String file) throws SAXException, IOException, ParserConfigurationException {
-		throw new UnsupportedOperationException("This method is deprecated.");
-		/*Document doc = XMLparser.createDocument(file);
-		Element root = doc.getDocumentElement();
-		
-		return Model.createModelInstance(root);
-		*/
-	}
-	
-	@Deprecated
-	public static Model createModelInstances(String file) throws SAXException, IOException, ParserConfigurationException {
-		/*
-		Document doc = XMLparser.createDocument(file);
-		Element root = doc.getDocumentElement();
-		
-		return Model.createInstancedModel(root);
-		*/
-		throw new UnsupportedOperationException("This method is deprecated.");
-	}
 	
 	protected abstract ModelInstance createModelInstance(Model m, Element instanceRoot, int bufferStart, int bufferStop, FloatBuffer instanceBuffer);
 	
 	protected abstract ModelInstance createModelInstance(Model m, int bufferStart, int bufferStop, FloatBuffer instanceBuffer);
 
+	protected int getVBO() {
+		return this.modelVBO;
+	}
+	
 	@Override
 	public void render() {
 		
@@ -345,38 +226,5 @@ public abstract class Model implements RenderObject {
 	public void setDepthShader(Shaders shader) {
 		// TODO Auto-generated method stub
 		
-	}
-
-	
-	protected static class VertexAttribute {
-		private int index, size, type, stride;
-		private long pointer;
-		private boolean normalized;
-
-		public VertexAttribute (@NativeType(value="GLuint") int index, @NativeType(value="GLint") int size, @NativeType(value="GLenum") int type, @NativeType(value="GLboolean") boolean normalized, @NativeType(value="GLsizei") int stride, @NativeType(value="void cont *") long pointer) {
-			this.index = index;
-			this.size = size;
-			this.type = type;
-			this.stride = stride;
-			this.pointer = pointer;
-			this.normalized = normalized;
-		}
-		
-		protected VertexAttribute(Element root) {
-			this.index = Integer.parseInt( root.getAttribute("index"));
-			
-			switch(root.getAttribute("type")) {
-			case "vec4":
-				
-				break;
-			}
-			
-		}
-
-		void bindAttribute() {
-			GL20.glVertexAttribPointer(this.index, this.size, this.type, this.normalized, this.stride, this.pointer);
-		}
-	}
-
-	
+	}	
 }

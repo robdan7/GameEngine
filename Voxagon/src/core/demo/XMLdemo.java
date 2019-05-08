@@ -9,8 +9,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import core.entities.Mesh;
-import core.entities.*;
+import core.graphics.entities.Mesh;
 import core.utils.fileSystem.XMLparser;
 
 public class XMLdemo {

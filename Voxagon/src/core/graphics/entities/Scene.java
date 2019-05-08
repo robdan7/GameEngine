@@ -1,4 +1,4 @@
-package core.entities;
+package core.graphics.entities;
 
 import core.utils.datatypes.GlueList;
 import core.utils.math.Vector;

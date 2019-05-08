@@ -1,4 +1,4 @@
-package core.entities.staticMesh;
+package core.graphics.entities.staticMesh;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 
@@ -7,18 +7,21 @@ import java.nio.FloatBuffer;
 import org.lwjgl.opengl.GL20;
 import org.w3c.dom.Element;
 
-import core.entities.Model;
-import core.entities.ModelInstance;
+import core.graphics.entities.Model;
+import core.graphics.entities.ModelInstance;
+import core.graphics.renderUtils.VertexAttribute;
 import core.utils.math.Vector4f;
 
 public class StaticModel extends Model{
 
 	public StaticModel(String modelFile) {
-		super(modelFile, Vector4f.SIZE);
+		super(modelFile, StaticModelInstance.bufferSize);
 		
 		//GL20.glVertexAttribPointer(3, 4, GL_FLOAT, false, Float.BYTES*4, Float.BYTES*this.modelMesh.getTotalNumberOfVertices()*8);
-		VertexAttribute attrib = new VertexAttribute(3, 4, GL_FLOAT, false, Float.BYTES*4, Float.BYTES*super.getMeshVerticesCount()*8);
-		super.addAttribute(attrib);
+		VertexAttribute attrib = new VertexAttribute(3, 4, GL_FLOAT, false, Float.BYTES*4, Float.BYTES*super.getMeshVerticesCount()*8,1);
+	
+		super.addVAOattributes(super.getVBO(), attrib);
+		//super.addAttribute(attrib);
 	}
 
 	@Override
