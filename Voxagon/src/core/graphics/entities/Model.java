@@ -55,6 +55,11 @@ public abstract class Model implements RenderObject {
 	private Material material;
 	FloatBuffer modelBuffer;
 	private int modelVBO;
+	
+	
+	FloatBuffer instanceBuffer;
+	private int instanceVBO;
+	
 	private int modelVAO;
 	
 	private boolean shouldUpdate = false;
@@ -100,30 +105,31 @@ public abstract class Model implements RenderObject {
 		
 		/* Create the VBO and all instances. The VBO must exist before the instances can be created. */
 		int instancecount = root.getElementsByTagName("instance").getLength();
-		this.modelVBO = this.createVBO(instancecount, instanceBufferSize);
+		this.modelVBO = this.createVBO( instancecount, instanceBufferSize);
 		this.instances = this.createInstances(root, instanceBufferSize);
 		
 		this.modelVAO = BufferTools.createVAO(this.modelVBO, this.attributes);
 		
 		/* All the instances are set up, but the VBO has not been updated yet. */
-		this.updateVBO();
+		this.updateVBO(this.instanceBuffer);
 	}
 	
 
 	private ModelInstance[] createInstances(Element root, int instanceBufferSize) {
 		NodeList nodes = root.getElementsByTagName("instance");
 		int start = this.modelMesh.getMeshBuffer().capacity();
+		start = 0;
 		if (nodes.getLength() == 0) {
 			
 			// There are no instances, create one instance with the model position instead.
-			ModelInstance instance = this.createModelInstance(this,root,start,start+instanceBufferSize, this.modelBuffer);
+			ModelInstance instance = this.createModelInstance(this,root,start,start+instanceBufferSize, this.instanceBuffer);
 			instance.setAxisPosition(this.createPosition(root));
 			return new ModelInstance[] {instance};
 		}
 		
 		ModelInstance[] instances = new ModelInstance[nodes.getLength()];
 		for (int i = 0; i < nodes.getLength(); i++) {
-			instances[i] = this.createModelInstance(this, (Element) nodes.item(i),start+i*instanceBufferSize,start+(i+1)*instanceBufferSize, this.modelBuffer);
+			instances[i] = this.createModelInstance(this, (Element) nodes.item(i),start+i*instanceBufferSize,start+(i+1)*instanceBufferSize, this.instanceBuffer);
 		}
 		return instances;
 	}
@@ -152,30 +158,33 @@ public abstract class Model implements RenderObject {
 	 * Generate a VBO for this model.
 	 * @return
 	 */
-	private int createVBO(int instances, int instanceBufferSize) {
+	private int createVBO( int instances, int instanceBufferSize) {
 		
 		int instanceData = 0;
 		if (instances > 0 ) {
 			instanceData = instances * instanceBufferSize;
 		}
-		this.modelBuffer = BufferUtils.createFloatBuffer(this.modelMesh.getMeshBuffer().capacity() + instanceData);
+		this.modelBuffer = BufferUtils.createFloatBuffer(this.modelMesh.getMeshBuffer().capacity());
 		this.modelMesh.getMeshBuffer().flip();
 		this.modelBuffer.put(this.modelMesh.getMeshBuffer());
 
 		this.modelBuffer.clear();
-		return BufferTools.createVBO(GL_ARRAY_BUFFER, this.modelBuffer, GL_STATIC_DRAW);
+		
+		this.instanceBuffer = BufferUtils.createFloatBuffer(instanceData);
+		this.instanceVBO = BufferTools.createVBO(this.instanceBuffer, GL_STATIC_DRAW);
+		return BufferTools.createVBO(this.modelBuffer, GL_STATIC_DRAW);
 	}
 	
 	/**
-	 * Create and bind the VAO used in this model.
+	 * Add instance attributes to this model.
 	 */
-	protected void addVAOattributes(int VBO, VertexAttribute...attributes) {
-		BufferTools.addVAOattributes(this.modelVAO, this.modelVBO, attributes);
+	protected void addVAOattributes(VertexAttribute...attributes) {
+		BufferTools.addVAOattributes(this.modelVAO, this.instanceVBO, attributes);
 	}
 	
-	protected void updateVBO() {
-		this.modelBuffer.clear();
-		BufferTools.updateVertexBuffer(GL_ARRAY_BUFFER, modelVBO, 0, this.modelBuffer);
+	private void updateVBO(FloatBuffer buffer) {
+		buffer.clear();
+		BufferTools.updateVertexBuffer(GL_ARRAY_BUFFER, this.instanceVBO, 0, buffer);
 	}
 	
 	protected int getMeshVerticesCount() {
@@ -202,8 +211,8 @@ public abstract class Model implements RenderObject {
 	
 	protected abstract ModelInstance createModelInstance(Model m, int bufferStart, int bufferStop, FloatBuffer instanceBuffer);
 
-	protected int getVBO() {
-		return this.modelVBO;
+	protected int getInstanceVBO() {
+		return this.instanceVBO;
 	}
 	
 	@Override

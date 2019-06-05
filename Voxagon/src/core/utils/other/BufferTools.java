@@ -41,25 +41,39 @@ import core.utils.math.*;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class BufferTools {
 	
 	/**
-	 * Create an openGL vertex buffer object.
-	 * @param target - GL_ARRAY_BUFFER if you are not sure what to put here.
-	 * @param data - the actual float buffer to store.
+	 * Create an OpenGL vertex buffer object. The target used here is GL_ARRAY_BUFFER, 
+	 * use {@link #createIBO(FloatBuffer, int)} to create an index buffer.
+	 * @param data - the buffer to read from. The VBO will be an exact copy of this buffer.
 	 * @param usage - GL_STATIC_DRAW if you are not sure what to put here.
 	 * @return The generated buffer index. Keep this!
 	 */
-	public static int createVBO(int target, FloatBuffer data, int usage) {
-		int glBuffer = GL15.glGenBuffers();
-		
-		GL15.glBindBuffer(target, glBuffer);
-		GL15.glBufferData(target, data, usage);
-		GL15.glBindBuffer(target, 0);
-		return glBuffer;
+	public static int createVBO(FloatBuffer data, int usage) {
+		int VBO = GL15.glGenBuffers();
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, VBO);
+		GL15.glBufferData(GL15.GL_ARRAY_BUFFER, data, usage);
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		return VBO;
 	}
 	
+	/**
+	 * Create an OpenGL index buffer object. The target used here is GL_ELEMENT_ARRAY_BUFFER,
+	 * use {@link #createVBO(FloatBuffer, int)} to create a vertex buffer.
+	 * @param data - The buffer to read from. The IBO will be an exact copy of this buffer.
+	 * @param usage - GL_STATIC_DRAW if you are not sure what to put here.
+	 * @return
+	 */
+	public static int createIBO(IntBuffer data, int usage) {
+		int glBuffer = GL15.glGenBuffers();
+		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, glBuffer);
+		GL15.glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, data, usage);
+		GL15.glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
+		return glBuffer;
+	}	
 	
 	/**
 	 * Create an OpenGL vertex array object. The vertex array holds pointers between 
@@ -71,16 +85,7 @@ public class BufferTools {
 	 */
 	public static int createVAO( int VBO, VertexAttribute... attributes) {
 		int VAO = GL30.glGenVertexArrays();
-		GL30.glBindVertexArray(VAO);
-		GL15.glBindBuffer(GL30.GL_ARRAY_BUFFER, VBO);
-		
-		for (VertexAttribute attrib : attributes ) {
-			GL30.glEnableVertexAttribArray(attrib.getIndex());
-			GL33.glVertexAttribDivisor(attrib.getIndex(), attrib.getDivisor());
-			attrib.bindAttribute();
-		}
-		GL30.glBindVertexArray(0);
-		//GL15.glBindBuffer(GL30.GL_ARRAY_BUFFER, VBO);
+		addVAOattributes(VAO, VBO, attributes);
 		return VAO;
 	}
 	
@@ -100,6 +105,7 @@ public class BufferTools {
 			GL33.glVertexAttribDivisor(attrib.getIndex(), attrib.getDivisor());
 			attrib.bindAttribute();
 		}
+		GL15.glBindBuffer(GL30.GL_ARRAY_BUFFER, 0);
 		GL30.glBindVertexArray(0);
 	}
 	

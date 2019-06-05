@@ -18,9 +18,9 @@ public class StaticModel extends Model{
 		super(modelFile, StaticModelInstance.bufferSize);
 		
 		//GL20.glVertexAttribPointer(3, 4, GL_FLOAT, false, Float.BYTES*4, Float.BYTES*this.modelMesh.getTotalNumberOfVertices()*8);
-		VertexAttribute attrib = new VertexAttribute(3, 4, GL_FLOAT, false, Float.BYTES*4, Float.BYTES*super.getMeshVerticesCount()*8,1);
+		VertexAttribute attrib = new VertexAttribute(3, 4, GL_FLOAT, false, Float.BYTES*4, 0,1);
 	
-		super.addVAOattributes(super.getVBO(), attrib);
+		super.addVAOattributes(attrib);
 		//super.addAttribute(attrib);
 	}
 
