@@ -386,15 +386,17 @@ public class BufferTools {
     	}
     	return dest;
     }
-
+    
     /**
-     * @param amountOfElements the amount of elements in the FloatBuffers
-     *
-     * @return an empty FloatBuffer with a set amount of elements
+     * Get a new buffer with a capacity smaller or larger than the original buffer.
+     * @param buffer - The source buffer
+     * @param newCapacity - The new capacity
+     * @return A copy of the original buffer containing the first n floats.
      */
-    public static FloatBuffer reserveData(int amountOfElements) {
-        return BufferUtils.createFloatBuffer(amountOfElements);
+    public static FloatBuffer resizedBufferCopy(FloatBuffer buffer, int newCapacity) {
+    	FloatBuffer dest = BufferUtils.createFloatBuffer(newCapacity);
+    	buffer.clear();
+    	dest.put(buffer);
+    	return dest;
     }
-
-
 }

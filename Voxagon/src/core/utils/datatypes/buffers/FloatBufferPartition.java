@@ -10,6 +10,12 @@ import java.nio.FloatBuffer;
  */
 public class FloatBufferPartition extends BufferPartition<FloatBuffer> {
 
+	/**
+	 * 
+	 * @param buffer - The parent buffer.
+	 * @param start - Start position in floats.
+	 * @param stop - Stop position. This is exclusive.
+	 */
 	public FloatBufferPartition(FloatBuffer buffer, int start, int stop) {
 		super(buffer ,start, stop);
 		
