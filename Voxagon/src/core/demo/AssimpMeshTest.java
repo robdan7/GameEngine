@@ -11,6 +11,7 @@ import org.lwjgl.assimp.Assimp;
 import org.lwjgl.assimp.AIFace;
 import org.lwjgl.assimp.AILight;
 
+import core.graphics.entities.assimp.AssimpScene;
 import core.graphics.entities.assimp.MeshContainer;
 import core.utils.fileSystem.FileManager;
 
@@ -27,16 +28,14 @@ public class AssimpMeshTest {
 		
 		//MeshContainer mesh = new MeshContainer(1,scene);
 
-		
+		System.out.println("Meshnumber: " + scene.mRootNode().mNumMeshes());
 		
 		System.out.println("Meshes: ");
 		for (int i = 0; i < scene.mNumMeshes(); i++) {
 			AIMesh mesh = AIMesh.create(scene.mMeshes().get(i));
-			System.out.println(mesh.mName().dataString());
+			System.out.println(scene.mMeshes().get(i));
 			for (int l = 0; l < mesh.mNumVertices(); l++) {
 				AIVector3D vertex = mesh.mVertices().get(l);
-				System.out.println(vertex.x() + ", " + vertex.y() + ", " + vertex.z());
-				vertex = mesh.mNormals().get(l);
 				System.out.println(vertex.x() + ", " + vertex.y() + ", " + vertex.z());
 			}
 			System.out.println(mesh.mNumVertices());
@@ -53,7 +52,9 @@ public class AssimpMeshTest {
 			System.out.println("Node name: " + node.mName().dataString());
 			System.out.println("Meshes: " + node.mNumMeshes());
 			for (int j = 0; j < node.mNumMeshes(); j++) {
-				System.out.println(AIMesh.create(scene.mMeshes().get(node.mMeshes().get(i))).mName().dataString());
+				AIMesh mesh = AIMesh.create(scene.mMeshes().get(node.mMeshes().get(j)));
+				
+				System.out.println(AIMesh.create(scene.mMeshes().get(node.mMeshes().get(j))).mName().dataString() );
 			}
 			System.out.println("Children: " + node.mNumChildren());
 			if (node.mNumChildren() > 0) {
@@ -70,9 +71,14 @@ public class AssimpMeshTest {
 		scene.free();
 	}
 	
+	public static void test(String file) {
+		AssimpScene scene = new AssimpScene(file);
+	}
+	
 	public static void main(String[] args) {
-		File file = FileManager.getFile("/Assets/triangles.dae");
-		new AssimpMeshTest(file);
+		//File file = FileManager.getFile("/Assets/triangles.dae");
+		//new AssimpMeshTest(file);
+		test("/Assets/triangles.dae");
 	}
 
 }
