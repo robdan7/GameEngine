@@ -2,11 +2,13 @@ package core.utils.datatypes.buffers;
 
 import java.nio.Buffer;
 
+import core.utils.datatypes.buffers.pointers.BufferPointer;
+
 /**
  * A buffer partition is a partition with a fixed length within a buffer. The partition itself is not 
  * allowed to read or write outside its own mark and limit. This allows the user to divide one singular buffer 
  * into smaller portions, thus allowing several objects to access the buffer without their own buffers as 
- * remporary storage. Note that there is no multi-thread support built in.
+ * temporary storage. Note that there is no multi-thread support built in.
  * @author Robin
  *
  * @param <BUFF>
@@ -15,6 +17,7 @@ public abstract class BufferPartition<BUFF extends Buffer> {
 	private int start, stop;
 	private int limit, position, mark;
 	private BUFF buffer;
+	private BufferPointer<BUFF> bufferPointer;
 	private boolean markDefined = false;
 
 	public BufferPartition(BUFF buffer, int start, int stop) {
@@ -23,6 +26,18 @@ public abstract class BufferPartition<BUFF extends Buffer> {
 		this.stop = stop;
 		this.limit = stop-1;
 		this.position = start;
+	}
+	
+	/**
+	 * Create a buffer partition with the source being a buffer pointer. Be careful when 
+	 * switching sources! 
+	 * @param buffer
+	 * @param start
+	 * @param stop
+	 */
+	public BufferPartition(BufferPointer<BUFF> buffer, int start, int stop) {
+		this(buffer.getBuffer(), start, stop);
+		this.bufferPointer = buffer;
 	}
 	
 	/**
@@ -40,6 +55,9 @@ public abstract class BufferPartition<BUFF extends Buffer> {
 	}
 	
 	protected final BUFF getBuffer() {
+		if (this.buffer == null) {
+			return this.bufferPointer.getBuffer();
+		}
 		return this.buffer;
 	}
 
@@ -153,6 +171,6 @@ public abstract class BufferPartition<BUFF extends Buffer> {
 	}
 	
 	public boolean isReadOnly() {
-		return this.buffer.isReadOnly();
+		return this.getBuffer().isReadOnly();
 	}
 }
