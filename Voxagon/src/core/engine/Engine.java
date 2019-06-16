@@ -3,6 +3,8 @@ package core.engine;
 import static org.lwjgl.glfw.GLFW.*;
 
 import core.graphics.entities.ModelInstance;
+import core.graphics.entities.assimp.AssimpScene;
+import core.graphics.entities.assimp.assets.BluePrint;
 import core.graphics.entities.staticMesh.StaticModel;
 import core.graphics.lights.DirectionalLight;
 import core.graphics.misc.Color;
@@ -195,7 +197,12 @@ public class Engine {
 		this.staticShadowMap.getTexture().bindAsUniforms( deffered);
 		this.dynamicShadowMap.getTexture().bindAsUniforms(deffered);
 
-
+		
+		/* 
+		 * Scene used for testing purposes!
+		 * */
+		//AssimpScene scene = new AssimpScene("/Assets/triangles.dae");
+		BluePrint bp = new BluePrint("/Assets/new/assimp/blueprints/test.blp");
 		this.renderloop();
 		//test.discard();
 		//m.discard();

@@ -2,6 +2,8 @@ package core.utils.datatypes.buffers;
 
 import java.nio.FloatBuffer;
 
+import core.utils.datatypes.buffers.pointers.FloatBufferPointer;
+
 /**
  * The float buffer partition is a buffer partition used for storing floats. This is an extension 
  * of the class {@link BufferPartition}.
@@ -20,6 +22,10 @@ public class FloatBufferPartition extends BufferPartition<FloatBuffer> {
 		super(buffer ,start, stop);
 		
 		
+	}
+	
+	public FloatBufferPartition(FloatBufferPointer pointer, int start, int stop) {
+		super(pointer, start, stop);
 	}
 	
 	/**

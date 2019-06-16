@@ -1,4 +1,4 @@
-package core.graphics.entities.assimp;
+package core.graphics.entities.assimp.assets;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 
@@ -19,7 +19,7 @@ import core.utils.other.BufferTools;
 
 /**
  * <p>This represents a single mesh with its own vertex buffer. A mesh is just a group of
- * vertices with the same material (shader). A model with several materials should also 
+ * vertices with the same material (shader). A model with several materials should by default 
  * have several meshes in it.</p>
  * 
  * @author Robin
@@ -28,8 +28,9 @@ import core.utils.other.BufferTools;
 public class MeshContainer {
 	public FloatBuffer vertexBuffer;	// Vertex buffer
 	private IntBuffer indexBuffer;
-	private AIMesh mesh;
+	private String name = "";
 	private int VBO, IBO;	// Vertex buffer and index buffer objects.
+	private int materialIndex;
 	
 	@Deprecated
 	private int VAO;
@@ -45,15 +46,14 @@ public class MeshContainer {
 	 * of a model mesh.
 	 */
 	public MeshContainer(AIMesh mesh) {
-		
+		this.name = mesh.mName().dataString();
 		this.hasNormals = mesh.mNormals().capacity() > 0;
 		this.hasTextureCoords = mesh.mTextureCoords().capacity() > 0;
-		
+		this.materialIndex = mesh.mMaterialIndex();
 		this.compileMeshBuffer(mesh);
 		this.compileIndexBuffer(mesh);
 		
 		this.createGLBuffers();
-		this.mesh = mesh;
 	}
 	
 	/**
@@ -75,7 +75,7 @@ public class MeshContainer {
 			this.vertexBuffer.put(normal.x());
 			this.vertexBuffer.put(normal.y());
 			this.vertexBuffer.put(normal.z());
-			this.vertexBuffer.put(new float[2]);
+			this.vertexBuffer.put(new float[2]); // Texture coords
 		}
 		this.vertexBuffer.flip();
 		
@@ -146,7 +146,7 @@ public class MeshContainer {
 	 * @param VAO
 	 */
 	public void bindToVAO(int VAO) {
-		//BufferTools.addVAOattributes(VAO, this.VBO, this.vertexAttributes);
+		BufferTools.addVAOattributes(VAO, this.VBO, this.vertexAttributes);
 		/*
 		 * TODO Add the VBO and IBO to the VAO with proper connection between the two objects.
 		 */
@@ -158,6 +158,11 @@ public class MeshContainer {
 	
 	private boolean hasTextureCoords() {
 		return this.hasTextureCoords;
+	}
+	
+	@Override
+	public String toString() {
+		return this.name;
 	}
 
 }

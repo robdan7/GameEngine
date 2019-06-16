@@ -3,11 +3,15 @@ package core.graphics.entities.assimp;
 import java.io.File;
 import java.util.concurrent.Semaphore;
 
+import org.lwjgl.assimp.AIMaterial;
 import org.lwjgl.assimp.AIMesh;
 import org.lwjgl.assimp.AINode;
 import org.lwjgl.assimp.AIScene;
 import org.lwjgl.assimp.Assimp;
 
+import core.graphics.entities.assimp.assets.MeshContainer;
+import core.graphics.entities.assimp.assets.Model;
+import core.graphics.entities.assimp.assets.ModelInstance;
 import core.utils.datatypes.GlueList;
 import core.utils.fileSystem.FileManager;
 
@@ -15,6 +19,7 @@ import core.utils.fileSystem.FileManager;
 public class AssimpScene {
 	private AssimpNode root;
 	private AIScene scene;
+	private MeshContainer[] meshes;
 
 	public AssimpScene(String file) {
 		File AssimpFile = FileManager.getFile(file);
@@ -26,9 +31,28 @@ public class AssimpScene {
 			System.err.println("Assimp scene was not created.");
 			System.exit(0);
 		}
-		//System.out.println(scene.mNumMeshes());
-		this.root = new AssimpNode(scene);
-		System.out.println("The scene was created successfully! Now there will be cake.");
+		
+		/* Create all the meshes */
+		this.meshes = new MeshContainer[scene.mNumMeshes()];
+		for (int i = 0; i < scene.mNumMeshes(); i++) {
+			MeshContainer mesh = new MeshContainer(AIMesh.create(scene.mMeshes().get(i)));
+			this.meshes[i] = mesh;
+			//System.out.println("mesh " + mesh.toString());
+			//System.out.println(mesh.mesh.mMaterialIndex());
+		}
+		
+		this.root = new AssimpNode(this);
+	}
+	
+	public MeshContainer[] getMeshes() {
+		return this.meshes;
+	}
+	
+	/**
+	 * Dispose the scene. It will be.
+	 */
+	public void dispose() {
+		Assimp.aiFreeScene(this.scene);
 	}
 
 	private class AssimpNode {
@@ -61,10 +85,7 @@ public class AssimpScene {
 				meshes[i] = this.node.mMeshes().get(i);
 			}
 			String name = AIMesh.create(this.scene.mMeshes().get(meshes[0])).mName().dataString();
-			
-			/*
-			 * TODO temporarily remove the GL buffers in the model class or add LWJGL start code.
-			 */
+
 			PreModelContainer container = this.layer.requestModelContainer(name, meshes);
 			
 			
@@ -81,11 +102,11 @@ public class AssimpScene {
 		 * Use this to create a root node.
 		 * @param node
 		 */
-		private AssimpNode(AIScene scene) {
-			this.node = scene.mRootNode();
-			this.layer = new NodeLayer();
+		private AssimpNode(AssimpScene scene) {
+			this.node = scene.scene.mRootNode();
+			this.layer = new NodeLayer(scene);
 			this.isRoot = true;
-			this.scene = scene;
+			this.scene = scene.scene;
 			this.createChildren();
 			this.layer.finalizeLayer();
 		}
@@ -120,8 +141,10 @@ public class AssimpScene {
 		private GlueList<Model> models;
 		private GlueList<PreModelContainer> modelQueue;
 		private int layerID = 0; /* This is just an identifier for all the layers. Only used for debugging. */
+		private AssimpScene scene;
 
-		NodeLayer() {
+		NodeLayer(AssimpScene scene) {
+			this.scene = scene;
 			this.modelQueue = new GlueList<PreModelContainer>();
 			this.models = new GlueList<Model>();
 		}
@@ -134,7 +157,7 @@ public class AssimpScene {
 		 */
 		NodeLayer requestNext() {
 			if (!this.hasNext()) {
-				this.next = new NodeLayer();
+				this.next = new NodeLayer(this.scene);
 				this.next.layerID = this.layerID + 1;
 			}
 
@@ -169,7 +192,7 @@ public class AssimpScene {
 		 * container is not a model, it's just a key used when creating an instance.
 		 * 
 		 * @param name   - The name of the model.
-		 * @param meshes - Addresses of all meshed required to create the model.
+		 * @param meshes - Addresses (relative to the scene) of all meshed required to create the model.
 		 * @return A model container used when creating a model instance. This is the
 		 *         authenticator for {@link #requestModelInstance(PreModelContainer)}.
 		 */
@@ -182,7 +205,7 @@ public class AssimpScene {
 				}
 			}
 			if (container == null) {
-				container = new PreModelContainer(name, meshes);
+				container = new PreModelContainer(this.scene,name, meshes);
 				this.modelQueue.add(container);
 			}
 			container.enqueue();
@@ -197,9 +220,10 @@ public class AssimpScene {
 		 */
 		private void finalizeLayer() {
 
-			for (PreModelContainer model : this.modelQueue) {
-				model.model = new Model(model.name, model.waitingNodes, 16);
-				model.nodeSemaphore.release(model.getQueue());
+			for (PreModelContainer container : this.modelQueue) {
+				container.model = new Model(container.name, container.waitingNodes, 16,container.getContainerMeshes());
+				container.nodeSemaphore.release(container.getQueue());
+				this.models.add(container.model);
 			}
 			this.modelQueue.clear();
 			if (this.hasNext()) {
@@ -222,17 +246,27 @@ public class AssimpScene {
 	class PreModelContainer {
 		private int waitingNodes = 0;
 		private Semaphore nodeSemaphore;
-		private int[] meshes;
+		private int[] meshID;
 		private String name;
+		private AssimpScene scene;
 		
 		/* This should be null until a model is created by the layer */
 		private Model model;
 		
 		
-		private PreModelContainer(String name, int... meshes) {
-			this.meshes = meshes;
+		private PreModelContainer(AssimpScene scene, String name, int... meshID) {
+			this.meshID = meshID;
 			this.name = name;
+			this.scene = scene;
 			this.nodeSemaphore = new Semaphore(0);
+		}
+		
+		private MeshContainer[] getContainerMeshes() {
+			MeshContainer[] meshes = new MeshContainer[this.meshID.length];
+			for (int i = 0; i < this.meshID.length; i++) {
+				meshes[i] = new MeshContainer(AIMesh.create(this.scene.scene.mMeshes().get(this.meshID[i])));
+			}
+			return meshes;
 		}
 		
 		/**

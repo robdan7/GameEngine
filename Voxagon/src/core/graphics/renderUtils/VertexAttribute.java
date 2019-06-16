@@ -11,13 +11,20 @@ public class VertexAttribute {
 
 	/**
 	 * 
-	 * @param index
-	 * @param size
-	 * @param type
-	 * @param normalized
-	 * @param stride
-	 * @param pointer
-	 * @param divisor
+	 * @param index      - Specifies the index of the generic vertex attribute to be
+	 *                   modified.
+	 * @param size       - Specifies the number of components per generic vertex
+	 *                   attribute. Must be 1,2,3,4.
+	 * @param type       - Specifies the data type of each component in the array.
+	 * @param normalized - Specifies wether fixed-point data should be normalized or
+	 *                   converted directly as fixed-point values when they are
+	 *                   accessed.
+	 * @param stride     - Specifies the byte offset between consecutive attributes.
+	 *                   0 for tightly packed array.
+	 * @param pointer    - Specifies an offset of the first component of the first
+	 *                   generic vertex attribute in the array in the data store of
+	 *                   the buffer.
+	 * @param divisor - Specifies the number of instances that will pass between updates of the generic attribute.
 	 */
 	public VertexAttribute(@NativeType(value = "GLuint") int index, @NativeType(value = "GLint") int size,
 			@NativeType(value = "GLenum") int type, @NativeType(value = "GLboolean") boolean normalized,
@@ -34,12 +41,19 @@ public class VertexAttribute {
 
 	/**
 	 * 
-	 * @param index
-	 * @param size
-	 * @param type
-	 * @param normalized
-	 * @param stride
-	 * @param pointer
+	 * @param index      - Specifies the index of the generic vertex attribute to be
+	 *                   modified.
+	 * @param size       - Specifies the number of components per generic vertex
+	 *                   attribute. Must be 1,2,3,4.
+	 * @param type       - Specifies the data type of each component in the array.
+	 * @param normalized - Specifies wether fixed-point data should be normalized or
+	 *                   converted directly as fixed-point values when they are
+	 *                   accessed.
+	 * @param stride     - Specifies the byte offset between consecutive attributes.
+	 *                   0 for tightly packed array.
+	 * @param pointer    - Specifies an offset of the first component of the first
+	 *                   generic vertex attribute in the array in the data store of
+	 *                   the buffer.
 	 */
 	public VertexAttribute(@NativeType(value = "GLuint") int index, @NativeType(value = "GLint") int size,
 			@NativeType(value = "GLenum") int type, @NativeType(value = "GLboolean") boolean normalized,

@@ -12,7 +12,7 @@ import org.lwjgl.assimp.AIFace;
 import org.lwjgl.assimp.AILight;
 
 import core.graphics.entities.assimp.AssimpScene;
-import core.graphics.entities.assimp.MeshContainer;
+import core.graphics.entities.assimp.assets.MeshContainer;
 import core.utils.fileSystem.FileManager;
 
 public class AssimpMeshTest {
@@ -78,7 +78,7 @@ public class AssimpMeshTest {
 	public static void main(String[] args) {
 		//File file = FileManager.getFile("/Assets/triangles.dae");
 		//new AssimpMeshTest(file);
-		test("/Assets/triangles.dae");
+		AssimpScene scene = new AssimpScene("/Assets/triangles.dae");
 	}
 
 }

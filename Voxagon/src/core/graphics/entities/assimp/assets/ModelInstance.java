@@ -1,4 +1,4 @@
-package core.graphics.entities.assimp;
+package core.graphics.entities.assimp.assets;
 
 import core.utils.datatypes.buffers.FloatBufferPartition;
 
